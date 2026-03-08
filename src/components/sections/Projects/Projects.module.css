@@ -1,32 +1,4 @@
-.projects {
-  background: var(--navy);
-}
-
-.sectionTitle {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: clamp(22px, 4vw, 32px);
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: 50px;
-  white-space: nowrap;
-}
-
-.num {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  color: var(--cyan);
-  font-weight: 400;
-}
-
-.line {
-  display: block;
-  height: 1px;
-  flex: 1;
-  background: var(--navy-lighter);
-  min-width: 40px;
-}
+/* Projects-specific styles — section wrapper, title, card base & badges handled by shared components */
 
 .grid {
   display: grid;
@@ -43,35 +15,13 @@
 }
 
 .card {
-  background: var(--navy-light);
-  border: 1px solid var(--navy-lighter);
-  border-radius: 8px;
-  padding: 28px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--cyan-dim) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.card:hover::after {
-  opacity: 1;
 }
 
 .card:hover {
   transform: translateY(-6px);
-  border-color: var(--cyan-dim);
   box-shadow: 0 20px 50px rgba(2, 12, 27, 0.6);
 }
 
@@ -114,15 +64,7 @@
 }
 
 .featuredBadge {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--cyan);
-  border: 1px solid var(--cyan);
-  border-radius: 20px;
-  padding: 2px 10px;
   margin-bottom: 12px;
-  letter-spacing: 0.05em;
 }
 
 .cardTitle {
@@ -149,14 +91,4 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
-}
-
-.techTag {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--cyan);
-  background: var(--cyan-dim);
-  padding: 3px 10px;
-  border-radius: 4px;
-  letter-spacing: 0.03em;
 }

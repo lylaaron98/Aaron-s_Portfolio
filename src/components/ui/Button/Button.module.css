@@ -1,0 +1,39 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--cyan);
+  color: var(--navy);
+  border: 1px solid var(--cyan);
+}
+
+.primary:hover {
+  background: transparent;
+  color: var(--cyan);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.2);
+}
+
+.secondary {
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+}
+
+.secondary:hover {
+  background: var(--cyan-dim);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.15);
+}

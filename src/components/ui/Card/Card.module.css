@@ -1,0 +1,57 @@
+.card {
+  background: var(--navy-light);
+  border: 1px solid var(--navy-lighter);
+  border-radius: 8px;
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Variant: navy background ── */
+.navy {
+  background: var(--navy);
+}
+
+/* ── Hoverable ── */
+.hoverable {
+  transition: var(--transition);
+}
+
+.hoverable:hover {
+  transform: translateY(-5px);
+  border-color: var(--cyan-dim);
+  box-shadow: 0 20px 40px rgba(2, 12, 27, 0.5);
+}
+
+/* ── Gradient overlay on hover ── */
+.gradientOverlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--cyan-dim) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.gradientOverlay:hover::after {
+  opacity: 1;
+}
+
+/* ── Top accent line on hover ── */
+.topAccent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.topAccent:hover::before {
+  transform: scaleX(1);
+}

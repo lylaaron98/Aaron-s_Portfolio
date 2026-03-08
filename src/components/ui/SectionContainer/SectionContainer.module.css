@@ -1,0 +1,44 @@
+.section {
+  padding: 100px 0;
+}
+
+.bgNavy {
+  background: var(--navy);
+}
+
+.bgLight {
+  background: var(--navy-light);
+}
+
+/* ── Section title ── */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 50px;
+  white-space: nowrap;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--cyan);
+  font-weight: 400;
+}
+
+.line {
+  display: block;
+  height: 1px;
+  flex: 1;
+  background: var(--navy-lighter);
+  min-width: 40px;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 0;
+  }
+}

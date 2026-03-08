@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { REVEAL_THRESHOLD } from '../animations/reveal'
 
 export function useScrollReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null)
@@ -14,7 +15,7 @@ export function useScrollReveal<T extends HTMLElement>() {
           observer.unobserve(el)
         }
       },
-      { threshold: 0.15 }
+      { threshold: REVEAL_THRESHOLD }
     )
 
     observer.observe(el)

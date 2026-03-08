@@ -1,32 +1,4 @@
-.contact {
-  background: var(--navy-light);
-}
-
-.sectionTitle {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: clamp(22px, 4vw, 32px);
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: 50px;
-  white-space: nowrap;
-}
-
-.num {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  color: var(--cyan);
-  font-weight: 400;
-}
-
-.line {
-  display: block;
-  height: 1px;
-  flex: 1;
-  background: var(--navy-lighter);
-  min-width: 40px;
-}
+/* Contact-specific styles — section wrapper, title & button base handled by shared components */
 
 .inner {
   display: grid;
@@ -154,28 +126,8 @@
 }
 
 .submitBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 32px;
-  background: var(--cyan);
-  color: var(--navy);
-  border: 1px solid var(--cyan);
-  border-radius: var(--border-radius);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
+  width: 100%;
   font-weight: 600;
-  transition: var(--transition);
-  cursor: pointer;
-  letter-spacing: 0.05em;
-}
-
-.submitBtn:hover {
-  background: transparent;
-  color: var(--cyan);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.2);
 }
 
 @media (max-width: 900px) {

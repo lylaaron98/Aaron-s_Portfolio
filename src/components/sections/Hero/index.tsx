@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import styles from './Hero.module.css'
+import { scrollToSection } from '../../../utils/smoothScroll'
 
 const roles = [
   'Frontend Engineer',
@@ -39,10 +40,6 @@ export default function Hero() {
     return () => clearTimeout(timeout)
   }, [charIndex, isDeleting, roleIndex])
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
     <section id="hero" className={styles.hero}>
       <div className={styles.content}>
@@ -58,10 +55,10 @@ export default function Hero() {
           solve real-world problems.
         </p>
         <div className={styles.ctas}>
-          <button className={styles.ctaPrimary} onClick={() => scrollTo('projects')}>
+          <button className={styles.ctaPrimary} onClick={() => scrollToSection('projects')}>
             View My Work
           </button>
-          <button className={styles.ctaSecondary} onClick={() => scrollTo('contact')}>
+          <button className={styles.ctaSecondary} onClick={() => scrollToSection('contact')}>
             Get In Touch
           </button>
         </div>

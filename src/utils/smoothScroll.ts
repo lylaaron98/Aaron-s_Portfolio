@@ -12,6 +12,15 @@ export function smoothScrollTo(target: string): void {
 }
 
 /**
+ * Convenience alias — scrolls to a section by its id (without the # prefix).
+ * @param id - the section element's id attribute
+ */
+export function scrollToSection(id: string): void {
+  const el = document.getElementById(id)
+  el?.scrollIntoView({ behavior: 'smooth' })
+}
+
+/**
  * Smoothly scrolls back to the top of the page.
  */
 export function scrollToTop(): void {

@@ -3,6 +3,7 @@ import styles from './Contact.module.css'
 import { useScrollReveal } from '../../../hooks/useScrollReveal'
 import SectionContainer from '../../ui/SectionContainer'
 import Button from '../../ui/Button'
+import { sendContactMessage } from '../../../api/contact'
 
 export default function Contact() {
   const ref = useScrollReveal<HTMLDivElement>()
@@ -13,8 +14,9 @@ export default function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    await sendContactMessage(form)
     setSubmitted(true)
     setForm({ name: '', email: '', message: '' })
     setTimeout(() => setSubmitted(false), 4000)

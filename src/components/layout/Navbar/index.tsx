@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import styles from './Navbar.module.css'
 import { navLinks } from '../../../data/navigation'
+import { smoothScrollTo } from '../../../utils/smoothScroll'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -14,8 +15,7 @@ export default function Navbar() {
 
   const handleNavClick = (href: string) => {
     setMenuOpen(false)
-    const el = document.querySelector(href)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+    smoothScrollTo(href)
   }
 
   return (

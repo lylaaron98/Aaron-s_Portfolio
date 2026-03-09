@@ -32,7 +32,7 @@
 }
 
 .greeting {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 1rem;
   color: var(--accent);
   margin-bottom: 24px;
@@ -101,7 +101,7 @@
 .ctaSecondary {
   padding: 16px 36px;
   font-size: 0.9rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   border-radius: var(--border-radius-xl);
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -182,7 +182,7 @@
   align-items: center;
   gap: 12px;
   color: var(--slate);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;

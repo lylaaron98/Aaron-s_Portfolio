@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import gsap from 'gsap'
-import LiquidEther from '../../ui/LiquidEther/LiquidEther'
+import Silk from '../../ui/Silk/Silk'
 import styles from './Hero.module.css'
 import { scrollToSection } from '../../../utils/smoothScroll'
 
@@ -88,21 +88,12 @@ export default function Hero() {
   return (
     <section id="hero" className={styles.hero} ref={heroRef}>
       <div className={styles.etherBg}>
-        <LiquidEther
-          colors={['#6a6a80', '#9090a8', '#b8b8d0']}
-          resolution={0.5}
-          mouseForce={20}
-          cursorSize={100}
-          isViscous={true}
-          viscous={50}
-          iterationsViscous={48}
-          iterationsPoisson={48}
-          dt={0.016}
-          BFECC={true}
-          autoDemo={true}
-          autoSpeed={0.25}
-          autoIntensity={2.5}
-          autoRampDuration={1.2}
+        <Silk
+          speed={5}
+          scale={1}
+          color="#7B7481"
+          noiseIntensity={0.1}
+          rotation={1.5}
         />
       </div>
       <div className={styles.content}>
@@ -114,7 +105,7 @@ export default function Hero() {
         </h2>
         <p className={styles.description}>
           Frontend and Full Stack Software Engineer with hands-on experience building
-          scalable web applications using React, Node.js, and SQL. Passionate about
+          scalable web applications using various popular frameworks, such as ReactJS and NextJS. Passionate about
           crafting clean, intuitive user interfaces and architecting efficient backend systems.
         </p>
         <div className={styles.ctas}>

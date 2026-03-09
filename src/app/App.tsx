@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react'
+import { ThemeProvider } from '../context/ThemeContext'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+import ScrollToTop from '../components/ui/ScrollToTop'
 
 const Hero = lazy(() => import('../components/sections/Hero'))
 const About = lazy(() => import('../components/sections/About'))
@@ -11,7 +13,7 @@ const Contact = lazy(() => import('../components/sections/Contact'))
 
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <Navbar />
       <main>
         <Suspense>
@@ -24,7 +26,8 @@ function App() {
         </Suspense>
       </main>
       <Footer />
-    </>
+      <ScrollToTop />
+    </ThemeProvider>
   )
 }
 

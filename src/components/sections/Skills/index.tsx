@@ -10,6 +10,7 @@ import {
   SiNextdotjs, SiReact, SiNodedotjs, SiExpress, SiTailwindcss,
   SiAntdesign, SiDjango, SiTensorflow,
   SiGit, SiGitlab, SiDocker, SiKubernetes, SiWebpack, SiJira,
+  SiMongodb,
 } from 'react-icons/si'
 import { DiCss3, DiJava, DiMsqlServer } from 'react-icons/di'
 import { FaDatabase } from 'react-icons/fa'
@@ -47,6 +48,7 @@ const skillIconMap: Record<string, ComponentType<{ size?: number; color?: string
   'Microsoft SQL Server': DiMsqlServer,
   'Oracle Database': FaDatabase,
   'MySQL': SiMysql,
+  'MongoDB': SiMongodb,
 }
 
 export default function Skills() {

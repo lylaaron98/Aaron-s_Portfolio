@@ -114,8 +114,9 @@ export default function LiquidEther({
     }
 
     const paletteTex = makePaletteTexture(colors);
-    // Hard-code transparent background vector (alpha 0)
-    const bgVec4 = new THREE.Vector4(0, 0, 0, 0);
+    // Use the first palette color as the background so the fluid fills the canvas
+    const bgBase = new THREE.Color(colors[0] || '#000000');
+    const bgVec4 = new THREE.Vector4(bgBase.r, bgBase.g, bgBase.b, 1.0);
 
     class CommonClass {
       width = 0;
@@ -169,6 +170,10 @@ export default function LiquidEther({
       coords = new THREE.Vector2();
       coords_old = new THREE.Vector2();
       diff = new THREE.Vector2();
+      smoothCoords = new THREE.Vector2();
+      smoothFactor = 0.35;
+      private _cachedRect: DOMRect | null = null;
+      private _rectCacheTime = 0;
       timer: number | null = null;
       container: HTMLElement | null = null;
       docTarget: Document | null = null;
@@ -218,10 +223,21 @@ export default function LiquidEther({
         this.docTarget = null;
         this.container = null;
       }
+      private getRect(): DOMRect | null {
+        if (!this.container) return null;
+        const now = performance.now();
+        if (!this._cachedRect || now - this._rectCacheTime > 200) {
+          this._cachedRect = this.container.getBoundingClientRect();
+          this._rectCacheTime = now;
+        }
+        return this._cachedRect;
+      }
+      invalidateRect() {
+        this._cachedRect = null;
+      }
       private isPointInside(clientX: number, clientY: number) {
-        if (!this.container) return false;
-        const rect = this.container.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return false;
+        const rect = this.getRect();
+        if (!rect || rect.width === 0 || rect.height === 0) return false;
         return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
       }
       private updateHoverState(clientX: number, clientY: number) {
@@ -229,10 +245,9 @@ export default function LiquidEther({
         return this.isHoverInside;
       }
       setCoords(x: number, y: number) {
-        if (!this.container) return;
+        const rect = this.getRect();
+        if (!rect || rect.width === 0 || rect.height === 0) return;
         if (this.timer) window.clearTimeout(this.timer);
-        const rect = this.container.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
         const nx = (x - rect.left) / rect.width;
         const ny = (y - rect.top) / rect.height;
         this.coords.set(nx * 2 - 1, -(ny * 2 - 1));
@@ -292,14 +307,20 @@ export default function LiquidEther({
             this.takeoverActive = false;
             this.coords.copy(this.takeoverTo);
             this.coords_old.copy(this.coords);
+            this.smoothCoords.copy(this.coords);
             this.diff.set(0, 0);
           } else {
             const k = t * t * (3 - 2 * t);
             this.coords.copy(this.takeoverFrom).lerp(this.takeoverTo, k);
           }
         }
-        this.diff.subVectors(this.coords, this.coords_old);
-        this.coords_old.copy(this.coords);
+        // Smooth mouse position to reduce force spikes while staying responsive
+        this.smoothCoords.lerp(this.coords, this.smoothFactor);
+        this.diff.subVectors(this.smoothCoords, this.coords_old);
+        // Clamp diff magnitude to prevent force explosions from fast mouse movements
+        const diffLen = this.diff.length();
+        if (diffLen > 0.08) this.diff.multiplyScalar(0.08 / diffLen);
+        this.coords_old.copy(this.smoothCoords);
         if (this.coords_old.x === 0 && this.coords_old.y === 0) this.diff.set(0, 0);
         if (this.isAutoActive && !this.takeoverActive) this.diff.multiplyScalar(this.autoIntensity);
       }
@@ -842,8 +863,8 @@ export default function LiquidEther({
       pressure!: Pressure;
       constructor(options?: Partial<SimOptions>) {
         this.options = {
-          iterations_poisson: 32,
-          iterations_viscous: 32,
+          iterations_poisson: 18,
+          iterations_viscous: 18,
           mouse_force: 20,
           resolution: 0.5,
           cursor_size: 100,
@@ -1043,6 +1064,7 @@ export default function LiquidEther({
         this.output = new Output();
       }
       resize() {
+        Mouse.invalidateRect();
         Common.resize();
         this.output.resize();
       }

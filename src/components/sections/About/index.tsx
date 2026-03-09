@@ -1,11 +1,11 @@
 import styles from './About.module.css'
 import { useGsapReveal } from '../../../hooks/useGsapReveal'
-import { useParallax } from '../../../hooks/useGsapEffects'
 import SectionContainer from '../../ui/SectionContainer'
+import ProfileCard from '../../ui/ProfileCard/ProfileCard'
+import { scrollToSection } from '../../../utils/smoothScroll'
 
 export default function About() {
   const ref = useGsapReveal<HTMLDivElement>()
-  const imgRef = useParallax<HTMLDivElement>(0.6)
 
   return (
     <SectionContainer id="about" title="About Me">
@@ -18,8 +18,8 @@ export default function About() {
           </p>
           <p>
             I have hands-on experience building scalable web applications using{' '}
-            <span className={styles.highlight}>React</span>,{' '}
-            <span className={styles.highlight}>Node.js</span>, and{' '}
+            <span className={styles.highlight}>ReactJS</span>,{' '}
+            <span className={styles.highlight}>NextJS</span>, and{' '}
             <span className={styles.highlight}>SQL</span>. I'm experienced in modernizing
             large-scale legacy workflows and delivering production-ready applications across
             finance, retail, and R&amp;D environments.
@@ -38,14 +38,23 @@ export default function About() {
             <li>Docker &amp; Azure DevOps</li>
           </ul>
         </div>
-        <div ref={imgRef} className={styles.imageBlock}>
-          <div className={styles.imgWrapper}>
-            <div className={styles.imgPlaceholder}>
-              <span>Aaron</span>
-              <small>Software Engineer</small>
-            </div>
-            <div className={styles.imgBorder} />
-          </div>
+        <div className={styles.imageBlock}>
+          <ProfileCard
+            avatarUrl="https://avatars.githubusercontent.com/u/lylaaron98"
+            name="Aaron"
+            title="Software Engineer"
+            handle="lylaaron98"
+            status="Open to Work"
+            contactText="Contact Me"
+            showUserInfo
+            enableTilt
+            enableMobileTilt
+            iconUrl="/assets/iconpattern.svg"
+            behindGlowColor="rgba(180, 180, 195, 0.45)"
+            behindGlowEnabled
+            innerGradient="linear-gradient(145deg, #1e1e28 0%, #2a2a38 100%)"
+            onContactClick={() => scrollToSection('contact')}
+          />
         </div>
       </div>
     </SectionContainer>

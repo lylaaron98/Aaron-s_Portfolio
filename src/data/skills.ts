@@ -19,6 +19,6 @@ export const skillCategories: SkillCategory[] = [
   {
     title: 'Databases',
     icon: '🗄️',
-    skills: ['Microsoft SQL Server', 'Oracle Database', 'MySQL'],
+    skills: ['Microsoft SQL Server', 'Oracle Database', 'MySQL', 'MongoDB'],
   },
 ]

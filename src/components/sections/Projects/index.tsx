@@ -10,7 +10,7 @@ export default function Projects() {
   const ref = useScrollReveal<HTMLDivElement>()
 
   return (
-    <SectionContainer id="projects" number="03" title="Projects">
+    <SectionContainer id="projects" number="04" title="Projects">
       <div ref={ref} className={styles.grid}>
         {projects.map((project, i) => (
           <Card

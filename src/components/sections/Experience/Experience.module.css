@@ -1,0 +1,85 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.timeline[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.entry {
+  position: relative;
+  padding-left: 24px;
+  border-left: 2px solid var(--cyan);
+}
+
+.entry::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cyan);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.role {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--lightest-slate);
+}
+
+.dates {
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  white-space: nowrap;
+}
+
+.company {
+  font-size: 0.95rem;
+  color: var(--cyan);
+  margin-bottom: 12px;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bullet {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--slate-light);
+  line-height: 1.5;
+}
+
+.bulletIcon {
+  color: var(--cyan);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.techRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -10,29 +10,30 @@ export default function About() {
       <div ref={ref} className={styles.inner}>
         <div className={styles.textBlock}>
           <p>
-            Hey! I'm <span className={styles.highlight}>Aaron</span>, a passionate Frontend &amp;
-            Fullstack Software Engineer with a love for crafting seamless digital experiences
-            across web and mobile platforms.
+            Hey! I'm <span className={styles.highlight}>Aaron</span>, a Frontend &amp;
+            Full Stack Software Engineer with a Bachelor's in Computer Science (Hons) from
+            Goldsmiths, University of London (SIM).
           </p>
           <p>
-            I specialize in building fast, scalable, and beautiful applications using modern
-            technologies like <span className={styles.highlight}>React</span>,{' '}
-            <span className={styles.highlight}>TypeScript</span>, and{' '}
-            <span className={styles.highlight}>React Native</span>. From pixel-perfect UIs to
-            robust backend APIs, I enjoy every layer of the stack.
+            I have hands-on experience building scalable web applications using{' '}
+            <span className={styles.highlight}>React</span>,{' '}
+            <span className={styles.highlight}>Node.js</span>, and{' '}
+            <span className={styles.highlight}>SQL</span>. I'm experienced in modernizing
+            large-scale legacy workflows and delivering production-ready applications across
+            finance, retail, and R&amp;D environments.
           </p>
           <p>
-            When I'm not coding, I'm exploring the latest in tech, contributing to open source,
-            or thinking about how great design can shape user behavior. I believe software
-            should be accessible, inclusive, and a joy to use.
+            Most recently, I contributed to large-scale system migration and modernization
+            at a global bank. When I'm not coding, I'm exploring Web3, UX design, AI
+            applications, and cloud infrastructure.
           </p>
           <ul className={styles.techList}>
-            <li>React &amp; React Native</li>
+            <li>React &amp; Next.js</li>
             <li>TypeScript / JavaScript</li>
             <li>Node.js &amp; Express</li>
-            <li>Python</li>
-            <li>PostgreSQL &amp; MongoDB</li>
-            <li>AWS &amp; Firebase</li>
+            <li>Python &amp; Django</li>
+            <li>SQL Server &amp; Oracle</li>
+            <li>Docker &amp; Azure DevOps</li>
           </ul>
         </div>
         <div className={styles.imageBlock}>

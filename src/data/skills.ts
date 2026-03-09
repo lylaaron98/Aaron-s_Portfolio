@@ -2,23 +2,23 @@ import type { SkillCategory } from '../types/skill'
 
 export const skillCategories: SkillCategory[] = [
   {
-    title: 'Frontend',
+    title: 'Languages',
+    icon: '💻',
+    skills: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'Python', 'SQL', 'Java', 'C++', 'C#', 'VB.Net', 'VBA'],
+  },
+  {
+    title: 'Frameworks & Libraries',
     icon: '🎨',
-    skills: ['React', 'TypeScript', 'JavaScript (ES6+)', 'HTML5', 'CSS3 / SASS', 'Next.js'],
+    skills: ['Next.js', 'ReactJS', 'Node.js', 'Express.js', 'TailwindCSS', 'Ant Design', 'Django', 'TensorFlow'],
   },
   {
-    title: 'Backend',
-    icon: '⚙️',
-    skills: ['Node.js', 'Express.js', 'Python', 'REST APIs', 'GraphQL', 'WebSockets'],
-  },
-  {
-    title: 'Mobile',
-    icon: '📱',
-    skills: ['React Native', 'Expo', 'iOS Development', 'Android Development', 'Push Notifications', 'App Store Deploy'],
-  },
-  {
-    title: 'Tools & Cloud',
+    title: 'DevOps & Tools',
     icon: '🛠️',
-    skills: ['Git & GitHub', 'Docker', 'AWS (EC2, S3)', 'Firebase', 'MongoDB', 'PostgreSQL'],
+    skills: ['Git', 'GitLab', 'Azure DevOps', 'Docker', 'Kubernetes', 'Webpack', 'Boomi Integration', 'JIRA'],
+  },
+  {
+    title: 'Databases',
+    icon: '🗄️',
+    skills: ['Microsoft SQL Server', 'Oracle Database', 'MySQL'],
   },
 ]

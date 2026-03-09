@@ -2,39 +2,39 @@ import type { Project } from '../types/project'
 
 export const projects: Project[] = [
   {
-    title: 'E-Commerce Platform',
+    title: 'AI Chatbot Assistant',
     description:
-      'A full-stack e-commerce web application featuring product listings, cart management, secure Stripe payments, and an admin dashboard. Built with React on the frontend and a Node.js/Express REST API backed by PostgreSQL.',
-    tech: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Stripe', 'Docker'],
-    github: 'https://github.com',
-    live: 'https://example.com',
+      'Intelligent support interface using Streamlit and GroqAI APIs for real-time conversational responses. Features dynamic context handling, custom parameter tuning for FAQ automation, session memory, and adjustable tone settings. Deployed as an internal prototype at Capgemini.',
+    tech: ['Python', 'Streamlit', 'GroqAI', 'AI/ML'],
+    github: 'https://github.com/lylaaron98',
+    live: '',
     featured: true,
   },
   {
-    title: 'FitTrack Mobile App',
+    title: 'Otodecks',
     description:
-      'Cross-platform fitness tracking mobile app with workout logging, progress charts, and personalized plans. Syncs data in real-time with Firebase and sends push notifications via Expo.',
-    tech: ['React Native', 'Expo', 'Firebase', 'TypeScript', 'Redux'],
-    github: 'https://github.com',
-    live: 'https://example.com',
+      'A fully interactive DJ deck simulator built with C++ and the JUCE framework, featuring real-time audio playback, mixing, and waveform visualization. Includes modular audio components, custom event-driven UI with responsive knobs, sliders, and cue buttons, with latency optimization for seamless track blending.',
+    tech: ['C++', 'JUCE', 'Audio Processing', 'Real-time DSP'],
+    github: 'https://github.com/lylaaron98',
+    live: '',
     featured: true,
   },
   {
-    title: 'Task Manager Dashboard',
+    title: 'MySmartHome',
     description:
-      'A productivity web dashboard with drag-and-drop task boards (Kanban style), team collaboration, real-time updates, and rich filtering. Built entirely in React with TypeScript and WebSockets.',
-    tech: ['React', 'TypeScript', 'WebSockets', 'Node.js', 'MongoDB'],
-    github: 'https://github.com',
-    live: 'https://example.com',
-    featured: false,
+      'A responsive Smart Home Web Dashboard enabling remote control and monitoring of household appliances over a network. Built with Node.js, Express.js, and SQL for device data storage, with a templated UI using EJS, CSS3, and vanilla JavaScript for dynamic appliance controls.',
+    tech: ['Node.js', 'Express.js', 'SQL', 'EJS', 'JavaScript', 'REST APIs'],
+    github: 'https://github.com/lylaaron98',
+    live: '',
+    featured: true,
   },
   {
-    title: 'Weather Now App',
+    title: 'G4Met',
     description:
-      'A mobile weather application delivering real-time forecasts, interactive weather maps, severe weather alerts, and hourly/weekly breakdowns. Uses OpenWeatherMap API with location services.',
-    tech: ['React Native', 'Expo', 'OpenWeatherMap API', 'Geolocation', 'TypeScript'],
-    github: 'https://github.com',
-    live: 'https://example.com',
+      'A full-stack gamer matchmaking web app connecting gamers based on skill level, preferred genres, and region. Features secure user authentication with bcrypt, relational SQL schema for user profiles and matchmaking algorithms, and clean RESTful API design.',
+    tech: ['Express.js', 'PUG', 'SQL', 'bcrypt', 'Node.js'],
+    github: 'https://github.com/lylaaron98',
+    live: '',
     featured: false,
   },
 ]

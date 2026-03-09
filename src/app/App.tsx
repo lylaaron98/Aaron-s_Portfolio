@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer'
 const Hero = lazy(() => import('../components/sections/Hero'))
 const About = lazy(() => import('../components/sections/About'))
 const Skills = lazy(() => import('../components/sections/Skills'))
+const Experience = lazy(() => import('../components/sections/Experience'))
 const Projects = lazy(() => import('../components/sections/Projects'))
 const Contact = lazy(() => import('../components/sections/Contact'))
 
@@ -17,6 +18,7 @@ function App() {
           <Hero />
           <About />
           <Skills />
+          <Experience />
           <Projects />
           <Contact />
         </Suspense>

@@ -1,7 +1,8 @@
 .footer {
   background: var(--navy-light);
-  border-top: 1px solid var(--navy-lighter);
-  padding: 30px 50px;
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(to right, transparent, rgba(100, 255, 218, 0.2), transparent) 1;
+  padding: 36px 50px;
 }
 
 .inner {
@@ -44,7 +45,8 @@
 
 .socials a:hover {
   color: var(--cyan);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  filter: drop-shadow(0 0 6px rgba(100, 255, 218, 0.3));
 }
 
 @media (max-width: 480px) {

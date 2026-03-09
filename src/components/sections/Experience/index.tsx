@@ -1,18 +1,17 @@
 import styles from './Experience.module.css'
-import { useScrollReveal } from '../../../hooks/useScrollReveal'
+import { useGsapStaggerReveal } from '../../../hooks/useGsapReveal'
 import { experiences } from '../../../data/experience'
-import { staggerStyle } from '../../../animations/stagger'
 import SectionContainer from '../../ui/SectionContainer'
 import Badge from '../../ui/Badge'
 
 export default function Experience() {
-  const ref = useScrollReveal<HTMLDivElement>()
+  const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.entry}`, { stagger: 0.15 })
 
   return (
     <SectionContainer id="experience" number="03" title="Experience">
       <div ref={ref} className={styles.timeline}>
         {experiences.map((exp, i) => (
-          <div key={exp.company} className={styles.entry} style={staggerStyle(i)}>
+          <div key={exp.company} className={styles.entry}>
             <div className={styles.header}>
               <h3 className={styles.role}>{exp.role}</h3>
               <span className={styles.dates}>

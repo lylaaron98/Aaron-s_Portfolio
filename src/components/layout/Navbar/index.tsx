@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import styles from './Navbar.module.css'
 import { navLinks } from '../../../data/navigation'
 import { smoothScrollTo } from '../../../utils/smoothScroll'
@@ -6,10 +7,41 @@ import { smoothScrollTo } from '../../../utils/smoothScroll'
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const navRef = useRef<HTMLElement>(null)
 
+  // Entrance animation
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', handleScroll)
+    const ctx = gsap.context(() => {
+      gsap.from(`.${styles.logo}`, { opacity: 0, y: -20, duration: 0.5, delay: 0.1, ease: 'power2.out' })
+      gsap.from(`.${styles.navLink}`, {
+        opacity: 0,
+        y: -20,
+        duration: 0.4,
+        stagger: 0.08,
+        delay: 0.3,
+        ease: 'power2.out',
+      })
+      gsap.from(`.${styles.resumeBtn}`, { opacity: 0, y: -20, duration: 0.4, delay: 0.7, ease: 'power2.out' })
+    }, navRef)
+    return () => ctx.revert()
+  }, [])
+
+  // Hide on scroll down, show on scroll up
+  useEffect(() => {
+    let lastScroll = 0
+    const handleScroll = () => {
+      const current = window.scrollY
+      setScrolled(current > 50)
+
+      if (!navRef.current) return
+      if (current > lastScroll && current > 100) {
+        gsap.to(navRef.current, { y: '-100%', duration: 0.3, ease: 'power2.out' })
+      } else {
+        gsap.to(navRef.current, { y: 0, duration: 0.3, ease: 'power2.out' })
+      }
+      lastScroll = current
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -19,7 +51,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
+    <header ref={navRef} className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
       <div className={styles.inner}>
         <a href="#hero" className={styles.logo} onClick={() => handleNavClick('#hero')}>
           <span className={styles.logoBracket}>&lt;</span>

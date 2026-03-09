@@ -1,13 +1,12 @@
 import styles from './Projects.module.css'
-import { useScrollReveal } from '../../../hooks/useScrollReveal'
+import { useGsapStaggerReveal } from '../../../hooks/useGsapReveal'
 import { projects } from '../../../data/projects'
-import { staggerStyle } from '../../../animations/stagger'
 import SectionContainer from '../../ui/SectionContainer'
 import Card from '../../ui/Card'
 import Badge from '../../ui/Badge'
 
 export default function Projects() {
-  const ref = useScrollReveal<HTMLDivElement>()
+  const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`, { stagger: 0.12 })
 
   return (
     <SectionContainer id="projects" number="04" title="Projects">
@@ -17,7 +16,6 @@ export default function Projects() {
             key={project.title}
             gradientOverlay
             className={`${styles.card} ${project.featured ? styles.featured : ''}`}
-            style={staggerStyle(i)}
           >
             <div className={styles.cardTop}>
               <div className={styles.cardIcons}>

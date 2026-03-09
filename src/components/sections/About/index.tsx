@@ -1,9 +1,11 @@
 import styles from './About.module.css'
-import { useScrollReveal } from '../../../hooks/useScrollReveal'
+import { useGsapReveal } from '../../../hooks/useGsapReveal'
+import { useParallax } from '../../../hooks/useGsapEffects'
 import SectionContainer from '../../ui/SectionContainer'
 
 export default function About() {
-  const ref = useScrollReveal<HTMLDivElement>()
+  const ref = useGsapReveal<HTMLDivElement>()
+  const imgRef = useParallax<HTMLDivElement>(0.6)
 
   return (
     <SectionContainer id="about" number="01" title="About Me">
@@ -36,7 +38,7 @@ export default function About() {
             <li>Docker &amp; Azure DevOps</li>
           </ul>
         </div>
-        <div className={styles.imageBlock}>
+        <div ref={imgRef} className={styles.imageBlock}>
           <div className={styles.imgWrapper}>
             <div className={styles.imgPlaceholder}>
               <span>Aaron</span>

@@ -6,8 +6,8 @@
   padding: 14px 32px;
   font-size: 0.9rem;
   font-family: var(--font-mono);
-  border-radius: var(--border-radius);
-  transition: var(--transition);
+  border-radius: var(--border-radius-lg);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   font-weight: 500;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -23,7 +23,7 @@
   background: transparent;
   color: var(--cyan);
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.2);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.25), 0 0 20px rgba(100, 255, 218, 0.1);
 }
 
 .secondary {
@@ -33,7 +33,7 @@
 }
 
 .secondary:hover {
-  background: var(--cyan-dim);
+  background: rgba(100, 255, 218, 0.08);
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.15);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.15), 0 0 20px rgba(100, 255, 218, 0.08);
 }

@@ -1,12 +1,11 @@
 import styles from './Skills.module.css'
-import { useScrollReveal } from '../../../hooks/useScrollReveal'
+import { useGsapStaggerReveal } from '../../../hooks/useGsapReveal'
 import { skillCategories } from '../../../data/skills'
-import { staggerStyle } from '../../../animations/stagger'
 import SectionContainer from '../../ui/SectionContainer'
 import Card from '../../ui/Card'
 
 export default function Skills() {
-  const ref = useScrollReveal<HTMLDivElement>()
+  const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`, { stagger: 0.12 })
 
   return (
     <SectionContainer id="skills" background="navy-light" number="02" title="Skills &amp; Technologies">
@@ -17,7 +16,6 @@ export default function Skills() {
             variant="navy"
             topAccent
             className={styles.card}
-            style={staggerStyle(i)}
           >
             <div className={styles.cardHeader}>
               <span className={styles.icon}>{cat.icon}</span>

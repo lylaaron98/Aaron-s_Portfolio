@@ -2,31 +2,27 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.timeline[data-visible="true"] {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .entry {
   position: relative;
-  padding-left: 24px;
-  border-left: 2px solid var(--cyan);
+  padding-left: 32px;
+  border-left: 2px solid rgba(100, 255, 218, 0.2);
+  padding-bottom: 8px;
 }
 
 .entry::before {
   content: '';
   position: absolute;
-  left: -6px;
+  left: -7px;
   top: 6px;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--cyan);
+  background: var(--navy);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 12px rgba(100, 255, 218, 0.3);
+  z-index: 1;
 }
 
 .header {
@@ -41,7 +37,7 @@
 .role {
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--lightest-slate);
+  color: var(--white);
 }
 
 .dates {
@@ -54,7 +50,8 @@
 .company {
   font-size: 0.95rem;
   color: var(--cyan);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  font-weight: 500;
 }
 
 .bullets {

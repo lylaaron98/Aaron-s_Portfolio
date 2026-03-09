@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import styles from './Contact.module.css'
-import { useScrollReveal } from '../../../hooks/useScrollReveal'
+import { useGsapReveal } from '../../../hooks/useGsapReveal'
 import SectionContainer from '../../ui/SectionContainer'
 import Button from '../../ui/Button'
 import { sendContactMessage } from '../../../api/contact'
 
 export default function Contact() {
-  const ref = useScrollReveal<HTMLDivElement>()
+  const ref = useGsapReveal<HTMLDivElement>()
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
 

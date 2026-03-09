@@ -1,26 +1,29 @@
 .card {
   background: var(--navy-light);
   border: 1px solid var(--navy-lighter);
-  border-radius: 8px;
-  padding: 28px;
+  border-radius: var(--border-radius-lg);
+  padding: 30px;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(4px);
 }
 
 /* ── Variant: navy background ── */
 .navy {
-  background: var(--navy);
+  background: rgba(10, 25, 47, 0.8);
+  border-color: rgba(29, 52, 97, 0.6);
 }
 
 /* ── Hoverable ── */
 .hoverable {
-  transition: var(--transition);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.3s ease,
+              box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hoverable:hover {
-  transform: translateY(-5px);
-  border-color: var(--cyan-dim);
-  box-shadow: 0 20px 40px rgba(2, 12, 27, 0.5);
+  border-color: rgba(100, 255, 218, 0.2);
+  box-shadow: 0 20px 50px rgba(2, 12, 27, 0.5), 0 0 30px rgba(100, 255, 218, 0.04);
 }
 
 /* ── Gradient overlay on hover ── */

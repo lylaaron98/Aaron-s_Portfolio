@@ -1,0 +1,82 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.entry {
+  position: relative;
+  padding-left: 32px;
+  border-left: 2px solid rgba(192, 192, 200, 0.15);
+  padding-bottom: 8px;
+}
+
+.entry::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--navy);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 12px rgba(192, 192, 200, 0.2);
+  z-index: 1;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.role {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.dates {
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  color: var(--cyan);
+  white-space: nowrap;
+}
+
+.company {
+  font-size: 0.95rem;
+  color: var(--cyan);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bullet {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--slate-light);
+  line-height: 1.5;
+}
+
+.bulletIcon {
+  color: var(--cyan);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.techRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -1,0 +1,70 @@
+.section {
+  padding: 120px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient glow on navy sections */
+.bgNavy {
+  background: var(--navy);
+}
+
+.bgNavy::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  right: -15%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(192, 192, 200, 0.02) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Ambient glow on light sections */
+.bgLight {
+  background: var(--navy-light);
+}
+
+.bgLight::before {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(192, 192, 200, 0.015) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Section title ── */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 56px;
+  white-space: nowrap;
+}
+
+.num {
+  font-family: var(--font-sans);
+  font-size: 0.9em;
+  color: var(--cyan);
+  font-weight: 400;
+}
+
+.line {
+  display: block;
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(to right, var(--navy-lighter), transparent);
+  min-width: 40px;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 0;
+  }
+}

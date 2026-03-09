@@ -1,0 +1,63 @@
+/* About-specific styles — section wrapper & title handled by SectionContainer */
+
+.inner {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.textBlock p {
+  color: var(--slate);
+  line-height: 1.8;
+  margin-bottom: 18px;
+  font-size: 1rem;
+}
+
+.highlight {
+  color: var(--cyan);
+}
+
+.techList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 20px;
+  margin-top: 24px;
+}
+
+.techList li {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--slate-light);
+  padding-left: 18px;
+  position: relative;
+}
+
+.techList li::before {
+  content: '▹';
+  position: absolute;
+  left: 0;
+  color: var(--cyan);
+}
+
+.imageBlock {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 50px;
+  }
+
+  .imageBlock {
+    order: -1;
+  }
+
+  .imgWrapper {
+    width: 220px;
+    height: 220px;
+  }
+}

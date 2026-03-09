@@ -8,7 +8,7 @@ export default function About() {
   const imgRef = useParallax<HTMLDivElement>(0.6)
 
   return (
-    <SectionContainer id="about" number="01" title="About Me">
+    <SectionContainer id="about" title="About Me">
       <div ref={ref} className={styles.inner}>
         <div className={styles.textBlock}>
           <p>

@@ -10,11 +10,11 @@
 }
 
 .navbar.scrolled {
-  background: rgba(10, 25, 47, 0.85);
+  background: rgba(14, 14, 18, 0.85);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  box-shadow: 0 10px 30px -10px rgba(2, 12, 27, 0.7);
-  border-bottom: 1px solid rgba(29, 52, 97, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  border-bottom: 1px solid rgba(42, 42, 53, 0.3);
 }
 
 .inner {
@@ -71,18 +71,22 @@
 .resumeBtn {
   margin-left: 16px;
   padding: 10px 20px;
-  border: 1px solid var(--cyan);
-  border-radius: var(--border-radius-lg);
-  color: var(--cyan);
+  border: 1px solid rgba(192, 192, 200, 0.3);
+  border-radius: var(--border-radius-xl);
+  color: var(--accent);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   transition: var(--transition);
   text-decoration: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .resumeBtn:hover {
-  background: var(--cyan-dim);
-  box-shadow: 0 0 20px rgba(100, 255, 218, 0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+  border-color: rgba(192, 192, 200, 0.5);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.2);
+  transform: translateY(2px);
 }
 
 .hamburger {

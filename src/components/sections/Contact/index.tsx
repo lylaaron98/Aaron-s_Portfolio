@@ -23,7 +23,7 @@ export default function Contact() {
   }
 
   return (
-    <SectionContainer id="contact" background="navy-light" number="05" title="Get In Touch">
+    <SectionContainer id="contact" background="navy-light" title="Get In Touch">
       <div ref={ref} className={styles.inner}>
         <div className={styles.infoBlock}>
           <h3 className={styles.heading}>Let's Work Together</h3>

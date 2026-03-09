@@ -8,7 +8,7 @@ export default function Experience() {
   const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.entry}`, { stagger: 0.15 })
 
   return (
-    <SectionContainer id="experience" number="03" title="Experience">
+    <SectionContainer id="experience" title="Experience">
       <div ref={ref} className={styles.timeline}>
         {experiences.map((exp, i) => (
           <div key={exp.company} className={styles.entry}>

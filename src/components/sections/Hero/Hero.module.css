@@ -3,51 +3,38 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   padding: 0 50px;
   padding-top: var(--nav-height);
   position: relative;
   overflow: hidden;
+  background: var(--navy);
 }
 
-.hero::before {
-  content: '';
+/* Liquid Ether background layer */
+.etherBg {
   position: absolute;
-  top: -40%;
-  right: -15%;
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(100, 255, 218, 0.07) 0%, transparent 65%);
-  pointer-events: none;
-  animation: pulse-glow 8s ease-in-out infinite alternate;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(100, 255, 218, 0.04) 0%, transparent 70%);
-  pointer-events: none;
-  animation: pulse-glow 10s ease-in-out 2s infinite alternate;
-}
-
-@keyframes pulse-glow {
-  0% { opacity: 0.6; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.15); }
+  inset: 0;
+  z-index: 0;
+  opacity: 0.9;
 }
 
 .content {
   max-width: 1100px;
   margin: 0 auto;
   width: 100%;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .greeting {
   font-family: var(--font-mono);
   font-size: 1rem;
-  color: var(--cyan);
+  color: var(--accent);
   margin-bottom: 24px;
   letter-spacing: 0.08em;
 }
@@ -55,13 +42,19 @@
 .name {
   font-size: clamp(50px, 9vw, 90px);
   font-weight: 800;
-  color: var(--white);
   line-height: 1.1;
   margin-bottom: 10px;
-  background: linear-gradient(135deg, var(--white) 0%, var(--slate-light) 100%);
+  background: linear-gradient(135deg, #f0f0f5 0%, #a0a0b0 40%, #f0f0f5 60%, #808090 100%);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: chrome-shift 6s ease-in-out infinite alternate;
+}
+
+@keyframes chrome-shift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 .tagline {
@@ -74,11 +67,11 @@
 }
 
 .typewriter {
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .cursor {
-  color: var(--cyan);
+  color: var(--accent);
   animation: blink 1s step-end infinite;
   font-weight: 300;
 }
@@ -89,7 +82,7 @@
 }
 
 .description {
-  max-width: 540px;
+  max-width: 600px;
   font-size: 1.05rem;
   color: var(--slate);
   line-height: 1.8;
@@ -100,44 +93,58 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  justify-content: center;
   margin-bottom: 50px;
 }
 
 .ctaPrimary,
 .ctaSecondary {
-  padding: 14px 34px;
+  padding: 16px 36px;
   font-size: 0.9rem;
   font-family: var(--font-mono);
-  border-radius: var(--border-radius-lg);
-  transition: var(--transition);
-  font-weight: 500;
+  border-radius: var(--border-radius-xl);
+  font-weight: 600;
   letter-spacing: 0.05em;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
 .ctaPrimary {
-  background: linear-gradient(135deg, var(--cyan) 0%, #4fd1c5 100%);
+  background: linear-gradient(180deg, #d0d0d8 0%, #a0a0b0 50%, #909098 100%);
   color: var(--navy);
-  border: 1px solid var(--cyan);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-3d);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 }
 
 .ctaPrimary:hover {
-  background: transparent;
-  color: var(--cyan);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 40px rgba(100, 255, 218, 0.25), 0 0 20px rgba(100, 255, 218, 0.1);
+  transform: translateY(4px);
+  box-shadow: var(--shadow-3d-hover);
+  background: linear-gradient(180deg, #e0e0e8 0%, #b0b0c0 50%, #a0a0a8 100%);
+}
+
+.ctaPrimary:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 rgba(0,0,0,0.25);
 }
 
 .ctaSecondary {
-  background: transparent;
-  color: var(--cyan);
-  border: 1px solid rgba(100, 255, 218, 0.4);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  color: var(--accent);
+  border: 1px solid rgba(192, 192, 200, 0.25);
+  box-shadow: var(--shadow-3d);
 }
 
 .ctaSecondary:hover {
-  background: var(--cyan-dim);
-  border-color: var(--cyan);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 40px rgba(100, 255, 218, 0.15);
+  transform: translateY(4px);
+  box-shadow: var(--shadow-3d-hover);
+  border-color: rgba(192, 192, 200, 0.45);
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+}
+
+.ctaSecondary:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 rgba(0,0,0,0.25);
 }
 
 .socials {
@@ -158,11 +165,11 @@
 }
 
 .socials a:hover {
-  color: var(--cyan);
-  border-color: rgba(100, 255, 218, 0.3);
-  background: rgba(100, 255, 218, 0.05);
+  color: var(--white);
+  border-color: rgba(192, 192, 200, 0.3);
+  background: rgba(192, 192, 200, 0.08);
   transform: translateY(-3px);
-  box-shadow: 0 4px 20px rgba(100, 255, 218, 0.1);
+  box-shadow: 0 4px 20px rgba(192, 192, 200, 0.1);
 }
 
 .scrollIndicator {
@@ -173,18 +180,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   color: var(--slate);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .scrollLine {
-  width: 1px;
-  height: 60px;
-  background: linear-gradient(to bottom, var(--cyan), transparent);
+  width: 2px;
+  height: 90px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
   animation: scrollPulse 2s ease infinite;
 }
 

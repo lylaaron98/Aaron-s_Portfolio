@@ -16,7 +16,7 @@
   right: -15%;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(100, 255, 218, 0.03) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192, 192, 200, 0.02) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -32,7 +32,7 @@
   left: -10%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(100, 255, 218, 0.025) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192, 192, 200, 0.015) 0%, transparent 70%);
   pointer-events: none;
 }
 

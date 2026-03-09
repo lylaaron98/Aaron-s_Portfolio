@@ -9,7 +9,7 @@ export default function Projects() {
   const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`, { stagger: 0.12 })
 
   return (
-    <SectionContainer id="projects" number="04" title="Projects">
+    <SectionContainer id="projects" title="Projects">
       <div ref={ref} className={styles.grid}>
         {projects.map((project, i) => (
           <Card

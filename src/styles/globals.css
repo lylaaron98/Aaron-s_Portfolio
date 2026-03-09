@@ -58,12 +58,12 @@ button {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--cyan);
+  background: var(--accent);
 }
 
 ::selection {
-  background: var(--cyan-dim);
-  color: var(--cyan);
+  background: rgba(192, 192, 200, 0.2);
+  color: var(--white);
 }
 
 section {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import gsap from 'gsap'
+import LiquidEther from '../../ui/LiquidEther/LiquidEther'
 import styles from './Hero.module.css'
 import { scrollToSection } from '../../../utils/smoothScroll'
 
@@ -86,6 +87,24 @@ export default function Hero() {
 
   return (
     <section id="hero" className={styles.hero} ref={heroRef}>
+      <div className={styles.etherBg}>
+        <LiquidEther
+          colors={['#6a6a80', '#9090a8', '#b8b8d0']}
+          resolution={0.5}
+          mouseForce={20}
+          cursorSize={100}
+          isViscous={true}
+          viscous={50}
+          iterationsViscous={48}
+          iterationsPoisson={48}
+          dt={0.016}
+          BFECC={true}
+          autoDemo={true}
+          autoSpeed={0.25}
+          autoIntensity={2.5}
+          autoRampDuration={1.2}
+        />
+      </div>
       <div className={styles.content}>
         <p className={styles.greeting}>Hi, my name is</p>
         <h1 className={styles.name}>Aaron.</h1>
@@ -99,11 +118,11 @@ export default function Hero() {
           crafting clean, intuitive user interfaces and architecting efficient backend systems.
         </p>
         <div className={styles.ctas}>
-          <button ref={applyMagnetic} className={styles.ctaPrimary} onClick={() => scrollToSection('projects')}>
-            View My Work
+          <button ref={applyMagnetic} className={styles.ctaPrimary} onClick={() => scrollToSection('contact')}>
+            Get in Touch
           </button>
-          <button ref={applyMagnetic} className={styles.ctaSecondary} onClick={() => scrollToSection('contact')}>
-            Get In Touch
+          <button ref={applyMagnetic} className={styles.ctaSecondary} onClick={() => scrollToSection('projects')}>
+            View My Work
           </button>
         </div>
         <div className={styles.socials}>

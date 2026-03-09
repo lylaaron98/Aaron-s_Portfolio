@@ -7,7 +7,7 @@
 .entry {
   position: relative;
   padding-left: 32px;
-  border-left: 2px solid rgba(100, 255, 218, 0.2);
+  border-left: 2px solid rgba(192, 192, 200, 0.15);
   padding-bottom: 8px;
 }
 
@@ -20,8 +20,8 @@
   height: 12px;
   border-radius: 50%;
   background: var(--navy);
-  border: 2px solid var(--cyan);
-  box-shadow: 0 0 12px rgba(100, 255, 218, 0.3);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 12px rgba(192, 192, 200, 0.2);
   z-index: 1;
 }
 

@@ -11,7 +11,7 @@ export default function Projects() {
   return (
     <SectionContainer id="projects" title="Projects">
       <div ref={ref} className={styles.grid}>
-        {projects.map((project, i) => (
+        {projects.map((project) => (
           <Card
             key={project.title}
             gradientOverlay

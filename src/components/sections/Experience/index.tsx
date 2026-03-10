@@ -10,7 +10,7 @@ export default function Experience() {
   return (
     <SectionContainer id="experience" title="Experience">
       <div ref={ref} className={styles.timeline}>
-        {experiences.map((exp, i) => (
+        {experiences.map((exp) => (
           <div key={exp.company} className={styles.entry}>
             <div className={styles.header}>
               <h3 className={styles.role}>{exp.role}</h3>

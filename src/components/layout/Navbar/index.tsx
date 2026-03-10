@@ -41,7 +41,7 @@ export default function Navbar() {
       <div className={styles.inner}>
         <a href="#hero" className={styles.logo} onClick={(e) => { e.preventDefault(); smoothScrollTo('#hero') }}>
           <span className={styles.logoBracket}>&lt;</span>
-          Aaron
+          <span className={styles.shinyText}>Aaron</span>
           <span className={styles.logoBracket}> /&gt;</span>
         </a>
 

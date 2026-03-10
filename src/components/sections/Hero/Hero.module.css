@@ -33,7 +33,7 @@
 
 .greeting {
   font-family: var(--font-sans);
-  font-size: 1rem;
+  font-size: 1.18rem;
   color: var(--accent);
   margin-bottom: 24px;
   letter-spacing: 0.08em;

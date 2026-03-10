@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { ThemeProvider } from '../context/ThemeContext'
 import Navbar from '../components/layout/Navbar'
+import CursorOverlay from '../components/ui/CursorOverlay'
 import Footer from '../components/layout/Footer'
 import ScrollToTop from '../components/ui/ScrollToTop'
 
@@ -14,6 +15,7 @@ const Contact = lazy(() => import('../components/sections/Contact'))
 function App() {
   return (
     <ThemeProvider>
+      <CursorOverlay />
       <Navbar />
       <main>
         <Suspense>

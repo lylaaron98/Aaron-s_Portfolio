@@ -9,7 +9,21 @@ export const skillCategories: SkillCategory[] = [
   {
     title: 'Frameworks & Libraries',
     icon: '🎨',
-    skills: ['Next.js', 'ReactJS', 'Node.js', 'Express.js', 'TailwindCSS', 'Ant Design', 'Django', 'TensorFlow'],
+    skills: [
+      'Next.js',
+      'ReactJS',
+      'React Bits',
+      'shadcn/ui',
+      'React Icons',
+      'React Three Fiber',
+      'GSAP',
+      'Node.js',
+      'Express.js',
+      'TailwindCSS',
+      'Ant Design',
+      'Django',
+      'TensorFlow',
+    ],
   },
   {
     title: 'DevOps & Tools',

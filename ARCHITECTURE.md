@@ -29,10 +29,11 @@
 | Language | TypeScript | ~5.9 |
 | Build Tool | Vite | 7 |
 | Styling | CSS Modules | (built into Vite) |
+| Routing | React Router | 6+ |
 | Linting | ESLint + typescript-eslint | 9 |
 | Package Manager | npm | — |
 
-No UI libraries, no CSS-in-JS, no router. The site is a single HTML page.
+Now uses React Router for client-side navigation (multi-page: main portfolio + demo page).
 
 ---
 
@@ -50,21 +51,20 @@ Aaron-s_Portfolio/
 ├── public/
 │   └── vite.svg                # Favicon (replace with personal logo)
 └── src/
-    ├── main.tsx                # React DOM entry — mounts <App>
-    ├── App.tsx                 # Root component — composes all sections
-    ├── index.css               # Global resets, CSS variables, keyframes
-    ├── App.css                 # App-level overrides (currently minimal)
-    ├── assets/                 # Static assets imported via JS
-    ├── hooks/
-    │   └── useScrollReveal.ts  # IntersectionObserver scroll-reveal hook
-    └── components/
-        ├── Navbar.tsx / .module.css
-        ├── Hero.tsx   / .module.css
-        ├── About.tsx  / .module.css
-        ├── Skills.tsx / .module.css
-        ├── Projects.tsx / .module.css
-        ├── Contact.tsx  / .module.css
-        └── Footer.tsx   / .module.css
+  ├── main.tsx                # React DOM entry — mounts <App>
+  ├── App.tsx                 # Root component — composes all sections, now with React Router
+  ├── index.css               # Global resets, CSS variables, keyframes
+  ├── assets/                 # Static assets imported via JS
+  ├── hooks/
+  │   └── useScrollReveal.ts  # IntersectionObserver scroll-reveal hook
+  ├── components/
+  │   └── sections/
+  │       ├── Projects/
+  │       │   ├── index.tsx   # Projects section, card grid, router links
+  │       │   ├── Projects.module.css # Card layout, scrollable description, custom scrollbar
+  │       │   └── DemoPage.tsx # Demo page route (gallery, description, video placeholders)
+  │       └── ...              # Other sections (Hero, About, Skills, Contact, Footer)
+  └── ...
 ```
 
 ---
@@ -80,15 +80,22 @@ The static HTML shell. Sets `lang`, `charset`, viewport meta, description meta, 
 Calls `createRoot(document.getElementById('root')!).render(...)` inside `<StrictMode>`. Imports global CSS (`index.css`) before mounting.
 
 ### `src/App.tsx`
-The single top-level component. Renders the full page in document order:
+The single top-level component. Renders the full page in document order, now wrapped in React Router:
 
 ```
-<header>  →  Navbar
-<main>    →  Hero → About → Skills → Projects → Contact
-<footer>  →  Footer
+<Router>
+  <header>  →  Navbar
+  <main>
+    <Routes>
+      /         → Hero → About → Skills → Projects → Contact
+      /demo     → DemoPage (gallery, description, video placeholders)
+    </Routes>
+  </main>
+  <footer>  →  Footer
+</Router>
 ```
 
-No router is used. Smooth-scroll navigation is handled imperatively via `element.scrollIntoView({ behavior: 'smooth' })`.
+Navigation is handled with React Router `<Link>` components for seamless client-side routing.
 
 ---
 
@@ -136,7 +143,7 @@ All four sections use the `useScrollReveal` hook (see below) to animate in when 
 
 **Skills** — Data-driven: `skillCategories[]` array → mapped to `<div className={styles.card}>`. Each card has a `transitionDelay` proportional to its index.
 
-**Projects** — Data-driven: `projects[]` array with `featured: boolean` flag. Featured cards get an additional badge class. Tech tags are rendered as `<span>` chips.
+**Projects** — Data-driven: `projects[]` array with `featured: boolean` flag. Featured cards get an additional badge class. Tech tags are rendered as `<span>` chips. Cards are uniform in size, with a scrollable, light-grey description area and a subtle, light-grey custom scrollbar. Tech stack is always visible at the bottom. Clicking a card or the folder icon navigates to the `/demo` page.
 
 **Contact** — Controlled form with `form` state object (`name`, `email`, `message`). `handleSubmit` prevents default, sets `submitted: true` for 4 seconds to show a success banner, then resets. No backend/email service is wired up yet — this is a client-only stub.
 
@@ -148,9 +155,19 @@ Stateless. Reads `new Date().getFullYear()` for the copyright year.
 
 ## Styling Architecture
 
-### CSS Modules
+
+### CSS Modules & Custom Scrollbars
 
 Every component has a co-located `.module.css` file. Vite transforms class names to locally-scoped identifiers at build time (e.g. `.card` → `._card_1ab2c_1`), preventing any cross-component bleed.
+
+Project card descriptions use a custom, light-grey scrollbar for a modern look:
+
+```css
+.cardDesc::-webkit-scrollbar-thumb {
+  background: #e0e4ea;
+  border-radius: 4px;
+}
+```
 
 ```
 Component.tsx         → import styles from './Component.module.css'
@@ -222,9 +239,10 @@ const ref = useScrollReveal<HTMLDivElement>()
 
 ---
 
+
 ## Data Flow & State
 
-The site has no global state manager, no context, and no server communication (yet).
+The site has no global state manager, no context, and no server communication (yet). Routing is handled by React Router.
 
 | Component | State | Description |
 |---|---|---|

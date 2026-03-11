@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './SectionContainer.module.css'
 import { cx } from '../../../utils/classNames'
+import ShinyText from '../ShinyText'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -25,6 +26,7 @@ export default function SectionContainer({
   ...props
 }: SectionContainerProps) {
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const titleWords = title?.split(/\s+/).filter(Boolean) ?? []
 
   useEffect(() => {
     const el = titleRef.current
@@ -63,7 +65,15 @@ export default function SectionContainer({
         {title && (
           <h2 ref={titleRef} className={styles.sectionTitle}>
             {number && <span className={styles.num}>{number}.</span>}
-            {title}
+            <span className={styles.titleWords}>
+              {titleWords.map((word, index) => (
+                <ShinyText
+                  key={`${word}-${index}`}
+                  text={word}
+                  className={styles.titleWord}
+                />
+              ))}
+            </span>
             <span className={styles.line} />
           </h2>
         )}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom';
 import gsap from 'gsap'
 import styles from './Navbar.module.css'
-import { smoothScrollTo } from '../../../utils/smoothScroll'
 import { useTheme } from '../../../context/ThemeContext'
 
 export default function Navbar() {
@@ -52,11 +52,11 @@ export default function Navbar() {
   return (
     <header ref={navRef} className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
       <div className={styles.inner}>
-        <a href="#hero" className={styles.logo} onClick={(e) => { e.preventDefault(); smoothScrollTo('#hero') }}>
+        <Link to="/" className={styles.logo}>
           <span className={styles.logoBracket}>&lt;</span>
           <span className={styles.shinyText}>Aaron</span>
           <span className={styles.logoBracket}> /&gt;</span>
-        </a>
+        </Link>
 
         <nav className={styles.nav}>
           <button

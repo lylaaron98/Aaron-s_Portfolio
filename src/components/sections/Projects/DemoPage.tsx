@@ -1,7 +1,8 @@
-import ShinyText from '../../ui/ShinyText';
-import { projects } from '../../../data/projects';
-import type { Project } from '../../../types/project';
-import Galaxy from './Galaxy';
+import ShinyText from '../../ui/ShinyText'
+import ScrollToTop from '../../ui/ScrollToTop'
+import { projects } from '../../../data/projects'
+import type { Project } from '../../../types/project'
+import Galaxy from './Galaxy'
 
 export default function DemoPage() {
   return (
@@ -9,18 +10,28 @@ export default function DemoPage() {
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
         <Galaxy />
       </div>
+      <ScrollToTop />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <h1>
+        <a
+          href="#projects"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '1.5rem',
+            color: '#bfc4cf',
+            textDecoration: 'none',
+            fontSize: '0.95rem',
+          }}
+        >
+          <span aria-hidden="true">←</span>
+          <span>Back to portfolio</span>
+        </a>
+        <h1 style={{ fontSize: '3rem', lineHeight: 1, marginBottom: '1.5rem' }}>
           <ShinyText
             text="Project Demos"
             speed={2}
             delay={0}
-            color="#b5b5b5"
-            shineColor="#ffffff"
-            spread={120}
-            direction="left"
-            yoyo={false}
-            pauseOnHover={false}
             disabled={false}
             className="shiny-header"
           />
@@ -68,5 +79,5 @@ export default function DemoPage() {
         ))}
       </div>
     </div>
-  );
+  )
 }

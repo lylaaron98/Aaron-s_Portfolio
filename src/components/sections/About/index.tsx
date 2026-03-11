@@ -3,9 +3,14 @@ import { useGsapReveal } from '../../../hooks/useGsapReveal'
 import SectionContainer from '../../ui/SectionContainer'
 import ProfileCard from '../../ui/ProfileCard/ProfileCard'
 import { scrollToSection } from '../../../utils/smoothScroll'
+import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 export default function About() {
   const ref = useGsapReveal<HTMLDivElement>()
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const hasFinePointer = useMediaQuery('(pointer: fine)')
+  const isDesktop = useMediaQuery('(min-width: 901px)')
+  const enableProfileTilt = hasFinePointer && isDesktop && !prefersReducedMotion
 
   return (
     <SectionContainer id="about" title="About Me">
@@ -47,11 +52,11 @@ export default function About() {
             status="Open to Work"
             contactText="Contact Me"
             showUserInfo
-            enableTilt
-            enableMobileTilt
+            enableTilt={enableProfileTilt}
+            enableMobileTilt={false}
             iconUrl="/assets/iconpattern.svg"
             behindGlowColor="rgba(180, 180, 195, 0.45)"
-            behindGlowEnabled
+            behindGlowEnabled={false}
             innerGradient="linear-gradient(145deg, #1e1e28 0%, #2a2a38 100%)"
             onContactClick={() => scrollToSection('contact')}
           />

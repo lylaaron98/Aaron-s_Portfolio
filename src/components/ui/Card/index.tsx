@@ -2,6 +2,7 @@ import { useRef, useEffect, type HTMLAttributes } from 'react'
 import gsap from 'gsap'
 import styles from './Card.module.css'
 import { cx } from '../../../utils/classNames'
+import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 type CardVariant = 'default' | 'navy'
 
@@ -14,7 +15,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   gradientOverlay?: boolean
   /** Show a top-edge gradient line on hover */
   topAccent?: boolean
-  /** Enable 3D tilt on hover (default: true) */
+  /** Enable 3D tilt on hover (default: false) */
   tilt?: boolean
 }
 
@@ -23,16 +24,20 @@ export default function Card({
   variant = 'default',
   gradientOverlay = false,
   topAccent = false,
-  tilt = true,
+  tilt = false,
   className,
   children,
   ...props
 }: CardProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const hasFinePointer = useMediaQuery('(pointer: fine)')
+  const isDesktop = useMediaQuery('(min-width: 901px)')
+  const enableTilt = tilt && hasFinePointer && isDesktop && !prefersReducedMotion
 
   useEffect(() => {
     const el = ref.current
-    if (!el || !tilt) return
+    if (!el || !enableTilt) return
 
     el.style.transformStyle = 'preserve-3d'
 
@@ -83,7 +88,7 @@ export default function Card({
       el.removeEventListener('mouseleave', handleLeave)
       if (el.contains(glareEl)) el.removeChild(glareEl)
     }
-  }, [tilt])
+  }, [enableTilt])
 
   return (
     <div

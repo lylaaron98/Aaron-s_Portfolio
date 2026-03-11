@@ -7,6 +7,9 @@ import { useTheme } from '../../../context/ThemeContext'
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const navRef = useRef<HTMLElement>(null)
+  const lastScrollRef = useRef(0)
+  const hiddenRef = useRef(false)
+  const scrolledRef = useRef(false)
   const { theme, toggleTheme } = useTheme()
 
   // Entrance animation
@@ -19,18 +22,28 @@ export default function Navbar() {
 
   // Hide on scroll down, show on scroll up
   useEffect(() => {
-    let lastScroll = 0
     const handleScroll = () => {
       const current = window.scrollY
-      setScrolled(current > 50)
+      const nextScrolled = current > 50
+      if (nextScrolled !== scrolledRef.current) {
+        scrolledRef.current = nextScrolled
+        setScrolled(nextScrolled)
+      }
 
       if (!navRef.current) return
-      if (current > lastScroll && current > 100) {
-        gsap.to(navRef.current, { y: '-100%', duration: 0.3, ease: 'power2.out' })
-      } else {
-        gsap.to(navRef.current, { y: 0, duration: 0.3, ease: 'power2.out' })
+
+      const shouldHide = current > lastScrollRef.current && current > 100
+      if (shouldHide !== hiddenRef.current) {
+        hiddenRef.current = shouldHide
+        gsap.to(navRef.current, {
+          y: shouldHide ? '-100%' : 0,
+          duration: 0.3,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        })
       }
-      lastScroll = current
+
+      lastScrollRef.current = current
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)

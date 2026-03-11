@@ -1,13 +1,4 @@
-// @ts-ignore: No types for @emailjs/browser
 import emailjs from '@emailjs/browser'
-
-/**
- * Contact API layer.
- * Stub implementation — swap the body with a real provider later:
- *   - EmailJS
- *   - Vercel serverless function
- *   - Node/Express backend
- */
 
 export interface ContactMessage {
   name: string
@@ -15,23 +6,24 @@ export interface ContactMessage {
   message: string
 }
 
+const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
 export async function sendContactMessage(data: ContactMessage): Promise<void> {
-  // TODO: replace with real backend call
-  console.log('stub contact request', data)
-  // EmailJS integration
-  const serviceId = 'YOUR_SERVICE_ID';
-  const templateId = 'YOUR_TEMPLATE_ID';
-  const userId = 'YOUR_PUBLIC_KEY';
-
-  const templateParams = {
-    from_name: data.name,
-    from_email: data.email,
-    message: data.message,
-  };
-
-  try {
-    await emailjs.send(serviceId, templateId, templateParams, userId);
-  } catch (error) {
-    throw new Error('Failed to send email');
+  if (!serviceId || !templateId || !publicKey) {
+    console.warn('EmailJS is not configured. Add VITE_EMAILJS_* environment variables to enable contact delivery.')
+    return
   }
+
+  await emailjs.send(
+    serviceId,
+    templateId,
+    {
+      from_name: data.name,
+      from_email: data.email,
+      message: data.message,
+    },
+    publicKey,
+  )
 }

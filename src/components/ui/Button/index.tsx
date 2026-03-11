@@ -24,7 +24,8 @@ export default function Button({
   )
 
   if (props.as === 'a') {
-    const { as: _as, ...anchorProps } = props as ButtonAsAnchor
+    const { as, ...anchorProps } = props as ButtonAsAnchor
+    void as
     return (
       <a className={classes} {...anchorProps}>
         {children}
@@ -32,7 +33,8 @@ export default function Button({
     )
   }
 
-  const { as: _as, ...buttonProps } = props as ButtonAsButton
+  const { as, ...buttonProps } = props as ButtonAsButton
+  void as
   return (
     <button className={classes} {...buttonProps}>
       {children}

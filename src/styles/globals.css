@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+@import "tailwindcss";
 @import './tokens.css';
 @import './animations.css';
 
@@ -68,6 +68,30 @@ button {
 
 section {
   padding: 100px 0;
+}
+
+.animate-cell-ripple {
+  animation: cell-ripple var(--duration, 480ms) ease-out;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes cell-ripple {
+  0% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+
+  40% {
+    opacity: 0.82;
+    transform: scale(0.94);
+    box-shadow: 0 0 24px 0 var(--cell-shadow-color);
+  }
+
+  100% {
+    opacity: 0.28;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 .container {

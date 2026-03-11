@@ -23,6 +23,10 @@ interface ProfileCardProps {
   onContactClick?: () => void;
 }
 
+type DeviceMotionPermissionEvent = typeof window.DeviceMotionEvent & {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
 const DEFAULT_INNER_GRADIENT = 'linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)';
 
 const ANIMATION_CONFIG = {
@@ -269,7 +273,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
     const handleClick = () => {
       if (!enableMobileTilt || location.protocol !== 'https:') return;
-      const anyMotion = window.DeviceMotionEvent as any;
+      const anyMotion = window.DeviceMotionEvent as DeviceMotionPermissionEvent | undefined;
       if (anyMotion && typeof anyMotion.requestPermission === 'function') {
         anyMotion
           .requestPermission()

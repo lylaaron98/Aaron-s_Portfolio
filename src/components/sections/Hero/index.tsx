@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import Silk from '../../ui/Silk/Silk'
 import styles from './Hero.module.css'
 import { scrollToSection } from '../../../utils/smoothScroll'
+import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+
+const Silk = lazy(() => import('../../ui/Silk/Silk'))
 
 const roles = [
   'Frontend Engineer',
@@ -12,11 +14,15 @@ const roles = [
 ]
 
 export default function Hero() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const isCompactViewport = useMediaQuery('(max-width: 900px)')
   const [roleIndex, setRoleIndex] = useState(0)
   const [displayed, setDisplayed] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [charIndex, setCharIndex] = useState(0)
   const heroRef = useRef<HTMLDivElement>(null)
+  const visibleRole = prefersReducedMotion ? roles[0] : displayed
+  const showSilk = !prefersReducedMotion && !isCompactViewport
 
   // GSAP entrance timeline
   useEffect(() => {
@@ -30,37 +36,24 @@ export default function Hero() {
         .from(`.${styles.socials} a`, { opacity: 0, y: 20, duration: 0.4, stagger: 0.1 }, '-=0.3')
         .from(`.${styles.scrollIndicator}`, { opacity: 0, duration: 0.6 }, '-=0.2')
 
-      // Floating scroll indicator
-      gsap.to(`.${styles.scrollIndicator}`, {
-        y: -8,
-        duration: 2,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-        delay: 1.5,
-      })
+      if (!prefersReducedMotion) {
+        gsap.to(`.${styles.scrollIndicator}`, {
+          y: -8,
+          duration: 2,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: 1.5,
+        })
+      }
     }, heroRef)
 
     return () => ctx.revert()
-  }, [])
-
-  // Magnetic hover effect for CTA buttons
-  const applyMagnetic = useCallback((el: HTMLElement | null) => {
-    if (!el) return
-    const handleMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect()
-      const x = e.clientX - rect.left - rect.width / 2
-      const y = e.clientY - rect.top - rect.height / 2
-      gsap.to(el, { x: x * 0.25, y: y * 0.25, duration: 0.3, ease: 'power2.out' })
-    }
-    const handleLeave = () => {
-      gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' })
-    }
-    el.addEventListener('mousemove', handleMove)
-    el.addEventListener('mouseleave', handleLeave)
-  }, [])
+  }, [prefersReducedMotion])
 
   useEffect(() => {
+    if (prefersReducedMotion) return
+
     const current = roles[roleIndex]
     let timeout: ReturnType<typeof setTimeout>
 
@@ -77,30 +70,42 @@ export default function Hero() {
     } else if (!isDeleting && charIndex > current.length) {
       timeout = setTimeout(() => setIsDeleting(true), 2000)
     } else if (isDeleting && charIndex < 0) {
-      setIsDeleting(false)
-      setCharIndex(0)
-      setRoleIndex((i) => (i + 1) % roles.length)
+      timeout = setTimeout(() => {
+        setDisplayed('')
+        setIsDeleting(false)
+        setCharIndex(0)
+        setRoleIndex((i) => (i + 1) % roles.length)
+      }, 150)
     }
 
     return () => clearTimeout(timeout)
-  }, [charIndex, isDeleting, roleIndex])
+  }, [charIndex, isDeleting, prefersReducedMotion, roleIndex])
 
   return (
     <section id="hero" className={styles.hero} ref={heroRef}>
-      <div className={styles.etherBg}>
-        <Silk
-          speed={5}
-          scale={1}
-          color="#7B7481"
-          noiseIntensity={0.1}
-          rotation={1.5}
+      {showSilk ? (
+        <div className={styles.etherBg} aria-hidden="true">
+          <Suspense fallback={<div className={`${styles.heroBackdrop} ${styles.heroBackdropStatic}`} />}>
+            <Silk
+              speed={4}
+              scale={0.9}
+              color="#7B7481"
+              noiseIntensity={0.08}
+              rotation={1.25}
+            />
+          </Suspense>
+        </div>
+      ) : (
+        <div
+          className={`${styles.heroBackdrop} ${styles.heroBackdropStatic}`}
+          aria-hidden="true"
         />
-      </div>
+      )}
       <div className={styles.content}>
         <p className={styles.greeting}>Hi, my name is</p>
         <h1 className={styles.name}>Aaron.</h1>
         <h2 className={styles.tagline}>
-          <span className={styles.typewriter}>{displayed}</span>
+          <span className={styles.typewriter}>{visibleRole}</span>
           <span className={styles.cursor}>|</span>
         </h2>
         <p className={styles.description}>
@@ -109,10 +114,10 @@ export default function Hero() {
           crafting clean, intuitive user interfaces and architecting efficient backend systems.
         </p>
         <div className={styles.ctas}>
-          <button ref={applyMagnetic} className={styles.ctaPrimary} onClick={() => scrollToSection('contact')}>
+          <button className={styles.ctaPrimary} onClick={() => scrollToSection('contact')}>
             Get in Touch
           </button>
-          <button ref={applyMagnetic} className={styles.ctaSecondary} onClick={() => scrollToSection('projects')}>
+          <button className={styles.ctaSecondary} onClick={() => scrollToSection('projects')}>
             View My Work
           </button>
         </div>

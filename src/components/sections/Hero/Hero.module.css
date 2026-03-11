@@ -11,12 +11,42 @@
   background: var(--navy);
 }
 
-/* Liquid Ether background layer */
 .etherBg {
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: 0.9;
+  opacity: 0.86;
+}
+
+.heroBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.95;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 28%),
+    radial-gradient(circle at 80% 25%, rgba(192, 192, 200, 0.08), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(192, 192, 200, 0.06), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 35%),
+    linear-gradient(135deg, #15151a 0%, #1b1b24 45%, #131319 100%);
+  background-size: 160% 160%, 180% 180%, 140% 140%, auto, auto;
+  animation: heroBackdropShift 18s ease-in-out infinite alternate;
+}
+
+.heroBackdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black 36%, transparent 88%);
+  opacity: 0.18;
+}
+
+.heroBackdropStatic {
+  animation: none;
 }
 
 .content {
@@ -55,6 +85,16 @@
 @keyframes chrome-shift {
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
+}
+
+@keyframes heroBackdropShift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 50% 100%, 0 0, 0 0;
+  }
+
+  100% {
+    background-position: 30% 15%, 80% 20%, 45% 85%, 0 0, 0 0;
+  }
 }
 
 .tagline {
@@ -224,6 +264,15 @@
 
   .scrollIndicator {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name,
+  .cursor,
+  .scrollLine,
+  .heroBackdrop {
+    animation: none;
   }
 }
 

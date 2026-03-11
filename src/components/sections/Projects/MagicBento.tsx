@@ -15,10 +15,10 @@ export interface BentoProps {
 }
 
 
-const MagicBento: React.FC<BentoProps> = ({ children, textAutoHide = true, enableBorderGlow = true }) => {
+const MagicBento: React.FC<BentoProps> = ({ cards, textAutoHide = true, enableBorderGlow = true }) => {
   return (
     <div className="card-grid">
-      {cards.map((card, idx) => (
+      {cards.map((card: BentoCardProps, idx: number) => (
         <div
           key={card.title + idx}
           className={`magic-bento-card${enableBorderGlow ? ' magic-bento-card--border-glow' : ''}${textAutoHide ? ' magic-bento-card--text-autohide' : ''}`}

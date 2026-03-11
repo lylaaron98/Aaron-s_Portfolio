@@ -9,6 +9,7 @@ export default function Contact() {
   const ref = useGsapReveal<HTMLDivElement>()
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -16,10 +17,16 @@ export default function Contact() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    await sendContactMessage(form)
-    setSubmitted(true)
-    setForm({ name: '', email: '', message: '' })
-    setTimeout(() => setSubmitted(false), 4000)
+    setError('')
+
+    try {
+      await sendContactMessage(form)
+      setSubmitted(true)
+      setForm({ name: '', email: '', message: '' })
+      setTimeout(() => setSubmitted(false), 4000)
+    } catch {
+      setError('Message sending is currently unavailable. Please email me directly instead.')
+    }
   }
 
   return (
@@ -66,6 +73,7 @@ export default function Contact() {
               Thanks! I'll get back to you soon.
             </div>
           )}
+          {error && <div className={styles.successMsg}>{error}</div>}
           <div className={styles.formGroup}>
             <label htmlFor="name">Name</label>
             <input

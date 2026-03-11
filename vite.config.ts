@@ -10,5 +10,24 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('@react-three/fiber') || id.includes('three')) {
+            return 'three-stack'
+          }
+
+          if (id.includes('gsap')) {
+            return 'gsap'
+          }
+
+          if (id.includes('react-icons')) {
+            return 'icons'
+          }
+        },
+      },
+    },
+  },
   base: './',
 })

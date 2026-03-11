@@ -62,6 +62,7 @@ export default function Skills() {
             key={cat.title}
             variant="navy"
             topAccent
+            tilt
             className={styles.card}
           >
             <div className={styles.cardHeader}>

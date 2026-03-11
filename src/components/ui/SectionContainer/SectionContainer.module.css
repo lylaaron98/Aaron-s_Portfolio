@@ -2,6 +2,25 @@
   padding: 120px 0;
   position: relative;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
+
+.backgroundLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rippleBackground {
+  opacity: 0.5;
+  mask-image: radial-gradient(circle at top center, black 38%, transparent 100%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
 }
 
 /* Ambient glow on navy sections */
@@ -79,5 +98,9 @@
 @media (max-width: 768px) {
   .section {
     padding: 80px 0;
+  }
+
+  .rippleBackground {
+    opacity: 0.4;
   }
 }

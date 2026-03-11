@@ -1,71 +1,87 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react'
+import { useMediaQuery, usePrefersReducedMotion } from '../../hooks/useMediaQuery'
 
-const TRAIL_LENGTH = 8;
-const TRAIL_FADE = 0.13;
+const TRAIL_SIZES = [24, 18, 14, 10]
 
 export default function CursorOverlay() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const [trail, setTrail] = useState<Array<{x: number, y: number}>>(Array(TRAIL_LENGTH).fill({x: -100, y: -100}));
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const hasFinePointer = useMediaQuery('(pointer: fine)')
+  const trailRefs = useRef<Array<HTMLDivElement | null>>([])
+  const targetRef = useRef({ x: -100, y: -100 })
+  const pointsRef = useRef(TRAIL_SIZES.map(() => ({ x: -100, y: -100 })))
+  const frameRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const handleMove = (e: MouseEvent) => {
-      setTrail(prev => [{x: e.clientX, y: e.clientY}, ...prev.slice(0, TRAIL_LENGTH - 1)]);
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+    if (!hasFinePointer || prefersReducedMotion) {
+      return
+    }
+
+    const animate = () => {
+      const points = pointsRef.current
+      const target = targetRef.current
+
+      points[0].x += (target.x - points[0].x) * 0.24
+      points[0].y += (target.y - points[0].y) * 0.24
+
+      for (let index = 1; index < points.length; index += 1) {
+        points[index].x += (points[index - 1].x - points[index].x) * 0.18
+        points[index].y += (points[index - 1].y - points[index].y) * 0.18
       }
-    };
-    document.addEventListener('mousemove', handleMove);
-    return () => document.removeEventListener('mousemove', handleMove);
-  }, []);
+
+      points.forEach((point, index) => {
+        const node = trailRefs.current[index]
+        if (!node) return
+
+        node.style.transform = `translate3d(${point.x}px, ${point.y}px, 0) translate(-50%, -50%)`
+      })
+
+      frameRef.current = window.requestAnimationFrame(animate)
+    }
+
+    const handleMove = (event: MouseEvent) => {
+      targetRef.current = { x: event.clientX, y: event.clientY }
+    }
+
+    document.addEventListener('mousemove', handleMove, { passive: true })
+    frameRef.current = window.requestAnimationFrame(animate)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMove)
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current)
+      }
+    }
+  }, [hasFinePointer, prefersReducedMotion])
+
+  if (!hasFinePointer || prefersReducedMotion) {
+    return null
+  }
 
   return (
     <>
-      {trail.map((pos, idx) => (
+      {TRAIL_SIZES.map((size, index) => (
         <div
-          key={idx}
+          key={size}
+          ref={(node) => {
+            trailRefs.current[index] = node
+          }}
           style={{
             position: 'fixed',
             left: 0,
             top: 0,
-            width: `${32 - idx * 2}px`,
-            height: `${32 - idx * 2}px`,
+            width: `${size}px`,
+            height: `${size}px`,
             pointerEvents: 'none',
             zIndex: 9999,
             borderRadius: '50%',
-            background: `rgba(192,192,200,${0.10 - idx * (TRAIL_FADE * 0.7)})`,
-            boxShadow:
-              '0 0 16px 4px rgba(192,192,200,0.18), 0 0 4px 1px rgba(255,255,255,0.10), 0 1px 4px rgba(120,120,140,0.08)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            transition: 'background 0.2s, box-shadow 0.2s',
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)',
-            mixBlendMode: 'lighten',
-            transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
-            opacity: 1 - idx * 0.13,
+            opacity: 1 - index * 0.18,
+            background: 'rgba(192, 192, 200, 0.08)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 0 14px rgba(192,192,200,0.12)',
+            willChange: 'transform',
           }}
         />
       ))}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          width: '32px',
-          height: '32px',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          borderRadius: '50%',
-          background: 'rgba(192,192,200,0.10)',
-          boxShadow:
-            '0 0 16px 4px rgba(192,192,200,0.18), 0 0 4px 1px rgba(255,255,255,0.10), 0 1px 4px rgba(120,120,140,0.08)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          transition: 'background 0.2s, box-shadow 0.2s',
-          backdropFilter: 'blur(2px)',
-          WebkitBackdropFilter: 'blur(2px)',
-          mixBlendMode: 'lighten',
-        }}
-      />
     </>
-  );
+  )
 }

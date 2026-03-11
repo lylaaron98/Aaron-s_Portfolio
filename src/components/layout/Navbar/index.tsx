@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom';
 import gsap from 'gsap'
 import styles from './Navbar.module.css'
 import { useTheme } from '../../../context/ThemeContext'
@@ -52,11 +51,11 @@ export default function Navbar() {
   return (
     <header ref={navRef} className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
       <div className={styles.inner}>
-        <Link to="/" className={styles.logo}>
+        <a href="#hero" className={styles.logo}>
           <span className={styles.logoBracket}>&lt;</span>
           <span className={styles.shinyText}>Aaron</span>
           <span className={styles.logoBracket}> /&gt;</span>
-        </Link>
+        </a>
 
         <nav className={styles.nav}>
           <button

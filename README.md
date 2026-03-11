@@ -1,35 +1,60 @@
-
 # Aaron's Portfolio
 
-A modern, responsive personal portfolio website for Aaron — a Frontend & Fullstack Software Engineer specializing in web and mobile application development.
+Personal portfolio site for Aaron, built as a Vite + React + TypeScript single-page app with a hash-based demo view for project walkthroughs.
 
-## Tech Stack
+## Stack
 
-- **Vite** — fast dev server & build tool
-- **React 19** + **TypeScript** — component-based UI
-- **React Router** — client-side routing for multi-page navigation
-- **CSS Modules** — scoped, plain CSS (no Tailwind, no styled-components)
+- React 19
+- TypeScript
+- Vite 7
+- CSS Modules
+- GSAP + ScrollTrigger
+- react-icons
+- EmailJS for contact delivery
+- @react-three/fiber, three, react-bits, ogl, and motion for visual effects
 
+## Current Features
 
-## Sections & Features
+- Hero section with GSAP entrance animation, rotating role text, and adaptive animated background
+- About, Skills, Experience, Projects, and Contact sections rendered in a single-page portfolio flow
+- Shared `SectionContainer` wrapper with animated section titles and ripple background accents
+- Theme toggle persisted in `localStorage`
+- Project cards with GitHub links and a top-right icon that opens the demo view
+- Demo page available at `#/projects/demo`
+- Contact form wired through EmailJS when `VITE_EMAILJS_*` variables are configured
+- Global scroll-to-top control
 
-- **Hero** — full-screen intro with typewriter role animation
-- **About** — personal bio and tech highlights
-- **Skills** — categorized cards (Frontend, Backend, Mobile, Tools & Cloud)
-- **Projects** — showcase project cards with always-visible tech stack tags and links
-	- Cards are uniform in size, with a scrollable, light-grey description area and a subtle, light-grey custom scrollbar
-	- Clicking a card navigates to a dedicated demo page (`/demo`)
-- **Demo Page** — placeholder for gallery, development process, and video (expandable)
-- **Contact** — contact form + direct links (email, LinkedIn, GitHub)
-- **Footer** — copyright and social links
+## Routing Model
 
-## Navigation
+This project does not use `react-router-dom`.
 
-- Uses **React Router** for seamless client-side navigation
-- Navbar logo always routes to the homepage
-- Project cards and folder icon link to the demo page
+The app uses `window.location.hash` in `src/app/App.tsx` to switch between:
 
-## Getting Started
+- the main portfolio view
+- the project demo view at `#/projects/demo`
+
+Hash links such as `#about`, `#skills`, and `#projects` are still used for in-page scrolling on the main view.
+
+## Project Structure
+
+```text
+src/
+  app/                App shell and hash-route switching
+  api/                External service adapters such as EmailJS
+  components/
+    layout/           Navbar and Footer
+    sections/         Hero, About, Skills, Experience, Projects, Contact
+    ui/               Shared primitives such as Card, Badge, ShinyText, ScrollToTop
+  constants/          Shared route constants
+  context/            Theme context
+  data/               Static portfolio content
+  hooks/              GSAP reveal hooks and viewport helpers
+  styles/             Global stylesheet
+  types/              Shared TypeScript interfaces
+  utils/              Helpers such as smooth scrolling and class merging
+```
+
+## Local Development
 
 ```bash
 npm install
@@ -42,17 +67,29 @@ npm run dev
 npm run build
 ```
 
-The output goes to `dist/`. The site is configured with `base: './'` in `vite.config.ts` for GitHub Pages compatibility.
+Production output is written to `dist/`.
 
-## Deployment (GitHub Pages)
+## Environment Variables
 
-1. Run `npm run build`
-2. Push the `dist/` folder to the `gh-pages` branch, or use a GitHub Actions workflow.
+The contact form can send via EmailJS if these are defined:
 
-## Customization
+```bash
+VITE_EMAILJS_SERVICE_ID=
+VITE_EMAILJS_TEMPLATE_ID=
+VITE_EMAILJS_PUBLIC_KEY=
+```
 
-- Update personal info, project details, and contact links in the component files under `src/components/`
-- Swap the avatar placeholder in `About.tsx` with a real `<img>` tag
-- Replace `href` placeholders in `Contact.tsx` and `Footer.tsx` with real URLs
-- Colors and fonts are defined as CSS custom properties in `src/index.css`
-- Project card layout, scrollable description, and tech stack display can be adjusted in `Projects.module.css`
+If they are missing, the app logs a warning and the submit flow degrades safely.
+
+## Deployment Notes
+
+- `vite.config.ts` uses `base: './'` so built assets stay relative for static hosting.
+- No `vercel.json` is required for the current setup.
+- The app can be deployed to Vercel, GitHub Pages, Netlify, or any other static host that serves `dist/`.
+
+## Maintenance Notes
+
+- Update project cards in `src/data/projects.ts`
+- Update skills in `src/data/skills.ts`
+- Update experience entries in `src/data/experience.ts`
+- Update contact links inside the Hero, Contact, and Footer components if profile URLs change

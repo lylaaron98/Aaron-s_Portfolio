@@ -1,3 +1,23 @@
+// SmartHome gallery: screenshots
+const smarthomeGallery = [
+  { src: encodeURI('/assets/smarthome/1.png'), title: 'Dashboard', subtitle: 'SmartHome dashboard overview.' },
+  { src: encodeURI('/assets/smarthome/2.png'), title: 'Device List', subtitle: 'List of connected devices.' },
+  { src: encodeURI('/assets/smarthome/3.png'), title: 'Add Device', subtitle: 'Adding a new device to the system.' },
+  { src: encodeURI('/assets/smarthome/4.png'), title: 'Device Details', subtitle: 'Detailed view of a device.' },
+  { src: encodeURI('/assets/smarthome/5.png'), title: 'Edit Device', subtitle: 'Editing device information.' },
+  { src: encodeURI('/assets/smarthome/6.png'), title: 'Notifications', subtitle: 'Device notification example.' },
+  { src: encodeURI('/assets/smarthome/7.png'), title: 'Project Structure', subtitle: 'Project folder structure.' },
+  { src: encodeURI('/assets/smarthome/addradiodeviceexample.png'), title: 'Add Radio Device', subtitle: 'Adding a radio device.' },
+  { src: encodeURI('/assets/smarthome/radioadd.png'), title: 'Radio Add', subtitle: 'Radio add screen.' },
+  { src: encodeURI('/assets/smarthome/radioaddnotify.png'), title: 'Radio Add Notification', subtitle: 'Notification after adding radio.' },
+  { src: encodeURI('/assets/smarthome/radiodash.png'), title: 'Radio Dashboard', subtitle: 'Dashboard for radio devices.' },
+  { src: encodeURI('/assets/smarthome/radiostatus.png'), title: 'Radio Status', subtitle: 'Status of radio devices.' },
+  { src: encodeURI('/assets/smarthome/updateradio.png'), title: 'Update Radio', subtitle: 'Updating radio device.' },
+  { src: encodeURI('/assets/smarthome/updateradio2.png'), title: 'Update Radio 2', subtitle: 'Another update radio screen.' },
+  { src: encodeURI('/assets/smarthome/updatedradio.png'), title: 'Updated Radio', subtitle: 'Radio device updated.' },
+  { src: encodeURI('/assets/smarthome/deleteradioconfirm.png'), title: 'Delete Radio Confirm', subtitle: 'Confirm radio device deletion.' },
+  { src: encodeURI('/assets/smarthome/deletedradio.png'), title: 'Deleted Radio', subtitle: 'Radio device deleted.' },
+]
 import ShinyText from '../../ui/ShinyText'
 import ScrollToTop from '../../ui/ScrollToTop'
 import ChromaGrid, { type ChromaItem } from '../../ui/ChromaGrid/ChromaGrid'
@@ -23,6 +43,21 @@ const projectThemes: Record<string, { borderColor: string; gradient: string }> =
     gradient: 'linear-gradient(155deg, #581c87, #020617 72%)',
   },
 }
+
+const otodecksGallery = [
+  {
+    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
+    title: 'Demo Recording 1',
+    subtitle: 'First Otodecks app demo walkthrough.',
+    isVideo: true,
+  },
+  {
+    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
+    title: 'Demo Recording 2',
+    subtitle: 'Second Otodecks app demo walkthrough.',
+    isVideo: true,
+  },
+]
 
 const aiGallery = [
   {
@@ -125,6 +160,37 @@ function buildProjectItems(project: Project): ChromaItem[] {
       url: project.github,
     },
   ]
+
+
+
+  if (project.title === 'Otodecks') {
+    // Show Otodecks demo videos in the gallery
+    const galleryItems: ChromaItem[] = otodecksGallery.map((item, index) => ({
+      image: item.src,
+      title: item.title,
+      subtitle: item.subtitle,
+      handle: `Gallery ${index + 1}`,
+      location: 'Otodecks demo video',
+      borderColor: theme.borderColor,
+      gradient: theme.gradient,
+      isVideo: true,
+    }))
+    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2], baseItems[3]]
+  }
+
+  if (project.title === 'MySmartHome') {
+    // Show SmartHome screenshots in the gallery
+    const galleryItems: ChromaItem[] = smarthomeGallery.map((item, index) => ({
+      image: item.src,
+      title: item.title,
+      subtitle: item.subtitle,
+      handle: `Gallery ${index + 1}`,
+      location: 'SmartHome screenshot',
+      borderColor: theme.borderColor,
+      gradient: theme.gradient,
+    }))
+    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2], baseItems[3]]
+  }
 
   if (project.title !== 'AI Chatbot Assistant') {
     return [

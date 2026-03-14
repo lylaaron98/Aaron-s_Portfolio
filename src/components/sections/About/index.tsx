@@ -1,12 +1,12 @@
 import styles from './About.module.css'
-import { useGsapReveal } from '../../../hooks/useGsapReveal'
+// import { useGsapReveal } from '../../../hooks/useGsapReveal'
 import SectionContainer from '../../ui/SectionContainer'
 import ProfileCard from '../../ui/ProfileCard/ProfileCard'
 import { scrollToSection } from '../../../utils/smoothScroll'
 import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 export default function About() {
-  const ref = useGsapReveal<HTMLDivElement>()
+  // const ref = useGsapReveal<HTMLDivElement>()
   const prefersReducedMotion = usePrefersReducedMotion()
   const hasFinePointer = useMediaQuery('(pointer: fine)')
   const isDesktop = useMediaQuery('(min-width: 901px)')
@@ -14,7 +14,7 @@ export default function About() {
 
   return (
     <SectionContainer id="about" title="About Me">
-      <div ref={ref} className={styles.inner}>
+      <div className={styles.inner}>
         <div className={styles.textBlock}>
           <p>
             Hey! I'm <span className={styles.highlight}>Aaron</span>, a Frontend &amp;
@@ -45,7 +45,7 @@ export default function About() {
         </div>
         <div className={styles.imageBlock}>
           <ProfileCard
-            avatarUrl="https://avatars.githubusercontent.com/u/lylaaron98"
+            avatarUrl="/assets/photo_2026-03-14_21-35-16.jpg"
             name="Aaron"
             title="Software Engineer"
             handle="lylaaron98"

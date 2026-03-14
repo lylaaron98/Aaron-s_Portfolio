@@ -39,18 +39,24 @@ export default function SectionContainer({
     const section = sectionRef.current
     if (!section || !showRipple) return
 
+
     const observer = new IntersectionObserver(
-      ([entry]) => setBackgroundActive(entry.isIntersecting),
+      ([entry]) => {
+        setBackgroundActive(prev => {
+          if (prev !== entry.isIntersecting) return entry.isIntersecting;
+          return prev;
+        });
+      },
       {
         rootMargin: '20% 0px 20% 0px',
         threshold: 0,
       },
-    )
+    );
 
-    observer.observe(section)
+    observer.observe(section);
 
-    return () => observer.disconnect()
-  }, [showRipple])
+    return () => observer.disconnect();
+  }, [showRipple]);
 
   useEffect(() => {
     const el = titleRef.current

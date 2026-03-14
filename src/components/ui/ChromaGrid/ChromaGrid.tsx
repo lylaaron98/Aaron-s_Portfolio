@@ -12,6 +12,7 @@ export interface ChromaItem {
   borderColor?: string
   gradient?: string
   url?: string
+  isVideo?: boolean
 }
 
 export interface ChromaGridProps {
@@ -190,7 +191,18 @@ export default function ChromaGrid({
           }
         >
           <div className="chroma-img-wrapper">
-            <img src={item.image} alt={item.title} loading="lazy" />
+            {item.isVideo ? (
+              <video
+                src={item.image}
+                controls
+                style={{ width: '100%', height: '100%', borderRadius: 12, display: 'block', background: '#18181b' }}
+                poster={undefined}
+              >
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img src={item.image} alt={item.title} loading="lazy" />
+            )}
           </div>
           <footer className="chroma-info">
             <h3 className="name">{item.title}</h3>

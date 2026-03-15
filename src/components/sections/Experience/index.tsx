@@ -3,6 +3,7 @@ import { experiences } from '../../../data/experience'
 import SectionContainer from '../../ui/SectionContainer'
 import Badge from '../../ui/Badge'
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component'
+import Card from '../../ui/Card'
 import 'react-vertical-timeline-component/style.min.css'
 
 export default function Experience() {
@@ -15,26 +16,32 @@ export default function Experience() {
             key={i}
             date={`${exp.startDate} – ${exp.endDate ?? 'Present'}`}
             iconStyle={{ background: 'var(--navy)', color: 'var(--accent)' }}
-            contentStyle={{ background: 'rgba(192,192,200,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}
+            contentStyle={{ background: 'none', boxShadow: 'none', padding: 0 }}
             contentArrowStyle={{ borderRight: '7px solid var(--accent)' }}
           >
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 mb-2">
-              <span className="font-semibold text-base md:text-lg text-neutral-900 dark:text-neutral-100">{exp.role}</span>
-              <span className="text-neutral-600 dark:text-neutral-400 text-sm md:text-base">@ {exp.company}</span>
-            </div>
-            <div className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mb-2">
-              {exp.startDate} – {exp.endDate ?? 'Present'}
-            </div>
-            <ul className="mb-4 list-disc pl-5 text-neutral-800 dark:text-neutral-200 text-sm md:text-base">
-              {exp.description.map((bullet, j) => (
-                <li key={j}>{bullet}</li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {exp.tech.map((t) => (
-                <Badge key={t}>{t}</Badge>
-              ))}
-            </div>
+            <Card className="w-full h-full flex flex-col gap-4 p-6" variant="default" hoverable gradientOverlay tilt>
+              {/* Role & Company */}
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-lg md:text-xl text-neutral-900 dark:text-neutral-100 leading-tight">{exp.role}</span>
+                <span className="text-neutral-600 dark:text-neutral-400 text-base md:text-lg leading-tight">@ {exp.company}</span>
+              </div>
+              {/* Date */}
+              <div className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 font-medium">
+                {exp.startDate} – {exp.endDate ?? 'Present'}
+              </div>
+              {/* Description */}
+              <ul className="flex flex-col gap-2 list-disc pl-5 text-neutral-800 dark:text-neutral-200 text-sm md:text-base">
+                {exp.description.map((bullet, j) => (
+                  <li key={j}>{bullet}</li>
+                ))}
+              </ul>
+              {/* Tech Stack */}
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                {exp.tech.map((t) => (
+                  <Badge key={t}>{t}</Badge>
+                ))}
+              </div>
+            </Card>
           </VerticalTimelineElement>
         ))}
       </VerticalTimeline>

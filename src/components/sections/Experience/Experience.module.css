@@ -1,3 +1,12 @@
+.dates {
+  /* ...existing styles... */
+}
+
+@media (prefers-color-scheme: dark) {
+  .dates {
+    display: none;
+  }
+}
 .timeline {
   display: flex;
   flex-direction: column;
@@ -34,46 +43,65 @@
   margin-bottom: 4px;
 }
 
+
+
 .role {
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--white);
+  margin-bottom: 2px;
+  font-family: var(--font-sans);
 }
+
+
+.company {
+  font-size: 1rem;
+  color: var(--slate-light);
+  font-style: italic;
+  margin-bottom: 10px;
+  font-weight: 300;
+  font-family: var(--font-sans);
+}
+
 
 .dates {
   font-size: 0.85rem;
   font-family: var(--font-sans);
-  color: var(--cyan);
+  color: var(--slate);
+  font-weight: 400;
+  margin-bottom: 12px;
   white-space: nowrap;
 }
 
-.company {
-  font-size: 0.95rem;
-  color: var(--cyan);
-  margin-bottom: 14px;
-  font-weight: 500;
-}
 
 .bullets {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 18px;
+  font-family: var(--font-sans);
 }
+
 
 .bullet {
   display: flex;
   gap: 8px;
-  font-size: 0.9rem;
-  color: var(--slate-light);
-  line-height: 1.5;
+  font-size: 1rem;
+  color: var(--white);
+  line-height: 1.6;
+  font-family: var(--font-sans);
 }
 
+
 .bulletIcon {
-  color: var(--cyan);
+  color: var(--navy-light);
   flex-shrink: 0;
   margin-top: 4px;
 }
+
+
+
+
 
 .techRow {
   display: flex;

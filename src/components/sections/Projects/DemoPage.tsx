@@ -24,7 +24,7 @@ import ChromaGrid, { type ChromaItem } from '../../ui/ChromaGrid/ChromaGrid'
 import { projects } from '../../../data/projects'
 import type { Project } from '../../../types/project'
 import Galaxy from './Galaxy'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 const projectThemes: Record<string, { borderColor: string; gradient: string }> = {
   'AI Chatbot Assistant': {

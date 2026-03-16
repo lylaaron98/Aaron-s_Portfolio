@@ -24,6 +24,7 @@ import ChromaGrid, { type ChromaItem } from '../../ui/ChromaGrid/ChromaGrid'
 import { projects } from '../../../data/projects'
 import type { Project } from '../../../types/project'
 import Galaxy from './Galaxy'
+import React, { useState } from 'react'
 
 const projectThemes: Record<string, { borderColor: string; gradient: string }> = {
   'AI Chatbot Assistant': {
@@ -117,6 +118,7 @@ function buildProjectItems(project: Project): ChromaItem[] {
     gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
   }
 
+  // Build base items without the Tech Stack card
   const baseItems: ChromaItem[] = [
     {
       image:
@@ -141,15 +143,6 @@ function buildProjectItems(project: Project): ChromaItem[] {
       url: project.live,
     },
     {
-      image: createProjectArt(project.title, 'Stack', theme.borderColor),
-      title: 'Tech Stack',
-      subtitle: project.tech.join(', '),
-      handle: 'Build',
-      location: `${project.tech.length} technologies`,
-      borderColor: theme.borderColor,
-      gradient: theme.gradient,
-    },
-    {
       image: createProjectArt(project.title, 'Source', theme.borderColor),
       title: 'Repository',
       subtitle: 'Open the source repository for implementation details and code history.',
@@ -161,10 +154,7 @@ function buildProjectItems(project: Project): ChromaItem[] {
     },
   ]
 
-
-
   if (project.title === 'Otodecks') {
-    // Show Otodecks demo videos in the gallery
     const galleryItems: ChromaItem[] = otodecksGallery.map((item, index) => ({
       image: item.src,
       title: item.title,
@@ -175,11 +165,10 @@ function buildProjectItems(project: Project): ChromaItem[] {
       gradient: theme.gradient,
       isVideo: true,
     }))
-    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2], baseItems[3]]
+    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2]]
   }
 
   if (project.title === 'MySmartHome') {
-    // Show SmartHome screenshots in the gallery
     const galleryItems: ChromaItem[] = smarthomeGallery.map((item, index) => ({
       image: item.src,
       title: item.title,
@@ -189,7 +178,7 @@ function buildProjectItems(project: Project): ChromaItem[] {
       borderColor: theme.borderColor,
       gradient: theme.gradient,
     }))
-    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2], baseItems[3]]
+    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2]]
   }
 
   if (project.title !== 'AI Chatbot Assistant') {
@@ -206,7 +195,6 @@ function buildProjectItems(project: Project): ChromaItem[] {
       },
       baseItems[1],
       baseItems[2],
-      baseItems[3],
     ]
   }
 
@@ -220,7 +208,7 @@ function buildProjectItems(project: Project): ChromaItem[] {
     gradient: theme.gradient,
   }))
 
-  return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2], baseItems[3]]
+  return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2]]
 }
 
 export default function DemoPage() {
@@ -260,7 +248,7 @@ export default function DemoPage() {
             borderColor: '#94a3b8',
             gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
           }
-
+          const [open, setOpen] = useState(false)
           return (
             <section
               key={project.title}
@@ -275,57 +263,82 @@ export default function DemoPage() {
                 backdropFilter: 'blur(10px)',
               }}
             >
-              <div
+              <button
+                onClick={() => setOpen((v) => !v)}
                 style={{
+                  width: '100%',
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  marginBottom: open ? '1.5rem' : 0,
                   display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: '1rem',
-                  flexWrap: 'wrap',
-                  marginBottom: '1.5rem',
                 }}
+                aria-expanded={open}
+                aria-controls={`section-content-${idx}`}
               >
-                <div>
-                  <h2 style={{ marginBottom: '0.5rem', fontSize: '2rem' }}>{project.title}</h2>
-                  <p style={{ maxWidth: 760, color: '#bfc4cf' }}>
-                    {project.description}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  {project.tech.map((tech) => (
-                    <span
-                      key={tech}
+                {project.title}
+                <span style={{ fontSize: '1.5rem', marginLeft: 8 }}>{open ? '▲' : '▼'}</span>
+              </button>
+              {open && (
+                <>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      gap: '1rem',
+                      flexWrap: 'wrap',
+                      marginBottom: '1.5rem',
+                    }}
+                  >
+                    <div>
+                      <p style={{ maxWidth: 760, color: '#bfc4cf' }}>
+                        {project.description}
+                      </p>
+                    </div>
+                    <div
                       style={{
-                        borderRadius: 999,
-                        border: `1px solid ${theme.borderColor}66`,
-                        color: '#d8deea',
-                        background: 'rgba(15, 23, 42, 0.72)',
-                        padding: '0.35rem 0.75rem',
-                        fontSize: '0.8rem',
-                        letterSpacing: '0.04em',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '0.5rem',
+                        justifyContent: 'flex-end',
                       }}
                     >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <ChromaGrid
-                items={buildProjectItems(project)}
-                columns={3}
-                rows={2}
-                radius={240}
-                damping={0.45}
-                fadeOut={0.6}
-                ease="power3.out"
-              />
+                      {project.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          style={{
+                            borderRadius: 999,
+                            border: `1px solid ${theme.borderColor}66`,
+                            color: '#d8deea',
+                            background: 'rgba(15, 23, 42, 0.72)',
+                            padding: '0.35rem 0.75rem',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <ChromaGrid
+                    items={buildProjectItems(project)}
+                    columns={3}
+                    rows={2}
+                    radius={240}
+                    damping={0.45}
+                    fadeOut={0.6}
+                    ease="power3.out"
+                  />
+                </>
+              )}
             </section>
           )
         })}

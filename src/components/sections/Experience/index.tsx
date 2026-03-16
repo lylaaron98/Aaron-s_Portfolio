@@ -4,6 +4,7 @@ import SectionContainer from '../../ui/SectionContainer'
 import Badge from '../../ui/Badge'
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component'
 import Card from '../../ui/Card'
+import styles from './Experience.module.css'
 import 'react-vertical-timeline-component/style.min.css'
 
 export default function Experience() {
@@ -22,17 +23,13 @@ export default function Experience() {
             <Card className="w-full h-full flex flex-col gap-4 p-6" variant="default" hoverable gradientOverlay tilt>
               {/* Role & Company */}
               <div className="flex flex-col gap-1">
-                <span className="font-semibold text-lg md:text-xl text-neutral-900 dark:text-neutral-100 leading-tight">{exp.role}</span>
-                <span className="text-neutral-600 dark:text-neutral-400 text-base md:text-lg leading-tight">@ {exp.company}</span>
-              </div>
-              {/* Date */}
-              <div className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 font-medium">
-                {exp.startDate} – {exp.endDate ?? 'Present'}
+                <span className={styles.role}>{exp.role}</span>
+                <span className={styles.company}>@ {exp.company}</span>
               </div>
               {/* Description */}
-              <ul className="flex flex-col gap-2 list-disc pl-5 text-neutral-800 dark:text-neutral-200 text-sm md:text-base">
+              <ul className={styles.bullets}>
                 {exp.description.map((bullet, j) => (
-                  <li key={j}>{bullet}</li>
+                  <li className={styles.bullet} key={j}>{bullet}</li>
                 ))}
               </ul>
               {/* Tech Stack */}

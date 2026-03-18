@@ -1,32 +1,24 @@
-// SmartHome gallery: screenshots
-const smarthomeGallery = [
-  { src: encodeURI('/assets/smarthome/1.png'), title: 'Dashboard', subtitle: 'SmartHome dashboard overview.' },
-  { src: encodeURI('/assets/smarthome/2.png'), title: 'Device List', subtitle: 'List of connected devices.' },
-  { src: encodeURI('/assets/smarthome/3.png'), title: 'Add Device', subtitle: 'Adding a new device to the system.' },
-  { src: encodeURI('/assets/smarthome/4.png'), title: 'Device Details', subtitle: 'Detailed view of a device.' },
-  { src: encodeURI('/assets/smarthome/5.png'), title: 'Edit Device', subtitle: 'Editing device information.' },
-  { src: encodeURI('/assets/smarthome/6.png'), title: 'Notifications', subtitle: 'Device notification example.' },
-  { src: encodeURI('/assets/smarthome/7.png'), title: 'Project Structure', subtitle: 'Project folder structure.' },
-  { src: encodeURI('/assets/smarthome/addradiodeviceexample.png'), title: 'Add Radio Device', subtitle: 'Adding a radio device.' },
-  { src: encodeURI('/assets/smarthome/radioadd.png'), title: 'Radio Add', subtitle: 'Radio add screen.' },
-  { src: encodeURI('/assets/smarthome/radioaddnotify.png'), title: 'Radio Add Notification', subtitle: 'Notification after adding radio.' },
-  { src: encodeURI('/assets/smarthome/radiodash.png'), title: 'Radio Dashboard', subtitle: 'Dashboard for radio devices.' },
-  { src: encodeURI('/assets/smarthome/radiostatus.png'), title: 'Radio Status', subtitle: 'Status of radio devices.' },
-  { src: encodeURI('/assets/smarthome/updateradio.png'), title: 'Update Radio', subtitle: 'Updating radio device.' },
-  { src: encodeURI('/assets/smarthome/updateradio2.png'), title: 'Update Radio 2', subtitle: 'Another update radio screen.' },
-  { src: encodeURI('/assets/smarthome/updatedradio.png'), title: 'Updated Radio', subtitle: 'Radio device updated.' },
-  { src: encodeURI('/assets/smarthome/deleteradioconfirm.png'), title: 'Delete Radio Confirm', subtitle: 'Confirm radio device deletion.' },
-  { src: encodeURI('/assets/smarthome/deletedradio.png'), title: 'Deleted Radio', subtitle: 'Radio device deleted.' },
-]
+import { useState } from 'react'
 import ShinyText from '../../ui/ShinyText'
 import ScrollToTop from '../../ui/ScrollToTop'
 import ChromaGrid, { type ChromaItem } from '../../ui/ChromaGrid/ChromaGrid'
 import { projects } from '../../../data/projects'
 import type { Project } from '../../../types/project'
 import Galaxy from './Galaxy'
-import { useState } from 'react'
 
-const projectThemes: Record<string, { borderColor: string; gradient: string }> = {
+type ProjectTheme = {
+  borderColor: string
+  gradient: string
+}
+
+type ProjectMedia = {
+  src: string
+  title: string
+  subtitle: string
+  isVideo?: boolean
+}
+
+const projectThemes: Record<string, ProjectTheme> = {
   'AI Chatbot Assistant': {
     borderColor: '#34d399',
     gradient: 'linear-gradient(155deg, #0f766e, #020617 72%)',
@@ -39,28 +31,13 @@ const projectThemes: Record<string, { borderColor: string; gradient: string }> =
     borderColor: '#38bdf8',
     gradient: 'linear-gradient(155deg, #0f4c81, #020617 72%)',
   },
-  G4Met: {
-    borderColor: '#c084fc',
-    gradient: 'linear-gradient(155deg, #581c87, #020617 72%)',
+  'UX Portfolio Microsite': {
+    borderColor: '#f59e0b',
+    gradient: 'linear-gradient(155deg, #7c2d12, #111827 72%)',
   },
 }
 
-const otodecksGallery = [
-  {
-    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
-    title: 'Demo Recording 1',
-    subtitle: 'First Otodecks app demo walkthrough.',
-    isVideo: true,
-  },
-  {
-    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
-    title: 'Demo Recording 2',
-    subtitle: 'Second Otodecks app demo walkthrough.',
-    isVideo: true,
-  },
-]
-
-const aiGallery = [
+const aiGallery: ProjectMedia[] = [
   {
     src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211044.png'),
     title: 'Assistant Home',
@@ -83,10 +60,89 @@ const aiGallery = [
   },
 ]
 
+const otodecksGallery: ProjectMedia[] = [
+  {
+    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
+    title: 'Demo Recording 1',
+    subtitle: 'First Otodecks app demo walkthrough.',
+    isVideo: true,
+  },
+  {
+    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
+    title: 'Demo Recording 2',
+    subtitle: 'Second Otodecks app demo walkthrough.',
+    isVideo: true,
+  },
+]
+
+const smarthomeGallery: ProjectMedia[] = [
+  {
+    src: encodeURI('/assets/smarthome/radiodash.png'),
+    title: 'Dashboard Overview',
+    subtitle: 'Main dashboard for monitoring connected smart-home devices.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/radiostatus.png'),
+    title: 'Device Status',
+    subtitle: 'Live status view for a connected radio device.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/addradiodeviceexample.png'),
+    title: 'Add Device Example',
+    subtitle: 'Guided form flow for adding a new radio device to the network.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/radioadd.png'),
+    title: 'Add Radio',
+    subtitle: 'Input screen for configuring a new radio endpoint.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/radioaddnotify.png'),
+    title: 'Add Confirmation',
+    subtitle: 'Success feedback after a new radio device is created.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/updateradio.png'),
+    title: 'Edit Device',
+    subtitle: 'Update flow for changing radio device configuration.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/updateradio2.png'),
+    title: 'Update Details',
+    subtitle: 'Secondary edit state with more detailed device settings.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/updatedradio.png'),
+    title: 'Updated Device',
+    subtitle: 'Updated radio card after a successful settings change.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/deleteradioconfirm.png'),
+    title: 'Delete Confirm',
+    subtitle: 'Confirmation step before removing a radio device.',
+  },
+  {
+    src: encodeURI('/assets/smarthome/deletedradio.png'),
+    title: 'Delete Result',
+    subtitle: 'State after a radio device has been removed.',
+  },
+]
+
+const fallbackTheme: ProjectTheme = {
+  borderColor: '#94a3b8',
+  gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
+}
+
+const mediaByProjectTitle: Record<string, ProjectMedia[]> = {
+  'AI Chatbot Assistant': aiGallery,
+  Otodecks: otodecksGallery,
+  MySmartHome: smarthomeGallery,
+}
+
 function createProjectArt(projectTitle: string, label: string, accent: string) {
   const initials = projectTitle
     .split(/\s+/)
-    .map((word) => word[0])
+    .map((word) => word[0] ?? '')
     .join('')
     .slice(0, 3)
     .toUpperCase()
@@ -112,106 +168,111 @@ function createProjectArt(projectTitle: string, label: string, accent: string) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
 }
 
-function buildProjectItems(project: Project): ChromaItem[] {
-  const theme = projectThemes[project.title] ?? {
-    borderColor: '#94a3b8',
-    gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
+function formatExternalLocation(url: string | undefined, fallback: string) {
+  return url ? url.replace(/^https?:\/\//, '') : fallback
+}
+
+function buildGalleryItems(project: Project, theme: ProjectTheme): ChromaItem[] {
+  if (project.images?.length) {
+    return project.images.map((image, index) => ({
+      image,
+      title: `Screenshot ${index + 1}`,
+      subtitle:
+        project.title === 'UX Portfolio Microsite'
+          ? 'UX Portfolio Microsite screenshot from the upm_portfolio_site gallery.'
+          : `${project.title} screenshot`,
+      handle: `Gallery ${index + 1}`,
+      location: `${project.title} gallery`,
+      borderColor: theme.borderColor,
+      gradient: theme.gradient,
+      previewable: true,
+    }))
   }
 
-  // Build base items without the Tech Stack card
-  const baseItems: ChromaItem[] = [
-    {
-      image:
-        project.title === 'AI Chatbot Assistant'
-          ? aiGallery[0].src
-          : createProjectArt(project.title, 'Overview', theme.borderColor),
-      title: 'Description',
-      subtitle: project.description,
-      handle: 'Overview',
-      location: project.featured ? 'Featured project' : 'Project archive',
+  const projectMedia = mediaByProjectTitle[project.title]
+  if (projectMedia?.length) {
+    return projectMedia.map((item, index) => ({
+      image: item.src,
+      title: item.title,
+      subtitle: item.subtitle,
+      handle: `Gallery ${index + 1}`,
+      location: item.isVideo ? `${project.title} demo video` : `${project.title} gallery`,
       borderColor: theme.borderColor,
       gradient: theme.gradient,
+      isVideo: item.isVideo,
+      previewable: !item.isVideo,
+    }))
+  }
+
+  return [
+    {
+      image: createProjectArt(project.title, 'Gallery', theme.borderColor),
+      title: 'Gallery',
+      subtitle: 'Project screenshots can be added here when assets are ready.',
+      handle: 'Visuals',
+      location: 'No local screenshots added yet',
+      borderColor: theme.borderColor,
+      gradient: theme.gradient,
+      previewable: false,
     },
+  ]
+}
+
+function buildProjectItems(project: Project): ChromaItem[] {
+  const theme = projectThemes[project.title] ?? fallbackTheme
+  const galleryItems = buildGalleryItems(project, theme)
+
+  return [
+    ...galleryItems,
     {
-      image: createProjectArt(project.title, 'Video', theme.borderColor),
-      title: 'Video',
-      subtitle: 'Demo video placeholder. Add a hosted walkthrough when it is ready.',
-      handle: 'Media',
-      location: 'Ready for embed or external demo link',
+      image: createProjectArt(project.title, 'Live', theme.borderColor),
+      title: 'Live Demo',
+      subtitle: project.live
+        ? 'Open the deployed build or shared walkthrough for this project.'
+        : 'This demo is shared privately or has not been published yet.',
+      handle: 'Demo',
+      location: formatExternalLocation(project.live, 'Shared privately'),
       borderColor: theme.borderColor,
       gradient: theme.gradient,
-      url: project.live,
+      url: project.live || undefined,
+      previewable: false,
     },
     {
       image: createProjectArt(project.title, 'Source', theme.borderColor),
       title: 'Repository',
-      subtitle: 'Open the source repository for implementation details and code history.',
-      handle: 'Link',
-      location: project.github.replace(/^https?:\/\//, ''),
+      subtitle: project.github
+        ? 'Open the source repository for implementation details and commit history.'
+        : 'Repository access is private for this project.',
+      handle: 'Code',
+      location: formatExternalLocation(project.github, 'Private repository'),
       borderColor: theme.borderColor,
       gradient: theme.gradient,
-      url: project.github,
+      url: project.github || undefined,
+      previewable: false,
+    },
+  ]
+}
+
+function DemoPage() {
+  const [activeProjectTitle, setActiveProjectTitle] = useState(projects[0]?.title ?? '')
+  const [modalImg, setModalImg] = useState<string | null>(null)
+  const [modalTitle, setModalTitle] = useState<string | undefined>(undefined)
+  const projectGroups = [
+    {
+      title: 'Side Projects',
+      projects: projects.filter((project) => project.category === 'personal'),
+    },
+    {
+      title: 'Client Projects',
+      projects: projects.filter((project) => project.category === 'client'),
     },
   ]
 
-  if (project.title === 'Otodecks') {
-    const galleryItems: ChromaItem[] = otodecksGallery.map((item, index) => ({
-      image: item.src,
-      title: item.title,
-      subtitle: item.subtitle,
-      handle: `Gallery ${index + 1}`,
-      location: 'Otodecks demo video',
-      borderColor: theme.borderColor,
-      gradient: theme.gradient,
-      isVideo: true,
-    }))
-    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2]]
+  const closeModal = () => {
+    setModalImg(null)
+    setModalTitle(undefined)
   }
 
-  if (project.title === 'MySmartHome') {
-    const galleryItems: ChromaItem[] = smarthomeGallery.map((item, index) => ({
-      image: item.src,
-      title: item.title,
-      subtitle: item.subtitle,
-      handle: `Gallery ${index + 1}`,
-      location: 'SmartHome screenshot',
-      borderColor: theme.borderColor,
-      gradient: theme.gradient,
-    }))
-    return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2]]
-  }
-
-  if (project.title !== 'AI Chatbot Assistant') {
-    return [
-      baseItems[0],
-      {
-        image: createProjectArt(project.title, 'Gallery', theme.borderColor),
-        title: 'Gallery',
-        subtitle: 'Project screenshots can be added here when you have assets ready.',
-        handle: 'Visuals',
-        location: 'No local screenshots added yet',
-        borderColor: theme.borderColor,
-        gradient: theme.gradient,
-      },
-      baseItems[1],
-      baseItems[2],
-    ]
-  }
-
-  const galleryItems: ChromaItem[] = aiGallery.map((image, index) => ({
-    image: image.src,
-    title: image.title,
-    subtitle: image.subtitle,
-    handle: `Gallery ${index + 1}`,
-    location: 'AI Chatbot Assistant screenshot',
-    borderColor: theme.borderColor,
-    gradient: theme.gradient,
-  }))
-
-  return [baseItems[0], ...galleryItems, baseItems[1], baseItems[2]]
-}
-
-export default function DemoPage() {
   return (
     <div style={{ position: 'relative', minHeight: '100vh', padding: '2rem', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
@@ -234,6 +295,7 @@ export default function DemoPage() {
           <span aria-hidden="true">&larr;</span>
           <span>Back to portfolio</span>
         </a>
+
         <h1 style={{ fontSize: '3rem', lineHeight: 1, marginBottom: '1.5rem' }}>
           <ShinyText
             text="Project Demos"
@@ -243,106 +305,177 @@ export default function DemoPage() {
             className="shiny-header"
           />
         </h1>
-        {projects.map((project, idx) => {
-          const theme = projectThemes[project.title] ?? {
-            borderColor: '#94a3b8',
-            gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
-          }
-          const [open, setOpen] = useState(false)
-          return (
-            <section
-              key={project.title}
+
+        {projectGroups.map((group, groupIndex) => (
+          <div key={group.title} style={{ marginTop: groupIndex === 0 ? '2rem' : '3.5rem' }}>
+            <h2
               style={{
-                marginTop: idx === 0 ? '2.5rem' : 0,
-                marginBottom: '2.5rem',
-                padding: '2rem',
-                borderRadius: 24,
-                border: `1px solid ${theme.borderColor}33`,
-                background: 'rgba(10, 15, 28, 0.78)',
-                boxShadow: '0 24px 80px rgba(0, 0, 0, 0.24)',
-                backdropFilter: 'blur(10px)',
+                margin: '0 0 1.5rem',
+                color: '#bfc4cf',
+                fontSize: '1.45rem',
+                letterSpacing: '0.04em',
               }}
             >
-              <button
-                onClick={() => setOpen((v) => !v)}
-                style={{
-                  width: '100%',
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  marginBottom: open ? '1.5rem' : 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-                aria-expanded={open}
-                aria-controls={`section-content-${idx}`}
-              >
-                {project.title}
-                <span style={{ fontSize: '1.5rem', marginLeft: 8 }}>{open ? '▲' : '▼'}</span>
-              </button>
-              {open && (
-                <>
-                  <div
+              {group.title}
+            </h2>
+
+            {group.projects.map((project, index) => {
+              const theme = projectThemes[project.title] ?? fallbackTheme
+              const isOpen = activeProjectTitle === project.title
+              const projectItems = buildProjectItems(project)
+
+              return (
+                <section
+                  key={project.title}
+                  style={{
+                    marginTop: index === 0 ? 0 : '2.5rem',
+                    marginBottom: '2.5rem',
+                    padding: '2rem',
+                    borderRadius: 24,
+                    border: `1px solid ${theme.borderColor}33`,
+                    background: 'rgba(10, 15, 28, 0.78)',
+                    boxShadow: '0 24px 80px rgba(0, 0, 0, 0.24)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveProjectTitle(isOpen ? '' : project.title)}
                     style={{
+                      width: '100%',
+                      background: 'none',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: '2rem',
+                      fontWeight: 700,
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      marginBottom: isOpen ? '1.5rem' : 0,
                       display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      gap: '1rem',
-                      flexWrap: 'wrap',
-                      marginBottom: '1.5rem',
                     }}
+                    aria-expanded={isOpen}
+                    aria-controls={`project-demo-${groupIndex}-${index}`}
                   >
-                    <div>
-                      <p style={{ maxWidth: 760, color: '#bfc4cf' }}>
-                        {project.description}
-                      </p>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem',
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      {project.tech.map((tech) => (
-                        <span
-                          key={tech}
+                    <span>{project.title}</span>
+                    <span style={{ fontSize: '1.5rem', marginLeft: 8 }}>{isOpen ? '-' : '+'}</span>
+                  </button>
+
+                  {isOpen && (
+                    <div id={`project-demo-${groupIndex}-${index}`}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: '1rem',
+                          flexWrap: 'wrap',
+                          marginBottom: '1.5rem',
+                        }}
+                      >
+                        <p style={{ maxWidth: 760, color: '#bfc4cf', margin: 0 }}>{project.description}</p>
+
+                        <div
                           style={{
-                            borderRadius: 999,
-                            border: `1px solid ${theme.borderColor}66`,
-                            color: '#d8deea',
-                            background: 'rgba(15, 23, 42, 0.72)',
-                            padding: '0.35rem 0.75rem',
-                            fontSize: '0.8rem',
-                            letterSpacing: '0.04em',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                            justifyContent: 'flex-end',
                           }}
                         >
-                          {tech}
-                        </span>
-                      ))}
+                          {project.tech.map((tech) => (
+                            <span
+                              key={tech}
+                              style={{
+                                borderRadius: 999,
+                                border: `1px solid ${theme.borderColor}66`,
+                                color: '#d8deea',
+                                background: 'rgba(15, 23, 42, 0.72)',
+                                padding: '0.35rem 0.75rem',
+                                fontSize: '0.8rem',
+                                letterSpacing: '0.04em',
+                              }}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <ChromaGrid
+                        items={projectItems}
+                        columns={3}
+                        rows={Math.max(2, Math.ceil(projectItems.length / 3))}
+                        radius={240}
+                        damping={0.45}
+                        fadeOut={0.6}
+                        ease="power3.out"
+                        onImageClick={(image, title) => {
+                          setModalImg(image)
+                          setModalTitle(title)
+                        }}
+                      />
                     </div>
-                  </div>
-                  <ChromaGrid
-                    items={buildProjectItems(project)}
-                    columns={3}
-                    rows={2}
-                    radius={240}
-                    damping={0.45}
-                    fadeOut={0.6}
-                    ease="power3.out"
-                  />
-                </>
-              )}
-            </section>
-          )
-        })}
+                  )}
+                </section>
+              )
+            })}
+          </div>
+        ))}
+
+        {modalImg && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.85)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+            }}
+            onClick={closeModal}
+          >
+            <img
+              src={modalImg}
+              alt={modalTitle || 'Project screenshot'}
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '90vh',
+                borderRadius: 16,
+                boxShadow: '0 8px 40px #000',
+                background: '#18181b',
+              }}
+              onClick={(event) => event.stopPropagation()}
+            />
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                closeModal()
+              }}
+              style={{
+                position: 'fixed',
+                top: 32,
+                right: 48,
+                fontSize: 32,
+                color: '#fff',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                zIndex: 10001,
+              }}
+              aria-label="Close image preview"
+            >
+              x
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
 }
+
+export default DemoPage

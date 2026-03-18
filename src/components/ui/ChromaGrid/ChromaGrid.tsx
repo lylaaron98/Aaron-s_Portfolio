@@ -4,7 +4,7 @@ import gsap from 'gsap'
 import './ChromaGrid.css'
 
 export interface ChromaItem {
-  image: string
+  image?: string
   title: string
   subtitle: string
   handle?: string
@@ -13,6 +13,7 @@ export interface ChromaItem {
   gradient?: string
   url?: string
   isVideo?: boolean
+  previewable?: boolean
 }
 
 export interface ChromaGridProps {
@@ -24,6 +25,7 @@ export interface ChromaGridProps {
   damping?: number
   fadeOut?: number
   ease?: string
+  onImageClick?: (image: string, title?: string) => void
 }
 
 type SetterFn = (value: number | string) => void
@@ -94,6 +96,7 @@ export default function ChromaGrid({
   damping = 0.45,
   fadeOut = 0.6,
   ease = 'power3.out',
+  onImageClick,
 }: ChromaGridProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const fadeRef = useRef<HTMLDivElement>(null)
@@ -146,9 +149,18 @@ export default function ChromaGrid({
     })
   }
 
-  const handleCardClick = (url?: string) => {
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer')
+  const handleCardClick = (item: ChromaItem) => {
+    if (item.url) {
+      window.open(item.url, '_blank', 'noopener,noreferrer')
+      return
+    }
+
+    if (item.isVideo || item.previewable === false) {
+      return
+    }
+
+    if (onImageClick && item.image) {
+      onImageClick(item.image, item.title)
     }
   }
 
@@ -179,31 +191,34 @@ export default function ChromaGrid({
       {data.map((item) => (
         <article
           key={item.title}
-          className="chroma-card"
+          className={`chroma-card${item.image ? '' : ' no-image'}`}
           onMouseMove={handleCardMove}
-          onClick={() => handleCardClick(item.url)}
+          onClick={() => handleCardClick(item)}
           style={
             {
               '--card-border': item.borderColor || 'transparent',
               '--card-gradient': item.gradient || 'linear-gradient(160deg, #1f2937, #020617)',
-              cursor: item.url ? 'pointer' : 'default',
+              cursor:
+                item.url || (!item.isVideo && item.previewable !== false) ? 'pointer' : 'default',
             } as CSSProperties
           }
         >
-          <div className="chroma-img-wrapper">
-            {item.isVideo ? (
-              <video
-                src={item.image}
-                controls
-                style={{ width: '100%', height: '100%', borderRadius: 12, display: 'block', background: '#18181b' }}
-                poster={undefined}
-              >
-                Your browser does not support the video tag.
-              </video>
-            ) : (
-              <img src={item.image} alt={item.title} loading="lazy" />
-            )}
-          </div>
+          {item.image && (
+            <div className="chroma-img-wrapper">
+              {item.isVideo ? (
+                <video
+                  src={item.image}
+                  controls
+                  style={{ width: '100%', height: '100%', borderRadius: 12, display: 'block', background: '#18181b' }}
+                  poster={undefined}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img src={item.image} alt={item.title} loading="lazy" />
+              )}
+            </div>
+          )}
           <footer className="chroma-info">
             <h3 className="name">{item.title}</h3>
             {item.handle && <span className="handle">{item.handle}</span>}

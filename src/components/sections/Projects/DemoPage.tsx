@@ -257,6 +257,16 @@ function DemoPage() {
   const [activeProjectTitle, setActiveProjectTitle] = useState(projects[0]?.title ?? '')
   const [modalImg, setModalImg] = useState<string | null>(null)
   const [modalTitle, setModalTitle] = useState<string | undefined>(undefined)
+  const projectGroups = [
+    {
+      title: 'Side Projects',
+      projects: projects.filter((project) => project.category === 'personal'),
+    },
+    {
+      title: 'Client Projects',
+      projects: projects.filter((project) => project.category === 'client'),
+    },
+  ]
 
   const closeModal = () => {
     setModalImg(null)
@@ -296,108 +306,123 @@ function DemoPage() {
           />
         </h1>
 
-        {projects.map((project, index) => {
-          const theme = projectThemes[project.title] ?? fallbackTheme
-          const isOpen = activeProjectTitle === project.title
-          const projectItems = buildProjectItems(project)
-
-          return (
-            <section
-              key={project.title}
+        {projectGroups.map((group, groupIndex) => (
+          <div key={group.title} style={{ marginTop: groupIndex === 0 ? '2rem' : '3.5rem' }}>
+            <h2
               style={{
-                marginTop: index === 0 ? '2.5rem' : 0,
-                marginBottom: '2.5rem',
-                padding: '2rem',
-                borderRadius: 24,
-                border: `1px solid ${theme.borderColor}33`,
-                background: 'rgba(10, 15, 28, 0.78)',
-                boxShadow: '0 24px 80px rgba(0, 0, 0, 0.24)',
-                backdropFilter: 'blur(10px)',
+                margin: '0 0 1.5rem',
+                color: '#bfc4cf',
+                fontSize: '1.45rem',
+                letterSpacing: '0.04em',
               }}
             >
-              <button
-                type="button"
-                onClick={() => setActiveProjectTitle(isOpen ? '' : project.title)}
-                style={{
-                  width: '100%',
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  marginBottom: isOpen ? '1.5rem' : 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-                aria-expanded={isOpen}
-                aria-controls={`project-demo-${index}`}
-              >
-                <span>{project.title}</span>
-                <span style={{ fontSize: '1.5rem', marginLeft: 8 }}>{isOpen ? '-' : '+'}</span>
-              </button>
+              {group.title}
+            </h2>
 
-              {isOpen && (
-                <div id={`project-demo-${index}`}>
-                  <div
+            {group.projects.map((project, index) => {
+              const theme = projectThemes[project.title] ?? fallbackTheme
+              const isOpen = activeProjectTitle === project.title
+              const projectItems = buildProjectItems(project)
+
+              return (
+                <section
+                  key={project.title}
+                  style={{
+                    marginTop: index === 0 ? 0 : '2.5rem',
+                    marginBottom: '2.5rem',
+                    padding: '2rem',
+                    borderRadius: 24,
+                    border: `1px solid ${theme.borderColor}33`,
+                    background: 'rgba(10, 15, 28, 0.78)',
+                    boxShadow: '0 24px 80px rgba(0, 0, 0, 0.24)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveProjectTitle(isOpen ? '' : project.title)}
                     style={{
+                      width: '100%',
+                      background: 'none',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: '2rem',
+                      fontWeight: 700,
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      marginBottom: isOpen ? '1.5rem' : 0,
                       display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      gap: '1rem',
-                      flexWrap: 'wrap',
-                      marginBottom: '1.5rem',
                     }}
+                    aria-expanded={isOpen}
+                    aria-controls={`project-demo-${groupIndex}-${index}`}
                   >
-                    <p style={{ maxWidth: 760, color: '#bfc4cf', margin: 0 }}>{project.description}</p>
+                    <span>{project.title}</span>
+                    <span style={{ fontSize: '1.5rem', marginLeft: 8 }}>{isOpen ? '-' : '+'}</span>
+                  </button>
 
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem',
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      {project.tech.map((tech) => (
-                        <span
-                          key={tech}
+                  {isOpen && (
+                    <div id={`project-demo-${groupIndex}-${index}`}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: '1rem',
+                          flexWrap: 'wrap',
+                          marginBottom: '1.5rem',
+                        }}
+                      >
+                        <p style={{ maxWidth: 760, color: '#bfc4cf', margin: 0 }}>{project.description}</p>
+
+                        <div
                           style={{
-                            borderRadius: 999,
-                            border: `1px solid ${theme.borderColor}66`,
-                            color: '#d8deea',
-                            background: 'rgba(15, 23, 42, 0.72)',
-                            padding: '0.35rem 0.75rem',
-                            fontSize: '0.8rem',
-                            letterSpacing: '0.04em',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                            justifyContent: 'flex-end',
                           }}
                         >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                          {project.tech.map((tech) => (
+                            <span
+                              key={tech}
+                              style={{
+                                borderRadius: 999,
+                                border: `1px solid ${theme.borderColor}66`,
+                                color: '#d8deea',
+                                background: 'rgba(15, 23, 42, 0.72)',
+                                padding: '0.35rem 0.75rem',
+                                fontSize: '0.8rem',
+                                letterSpacing: '0.04em',
+                              }}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
 
-                  <ChromaGrid
-                    items={projectItems}
-                    columns={3}
-                    rows={Math.max(2, Math.ceil(projectItems.length / 3))}
-                    radius={240}
-                    damping={0.45}
-                    fadeOut={0.6}
-                    ease="power3.out"
-                    onImageClick={(image, title) => {
-                      setModalImg(image)
-                      setModalTitle(title)
-                    }}
-                  />
-                </div>
-              )}
-            </section>
-          )
-        })}
+                      <ChromaGrid
+                        items={projectItems}
+                        columns={3}
+                        rows={Math.max(2, Math.ceil(projectItems.length / 3))}
+                        radius={240}
+                        damping={0.45}
+                        fadeOut={0.6}
+                        ease="power3.out"
+                        onImageClick={(image, title) => {
+                          setModalImg(image)
+                          setModalTitle(title)
+                        }}
+                      />
+                    </div>
+                  )}
+                </section>
+              )
+            })}
+          </div>
+        ))}
 
         {modalImg && (
           <div

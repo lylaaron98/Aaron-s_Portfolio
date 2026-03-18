@@ -221,10 +221,10 @@ function buildGalleryItems(project: Project, theme: ProjectTheme): ChromaItem[] 
 function buildProjectItems(project: Project): ChromaItem[] {
   const theme = projectThemes[project.title] ?? fallbackTheme
   const galleryItems = buildGalleryItems(project, theme)
+  const actionItems: ChromaItem[] = []
 
-  return [
-    ...galleryItems,
-    {
+  if (project.title !== 'UX Portfolio Microsite') {
+    actionItems.push({
       image: createProjectArt(project.title, 'Live', theme.borderColor),
       title: 'Live Demo',
       subtitle: project.live
@@ -236,8 +236,10 @@ function buildProjectItems(project: Project): ChromaItem[] {
       gradient: theme.gradient,
       url: project.live || undefined,
       previewable: false,
-    },
-    {
+    })
+  }
+
+  actionItems.push({
       image: createProjectArt(project.title, 'Source', theme.borderColor),
       title: 'Repository',
       subtitle: project.github
@@ -249,8 +251,9 @@ function buildProjectItems(project: Project): ChromaItem[] {
       gradient: theme.gradient,
       url: project.github || undefined,
       previewable: false,
-    },
-  ]
+    })
+
+  return [...galleryItems, ...actionItems]
 }
 
 function DemoPage() {

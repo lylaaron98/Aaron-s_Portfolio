@@ -35,6 +35,10 @@ const projectThemes: Record<string, ProjectTheme> = {
     borderColor: '#f59e0b',
     gradient: 'linear-gradient(155deg, #7c2d12, #111827 72%)',
   },
+  'Restaurant POS System': {
+    borderColor: '#fb7185',
+    gradient: 'linear-gradient(155deg, #7f1d1d, #111827 72%)',
+  },
 }
 
 const aiGallery: ProjectMedia[] = [
@@ -128,6 +132,15 @@ const smarthomeGallery: ProjectMedia[] = [
   },
 ]
 
+const restaurantPosGallery: ProjectMedia[] = [
+  {
+    src: encodeURI('/assets/restaurant_pos/Screen Recording 2026-02-27 122053.mp4'),
+    title: 'Restaurant POS Demo',
+    subtitle: 'Walkthrough of the waiter, kitchen, cashier, and manager flows in the POS app.',
+    isVideo: true,
+  },
+]
+
 const fallbackTheme: ProjectTheme = {
   borderColor: '#94a3b8',
   gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
@@ -137,6 +150,7 @@ const mediaByProjectTitle: Record<string, ProjectMedia[]> = {
   'AI Chatbot Assistant': aiGallery,
   Otodecks: otodecksGallery,
   MySmartHome: smarthomeGallery,
+  'Restaurant POS System': restaurantPosGallery,
 }
 
 function createProjectArt(projectTitle: string, label: string, accent: string) {

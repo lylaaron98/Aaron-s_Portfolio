@@ -55,4 +55,15 @@ export const projects: Project[] = [
       '/assets/upm_portfolio_site/Screenshot 2026-03-12 220102.png',
     ],
   },
+  {
+    title: 'Restaurant POS System',
+    description:
+      'A modern restaurant Point of Sale platform built for a client with role-based workflows for waiters, kitchen staff, cashiers, and managers. It includes live table status tracking, order management, kitchen queue updates, payment processing, manager analytics, JWT authentication, and a tested React plus Express architecture.',
+    tech: ['React', 'TypeScript', 'Express.js', 'MongoDB', 'Zustand', 'Ant Design'],
+    github: 'https://github.com/lylaaron98/codingo_projects/tree/main/restaurant-pos',
+    live: '',
+    featured: true,
+    category: 'client',
+    hideLiveDemoCard: true,
+  },
 ]

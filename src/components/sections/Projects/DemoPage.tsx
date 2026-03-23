@@ -223,7 +223,7 @@ function buildProjectItems(project: Project): ChromaItem[] {
   const galleryItems = buildGalleryItems(project, theme)
   const actionItems: ChromaItem[] = []
 
-  if (project.title !== 'UX Portfolio Microsite') {
+  if (!project.hideLiveDemoCard) {
     actionItems.push({
       image: createProjectArt(project.title, 'Live', theme.borderColor),
       title: 'Live Demo',

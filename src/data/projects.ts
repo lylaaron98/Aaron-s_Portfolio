@@ -40,6 +40,7 @@ export const projects: Project[] = [
     live: '',
     featured: true,
     category: 'client',
+    hideLiveDemoCard: true,
     images: [
       '/assets/upm_portfolio_site/Screenshot 2026-03-12 215932.png',
       '/assets/upm_portfolio_site/Screenshot 2026-03-12 215944.png',

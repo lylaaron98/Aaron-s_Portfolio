@@ -9,4 +9,5 @@ export interface Project {
   featured: boolean;
   category: ProjectCategory;
   images?: string[];
+  hideLiveDemoCard?: boolean;
 }

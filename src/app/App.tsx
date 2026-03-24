@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ThemeProvider } from '../context/ThemeContext'
 import Navbar from '../components/layout/Navbar'
-import CursorOverlay from '../components/ui/CursorOverlay'
 import Footer from '../components/layout/Footer'
 import ScrollToTop from '../components/ui/ScrollToTop'
 import Hero from '../components/sections/Hero'
@@ -38,7 +37,6 @@ function App() {
 
   return (
     <ThemeProvider>
-      <CursorOverlay />
       <Navbar />
       <main>
         {isDemoPage ? (

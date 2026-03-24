@@ -3,14 +3,15 @@ import styles from './About.module.css'
 import SectionContainer from '../../ui/SectionContainer'
 import ProfileCard from '../../ui/ProfileCard/ProfileCard'
 import { scrollToSection } from '../../../utils/smoothScroll'
-import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 export default function About() {
   // const ref = useGsapReveal<HTMLDivElement>()
   const prefersReducedMotion = usePrefersReducedMotion()
+  const lowPerformanceMode = useLowPerformanceMode()
   const hasFinePointer = useMediaQuery('(pointer: fine)')
   const isDesktop = useMediaQuery('(min-width: 901px)')
-  const enableProfileTilt = hasFinePointer && isDesktop && !prefersReducedMotion
+  const enableProfileTilt = hasFinePointer && isDesktop && !prefersReducedMotion && !lowPerformanceMode
 
   return (
     <SectionContainer id="about" title="About Me">

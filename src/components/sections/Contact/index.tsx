@@ -1,31 +1,89 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
+import type { HCaptcha as HCaptchaRef } from '@hcaptcha/react-hcaptcha'
+import isEmail from 'validator/es/lib/isEmail'
 import styles from './Contact.module.css'
 import { useGsapReveal } from '../../../hooks/useGsapReveal'
 import SectionContainer from '../../ui/SectionContainer'
 import Button from '../../ui/Button'
 import { sendContactMessage } from '../../../api/contact'
 
+const hCaptchaSiteKey = '50b2fe65-b00b-4b9e-ad62-3ba471098be2'
+
 export default function Contact() {
   const ref = useGsapReveal<HTMLDivElement>()
+  const captchaRef = useRef<HCaptchaRef | null>(null)
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaError, setCaptchaError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const validateEmail = (value: string) => {
+    const trimmedValue = value.trim()
+
+    if (!trimmedValue) {
+      return 'Please enter your email address.'
+    }
+
+    return isEmail(trimmedValue, { domain_specific_validation: true })
+      ? ''
+      : 'Please enter a valid email address.'
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+
+    setForm({ ...form, [name]: value })
+
+    if (name === 'email') {
+      setEmailError(validateEmail(value))
+    }
   }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    const nextEmailError = validateEmail(form.email)
+    const nextCaptchaError = captchaToken ? '' : 'Please complete the captcha.'
+
+    if (nextEmailError || nextCaptchaError) {
+      setSubmitted(false)
+      setError('')
+      setEmailError(nextEmailError)
+      setCaptchaError(nextCaptchaError)
+      return
+    }
+
+    setEmailError('')
+    setCaptchaError('')
     setError('')
+    setSubmitted(false)
+    setIsSubmitting(true)
+
+    let attemptedSubmission = false
 
     try {
-      await sendContactMessage(form)
+      attemptedSubmission = true
+      await sendContactMessage({ ...form, captchaToken })
       setSubmitted(true)
       setForm({ name: '', email: '', message: '' })
+      setEmailError('')
+      setCaptchaToken('')
+      setCaptchaError('')
       setTimeout(() => setSubmitted(false), 4000)
-    } catch {
-      setError('Message sending is currently unavailable. Please email me directly instead.')
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Message sending is currently unavailable. Please email me directly instead.',
+      )
+    } finally {
+      if (attemptedSubmission) {
+        captchaRef.current?.resetCaptcha()
+      }
+      setIsSubmitting(false)
     }
   }
 
@@ -69,11 +127,15 @@ export default function Contact() {
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {submitted && (
-            <div className={styles.successMsg}>
-              Thanks! I'll get back to you soon.
+            <div className={styles.successMsg} role="status" aria-live="polite">
+              Thanks! Your message has been sent successfully.
             </div>
           )}
-          {error && <div className={styles.successMsg}>{error}</div>}
+          {error && (
+            <div className={styles.errorMsg} role="alert">
+              {error}
+            </div>
+          )}
           <div className={styles.formGroup}>
             <label htmlFor="name">Name</label>
             <input
@@ -83,6 +145,7 @@ export default function Contact() {
               placeholder="Your Name"
               value={form.name}
               onChange={handleChange}
+              disabled={isSubmitting}
               required
             />
           </div>
@@ -95,8 +158,12 @@ export default function Contact() {
               placeholder="your@email.com"
               value={form.email}
               onChange={handleChange}
+              className={emailError ? styles.inputError : undefined}
+              aria-invalid={emailError ? 'true' : 'false'}
+              disabled={isSubmitting}
               required
             />
+            {emailError && <span className={styles.fieldError}>{emailError}</span>}
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="message">Message</label>
@@ -107,11 +174,33 @@ export default function Contact() {
               placeholder="Your message..."
               value={form.message}
               onChange={handleChange}
+              disabled={isSubmitting}
               required
             />
           </div>
-          <Button type="submit" className={styles.submitBtn}>
-            Send Message
+          <div className={styles.captchaWrap}>
+            <HCaptcha
+              ref={captchaRef}
+              sitekey={hCaptchaSiteKey}
+              reCaptchaCompat={false}
+              theme="dark"
+              onVerify={(token) => {
+                setCaptchaToken(token)
+                setCaptchaError('')
+              }}
+              onExpire={() => {
+                setCaptchaToken('')
+                setCaptchaError('Captcha expired. Please verify again.')
+              }}
+              onError={() => {
+                setCaptchaToken('')
+                setCaptchaError('Captcha could not be loaded. Please refresh and try again.')
+              }}
+            />
+            {captchaError && <span className={styles.fieldError}>{captchaError}</span>}
+          </div>
+          <Button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
+            {isSubmitting ? 'Sending...' : 'Send Message'}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
               <path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
             </svg>

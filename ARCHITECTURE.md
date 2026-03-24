@@ -46,7 +46,7 @@ ThemeProvider
 ```text
 src/
   api/
-    contact.ts              EmailJS adapter
+    contact.ts              Web3Forms adapter
   app/
     App.tsx                 Root composition and hash-route switching
   components/
@@ -151,17 +151,15 @@ Motion is reduced when `prefers-reduced-motion` is detected, and some heavier ba
 
 ## Contact Flow
 
-The contact form submits through `src/api/contact.ts`, which wraps EmailJS.
+The contact form submits through `src/api/contact.ts`, which posts to Web3Forms.
 
 Required variables:
 
 ```text
-VITE_EMAILJS_SERVICE_ID
-VITE_EMAILJS_TEMPLATE_ID
-VITE_EMAILJS_PUBLIC_KEY
+VITE_WEB3FORMS_ACCESS_KEY
 ```
 
-If those variables are missing, the app warns and safely avoids attempting delivery.
+If that variable is missing, the app warns and safely avoids attempting delivery.
 
 ## Build and Deployment
 

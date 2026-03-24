@@ -10,7 +10,7 @@ Personal portfolio site for Aaron, built as a Vite + React + TypeScript single-p
 - CSS Modules
 - GSAP + ScrollTrigger
 - react-icons
-- EmailJS for contact delivery
+- Web3Forms for contact delivery
 - @react-three/fiber, three, react-bits, ogl, and motion for visual effects
 
 ## Current Features
@@ -21,7 +21,8 @@ Personal portfolio site for Aaron, built as a Vite + React + TypeScript single-p
 - Theme toggle persisted in `localStorage`
 - Project cards with GitHub links and a top-right icon that opens the demo view
 - Demo page available at `#/projects/demo`
-- Contact form wired through EmailJS when `VITE_EMAILJS_*` variables are configured
+- Contact form wired through Web3Forms when `VITE_WEB3FORMS_ACCESS_KEY` is configured
+- Live email validation with `validator.js` and hCaptcha spam protection for contact submissions
 - Global scroll-to-top control
 
 ## Routing Model
@@ -40,7 +41,7 @@ Hash links such as `#about`, `#skills`, and `#projects` are still used for in-pa
 ```text
 src/
   app/                App shell and hash-route switching
-  api/                External service adapters such as EmailJS
+  api/                External service adapters such as Web3Forms
   components/
     layout/           Navbar and Footer
     sections/         Hero, About, Skills, Experience, Projects, Contact
@@ -71,15 +72,32 @@ Production output is written to `dist/`.
 
 ## Environment Variables
 
-The contact form can send via EmailJS if these are defined:
+The contact form can send via Web3Forms if these are defined:
 
 ```bash
-VITE_EMAILJS_SERVICE_ID=
-VITE_EMAILJS_TEMPLATE_ID=
-VITE_EMAILJS_PUBLIC_KEY=
+VITE_WEB3FORMS_ACCESS_KEY=
+VITE_CONTACT_FROM_NAME=Aaron Lee Portfolio
 ```
 
-If they are missing, the app logs a warning and the submit flow degrades safely.
+Copy `.env.example` to `.env` and fill in your Web3Forms access key.
+
+Web3Forms does not require you to maintain a separate email template in the dashboard for this basic setup. The app submits these fields directly:
+
+```text
+access_key
+from_name
+subject
+name
+email
+replyto
+message
+h-captcha-response
+botcheck
+```
+
+If the required Web3Forms key is missing, the form shows a clear configuration error instead of reporting a false success.
+
+To enforce captcha on submitted forms, enable `hCaptcha` for your form inside the Web3Forms dashboard settings.
 
 ## Deployment Notes
 

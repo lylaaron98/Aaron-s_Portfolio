@@ -1,5 +1,6 @@
 import styles from './Projects.module.css'
 import { useGsapStaggerReveal } from '../../../hooks/useGsapReveal'
+import { useLowPerformanceMode } from '../../../hooks/useMediaQuery'
 import { projects } from '../../../data/projects'
 import SectionContainer from '../../ui/SectionContainer'
 import Card from '../../ui/Card'
@@ -8,6 +9,7 @@ import { PROJECTS_DEMO_ROUTE } from '../../../constants/routes'
 
 
 export default function Projects() {
+  const lowPerformanceMode = useLowPerformanceMode()
   const refPersonal = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}-personal`, { stagger: 0.12 })
   const refClient = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}-client`, { stagger: 0.12 })
 
@@ -22,7 +24,7 @@ export default function Projects() {
           <Card
             key={project.title}
             gradientOverlay
-            tilt
+            tilt={!lowPerformanceMode}
             className={`${styles.card} ${styles['card-personal']} ${project.featured ? styles.featured : ''}`}
           >
             <div className={styles.cardTop}>
@@ -65,7 +67,7 @@ export default function Projects() {
             <Card
               key={project.title}
               gradientOverlay
-              tilt
+              tilt={!lowPerformanceMode}
               className={`${styles.card} ${styles['card-client']} ${project.featured ? styles.featured : ''}`}
             >
               <div className={styles.cardTop}>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { scrollToTop } from '../../../utils/smoothScroll'
 import styles from './ScrollToTop.module.css'
 
@@ -6,9 +6,18 @@ const SCROLL_THRESHOLD = 400
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false)
+  const visibleRef = useRef(false)
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > SCROLL_THRESHOLD)
+    const onScroll = () => {
+      const nextVisible = window.scrollY > SCROLL_THRESHOLD
+      if (nextVisible !== visibleRef.current) {
+        visibleRef.current = nextVisible
+        setVisible(nextVisible)
+      }
+    }
+
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])

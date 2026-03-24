@@ -5,7 +5,7 @@ import styles from './SectionContainer.module.css'
 import { cx } from '../../../utils/classNames'
 import ShinyText from '../ShinyText'
 import { BackgroundRippleEffect } from '../background-ripple-effect'
-import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -31,9 +31,10 @@ export default function SectionContainer({
   const titleRef = useRef<HTMLHeadingElement>(null)
   const titleWords = title?.split(/\s+/).filter(Boolean) ?? []
   const prefersReducedMotion = usePrefersReducedMotion()
+  const lowPerformanceMode = useLowPerformanceMode()
   const isCompactViewport = useMediaQuery('(max-width: 900px)')
   const [backgroundActive, setBackgroundActive] = useState(false)
-  const showRipple = !prefersReducedMotion && !isCompactViewport
+  const showRipple = !prefersReducedMotion && !lowPerformanceMode && !isCompactViewport
 
   useEffect(() => {
     const section = sectionRef.current
@@ -118,6 +119,7 @@ export default function SectionContainer({
                 <ShinyText
                   key={`${word}-${index}`}
                   text={word}
+                  disabled={prefersReducedMotion || lowPerformanceMode}
                   className={styles.titleWord}
                 />
               ))}

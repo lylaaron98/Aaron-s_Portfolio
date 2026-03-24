@@ -1,5 +1,4 @@
 import { useRef, useEffect, type HTMLAttributes } from 'react'
-import gsap from 'gsap'
 import styles from './Card.module.css'
 import { cx } from '../../../utils/classNames'
 import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
@@ -40,6 +39,7 @@ export default function Card({
     if (!el || !enableTilt) return
 
     el.style.transformStyle = 'preserve-3d'
+    el.style.willChange = 'transform'
 
     const glareEl = document.createElement('div')
     glareEl.style.cssText = `
@@ -48,19 +48,52 @@ export default function Card({
       opacity: 0; transition: opacity 0.3s ease;
     `
     el.appendChild(glareEl)
+    let frameId: number | null = null
+    let isHovering = false
+    let currentRotateX = 0
+    let currentRotateY = 0
+    let targetRotateX = 0
+    let targetRotateY = 0
+
+    const stopAnimation = () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+        frameId = null
+      }
+    }
+
+    const render = () => {
+      currentRotateX += (targetRotateX - currentRotateX) * 0.18
+      currentRotateY += (targetRotateY - currentRotateY) * 0.18
+
+      el.style.transform = `perspective(1000px) rotateX(${currentRotateX}deg) rotateY(${currentRotateY}deg)`
+
+      const stillAnimating =
+        Math.abs(targetRotateX - currentRotateX) > 0.05 ||
+        Math.abs(targetRotateY - currentRotateY) > 0.05
+
+      if (isHovering || stillAnimating) {
+        frameId = window.requestAnimationFrame(render)
+        return
+      }
+
+      frameId = null
+    }
+
+    const startAnimation = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(render)
+      }
+    }
 
     const handleMove = (e: MouseEvent) => {
       const rect = el.getBoundingClientRect()
       const x = (e.clientX - rect.left) / rect.width
       const y = (e.clientY - rect.top) / rect.height
 
-      gsap.to(el, {
-        rotateX: (0.5 - y) * 8,
-        rotateY: (x - 0.5) * 8,
-        duration: 0.4,
-        ease: 'power2.out',
-        transformPerspective: 1000,
-      })
+      isHovering = true
+      targetRotateX = (0.5 - y) * 8
+      targetRotateY = (x - 0.5) * 8
 
       glareEl.style.opacity = '1'
       glareEl.style.background = `radial-gradient(
@@ -68,24 +101,26 @@ export default function Card({
         rgba(100, 255, 218, 0.1) 0%,
         transparent 60%
       )`
+      startAnimation()
     }
 
     const handleLeave = () => {
-      gsap.to(el, {
-        rotateX: 0,
-        rotateY: 0,
-        duration: 0.6,
-        ease: 'power2.out',
-      })
+      isHovering = false
+      targetRotateX = 0
+      targetRotateY = 0
       glareEl.style.opacity = '0'
+      startAnimation()
     }
 
-    el.addEventListener('mousemove', handleMove)
+    el.addEventListener('mousemove', handleMove, { passive: true })
     el.addEventListener('mouseleave', handleLeave)
 
     return () => {
       el.removeEventListener('mousemove', handleMove)
       el.removeEventListener('mouseleave', handleLeave)
+      stopAnimation()
+      el.style.transform = ''
+      el.style.willChange = ''
       if (el.contains(glareEl)) el.removeChild(glareEl)
     }
   }, [enableTilt])

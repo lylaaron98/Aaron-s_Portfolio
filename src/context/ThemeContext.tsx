@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, startTransition } from 'react'
 import type { ReactNode } from 'react'
 
 type Theme = 'dark' | 'light'
@@ -23,7 +23,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme])
 
   const toggleTheme = useCallback(() => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
+    startTransition(() => {
+      setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
+    })
   }, [])
 
   return (

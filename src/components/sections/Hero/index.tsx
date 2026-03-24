@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import styles from './Hero.module.css'
 import { scrollToSection } from '../../../utils/smoothScroll'
-import { useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 const Silk = lazy(() => import('../../ui/Silk/Silk'))
 
@@ -15,17 +15,23 @@ const roles = [
 
 export default function Hero() {
   const prefersReducedMotion = usePrefersReducedMotion()
+  const lowPerformanceMode = useLowPerformanceMode()
   const isCompactViewport = useMediaQuery('(max-width: 900px)')
   const [roleIndex, setRoleIndex] = useState(0)
   const [displayed, setDisplayed] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [charIndex, setCharIndex] = useState(0)
   const heroRef = useRef<HTMLDivElement>(null)
-  const visibleRole = prefersReducedMotion ? roles[0] : displayed
-  const showSilk = !prefersReducedMotion && !isCompactViewport
+  const disableMotion = prefersReducedMotion || lowPerformanceMode
+  const visibleRole = disableMotion ? roles[0] : displayed
+  const showSilk = !disableMotion && !isCompactViewport
 
   // GSAP entrance timeline
   useEffect(() => {
+    if (disableMotion) {
+      return
+    }
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
       tl.from(`.${styles.greeting}`, { opacity: 0, y: 30, duration: 0.6 })
@@ -36,23 +42,21 @@ export default function Hero() {
         .from(`.${styles.socials} a`, { opacity: 0, y: 20, duration: 0.4, stagger: 0.1 }, '-=0.3')
         .from(`.${styles.scrollIndicator}`, { opacity: 0, duration: 0.6 }, '-=0.2')
 
-      if (!prefersReducedMotion) {
-        gsap.to(`.${styles.scrollIndicator}`, {
-          y: -8,
-          duration: 2,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: 1.5,
-        })
-      }
+      gsap.to(`.${styles.scrollIndicator}`, {
+        y: -8,
+        duration: 2,
+        ease: 'sine.inOut',
+        repeat: -1,
+        yoyo: true,
+        delay: 1.5,
+      })
     }, heroRef)
 
     return () => ctx.revert()
-  }, [prefersReducedMotion])
+  }, [disableMotion])
 
   useEffect(() => {
-    if (prefersReducedMotion) return
+    if (disableMotion) return
 
     const current = roles[roleIndex]
     let timeout: ReturnType<typeof setTimeout>
@@ -79,7 +83,7 @@ export default function Hero() {
     }
 
     return () => clearTimeout(timeout)
-  }, [charIndex, isDeleting, prefersReducedMotion, roleIndex])
+  }, [charIndex, disableMotion, isDeleting, roleIndex])
 
   return (
     <section id="hero" className={styles.hero} ref={heroRef}>

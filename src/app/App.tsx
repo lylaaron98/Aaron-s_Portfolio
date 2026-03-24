@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { ThemeProvider } from '../context/ThemeContext'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
@@ -9,9 +9,10 @@ import Skills from '../components/sections/Skills'
 import Experience from '../components/sections/Experience'
 import Projects from '../components/sections/Projects'
 import Contact from '../components/sections/Contact'
-import DemoPage from '../components/sections/Projects/DemoPage'
 import { smoothScrollTo } from '../utils/smoothScroll'
 import { PROJECTS_DEMO_ROUTE } from '../constants/routes'
+
+const DemoPage = lazy(() => import('../components/sections/Projects/DemoPage'))
 
 function App() {
   const [hash, setHash] = useState(() => window.location.hash)
@@ -40,7 +41,9 @@ function App() {
       <Navbar />
       <main>
         {isDemoPage ? (
-          <DemoPage />
+          <Suspense fallback={null}>
+            <DemoPage />
+          </Suspense>
         ) : (
           <>
             <Hero />

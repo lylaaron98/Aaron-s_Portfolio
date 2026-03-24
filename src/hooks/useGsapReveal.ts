@@ -1,8 +1,4 @@
 import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 /**
  * Reveals an element with a smooth fade-up + scale animation when it enters the viewport.
@@ -17,25 +13,41 @@ export function useGsapReveal<T extends HTMLElement>(
     const el = ref.current
     if (!el) return
 
-    gsap.set(el, { opacity: 0, y, scale })
+    el.style.opacity = '0'
+    el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`
 
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: 'top 88%',
-      once: true,
-      onEnter: () => {
-        gsap.to(el, {
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) {
+          return
+        }
+
+        observer.disconnect()
+        const { default: gsap } = await import('gsap')
+
+        if (!ref.current) {
+          return
+        }
+
+        gsap.to(ref.current, {
           opacity: 1,
           y: 0,
           scale: 1,
           duration,
           delay,
           ease: 'power3.out',
+          clearProps: 'transform,opacity',
         })
       },
-    })
+      {
+        rootMargin: '0px 0px -12% 0px',
+        threshold: 0,
+      },
+    )
 
-    return () => trigger.kill()
+    observer.observe(el)
+
+    return () => observer.disconnect()
   }, [y, duration, delay, scale])
 
   return ref
@@ -58,13 +70,21 @@ export function useGsapStaggerReveal<T extends HTMLElement>(
     const children = el.querySelectorAll(childSelector)
     if (!children.length) return
 
-    gsap.set(children, { opacity: 0, y, scale })
+    children.forEach((child) => {
+      const node = child as HTMLElement
+      node.style.opacity = '0'
+      node.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`
+    })
 
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: 'top 88%',
-      once: true,
-      onEnter: () => {
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) {
+          return
+        }
+
+        observer.disconnect()
+        const { default: gsap } = await import('gsap')
+
         gsap.to(children, {
           opacity: 1,
           y: 0,
@@ -72,11 +92,18 @@ export function useGsapStaggerReveal<T extends HTMLElement>(
           duration,
           stagger,
           ease: 'power3.out',
+          clearProps: 'transform,opacity',
         })
       },
-    })
+      {
+        rootMargin: '0px 0px -12% 0px',
+        threshold: 0,
+      },
+    )
 
-    return () => trigger.kill()
+    observer.observe(el)
+
+    return () => observer.disconnect()
   }, [childSelector, y, duration, stagger, scale])
 
   return ref
@@ -97,24 +124,38 @@ export function useGsapTitleReveal<T extends HTMLElement>() {
     const title = el.querySelector('h2')
     if (!title) return
 
-    gsap.set(title, { opacity: 0, y: 30, clipPath: 'inset(0 100% 0 0)' })
+    const titleElement = title as HTMLElement
+    titleElement.style.opacity = '0'
+    titleElement.style.transform = 'translate3d(0, 30px, 0)'
+    titleElement.style.clipPath = 'inset(0 100% 0 0)'
 
-    const trigger = ScrollTrigger.create({
-      trigger: title,
-      start: 'top 90%',
-      once: true,
-      onEnter: () => {
-        gsap.to(title, {
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) {
+          return
+        }
+
+        observer.disconnect()
+        const { default: gsap } = await import('gsap')
+
+        gsap.to(titleElement, {
           opacity: 1,
           y: 0,
           clipPath: 'inset(0 0% 0 0)',
           duration: 1,
           ease: 'power3.out',
+          clearProps: 'transform,opacity,clipPath',
         })
       },
-    })
+      {
+        rootMargin: '0px 0px -10% 0px',
+        threshold: 0,
+      },
+    )
 
-    return () => trigger.kill()
+    observer.observe(titleElement)
+
+    return () => observer.disconnect()
   }, [])
 
   return ref

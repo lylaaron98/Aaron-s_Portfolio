@@ -149,6 +149,18 @@
   gap: 8px;
 }
 
+.captchaPlaceholder {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: var(--border-radius);
+  color: var(--slate);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.9rem;
+}
+
 .submitBtn {
   width: 100%;
   font-weight: 600;

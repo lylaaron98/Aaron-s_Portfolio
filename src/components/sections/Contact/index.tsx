@@ -1,5 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
-import HCaptcha from '@hcaptcha/react-hcaptcha'
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { HCaptcha as HCaptchaRef } from '@hcaptcha/react-hcaptcha'
 import isEmail from 'validator/es/lib/isEmail'
 import styles from './Contact.module.css'
@@ -9,6 +8,7 @@ import Button from '../../ui/Button'
 import { sendContactMessage } from '../../../api/contact'
 
 const hCaptchaSiteKey = '50b2fe65-b00b-4b9e-ad62-3ba471098be2'
+const HCaptcha = lazy(() => import('@hcaptcha/react-hcaptcha'))
 
 export default function Contact() {
   const ref = useGsapReveal<HTMLDivElement>()
@@ -19,7 +19,38 @@ export default function Contact() {
   const [emailError, setEmailError] = useState('')
   const [captchaToken, setCaptchaToken] = useState('')
   const [captchaError, setCaptchaError] = useState('')
+  const [shouldLoadCaptcha, setShouldLoadCaptcha] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (shouldLoadCaptcha) {
+      return
+    }
+
+    const node = ref.current
+    if (!node) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          return
+        }
+
+        setShouldLoadCaptcha(true)
+        observer.disconnect()
+      },
+      {
+        rootMargin: '320px 0px',
+        threshold: 0,
+      },
+    )
+
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [ref, shouldLoadCaptcha])
 
   const validateEmail = (value: string) => {
     const trimmedValue = value.trim()
@@ -46,7 +77,11 @@ export default function Contact() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const nextEmailError = validateEmail(form.email)
-    const nextCaptchaError = captchaToken ? '' : 'Please complete the captcha.'
+    const nextCaptchaError = !shouldLoadCaptcha
+      ? 'Captcha is loading. Please wait a moment.'
+      : captchaToken
+        ? ''
+        : 'Please complete the captcha.'
 
     if (nextEmailError || nextCaptchaError) {
       setSubmitted(false)
@@ -179,24 +214,30 @@ export default function Contact() {
             />
           </div>
           <div className={styles.captchaWrap}>
-            <HCaptcha
-              ref={captchaRef}
-              sitekey={hCaptchaSiteKey}
-              reCaptchaCompat={false}
-              theme="dark"
-              onVerify={(token) => {
-                setCaptchaToken(token)
-                setCaptchaError('')
-              }}
-              onExpire={() => {
-                setCaptchaToken('')
-                setCaptchaError('Captcha expired. Please verify again.')
-              }}
-              onError={() => {
-                setCaptchaToken('')
-                setCaptchaError('Captcha could not be loaded. Please refresh and try again.')
-              }}
-            />
+            {shouldLoadCaptcha ? (
+              <Suspense fallback={<div className={styles.captchaPlaceholder}>Loading captcha...</div>}>
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={hCaptchaSiteKey}
+                  reCaptchaCompat={false}
+                  theme="dark"
+                  onVerify={(token) => {
+                    setCaptchaToken(token)
+                    setCaptchaError('')
+                  }}
+                  onExpire={() => {
+                    setCaptchaToken('')
+                    setCaptchaError('Captcha expired. Please verify again.')
+                  }}
+                  onError={() => {
+                    setCaptchaToken('')
+                    setCaptchaError('Captcha could not be loaded. Please refresh and try again.')
+                  }}
+                />
+              </Suspense>
+            ) : (
+              <div className={styles.captchaPlaceholder}>Captcha loads as you approach the form.</div>
+            )}
             {captchaError && <span className={styles.fieldError}>{captchaError}</span>}
           </div>
           <Button type="submit" className={styles.submitBtn} disabled={isSubmitting}>

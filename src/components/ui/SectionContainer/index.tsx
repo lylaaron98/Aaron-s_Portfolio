@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState, type HTMLAttributes } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './SectionContainer.module.css'
 import { cx } from '../../../utils/classNames'
 import ShinyText from '../ShinyText'
 import { BackgroundRippleEffect } from '../background-ripple-effect'
 import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
-
-gsap.registerPlugin(ScrollTrigger)
 
 interface SectionContainerProps extends HTMLAttributes<HTMLElement> {
   id?: string
@@ -63,23 +59,35 @@ export default function SectionContainer({
     const el = titleRef.current
     if (!el) return
 
-    gsap.set(el, { opacity: 0, y: 30 })
+    el.style.opacity = '0'
+    el.style.transform = 'translate3d(0, 30px, 0)'
 
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: 'top 90%',
-      once: true,
-      onEnter: () => {
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) {
+          return
+        }
+
+        observer.disconnect()
+        const { default: gsap } = await import('gsap')
+
         gsap.to(el, {
           opacity: 1,
           y: 0,
           duration: 0.9,
           ease: 'power3.out',
+          clearProps: 'transform,opacity',
         })
       },
-    })
+      {
+        rootMargin: '0px 0px -10% 0px',
+        threshold: 0,
+      },
+    )
 
-    return () => trigger.kill()
+    observer.observe(el)
+
+    return () => observer.disconnect()
   }, [])
 
   return (

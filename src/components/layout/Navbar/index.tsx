@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import gsap from 'gsap'
 import styles from './Navbar.module.css'
 import { useTheme } from '../../../context/ThemeContext'
 
@@ -13,14 +12,37 @@ export default function Navbar() {
 
   // Entrance animation
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(`.${styles.logo}`, { opacity: 0, y: -20, duration: 0.5, delay: 0.1, ease: 'power2.out' })
-    }, navRef)
-    return () => ctx.revert()
+    let cancelled = false
+    let cleanup = () => {}
+
+    const setupAnimation = async () => {
+      const { default: gsap } = await import('gsap')
+      if (cancelled) {
+        return
+      }
+
+      const ctx = gsap.context(() => {
+        gsap.from(`.${styles.logo}`, { opacity: 0, y: -20, duration: 0.5, delay: 0.1, ease: 'power2.out' })
+      }, navRef)
+
+      cleanup = () => ctx.revert()
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      void setupAnimation()
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(rafId)
+      cleanup()
+    }
   }, [])
 
   // Hide on scroll down, show on scroll up
   useEffect(() => {
+    let gsapPromise: Promise<typeof import('gsap')> | null = null
+
     const handleScroll = () => {
       const current = window.scrollY
       const nextScrolled = current > 50
@@ -34,11 +56,18 @@ export default function Navbar() {
       const shouldHide = current > lastScrollRef.current && current > 100
       if (shouldHide !== hiddenRef.current) {
         hiddenRef.current = shouldHide
-        gsap.to(navRef.current, {
-          y: shouldHide ? '-100%' : 0,
-          duration: 0.3,
-          ease: 'power2.out',
-          overwrite: 'auto',
+        gsapPromise ??= import('gsap')
+        void gsapPromise.then(({ default: gsap }) => {
+          if (!navRef.current) {
+            return
+          }
+
+          gsap.to(navRef.current, {
+            y: shouldHide ? '-100%' : 0,
+            duration: 0.3,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          })
         })
       }
 

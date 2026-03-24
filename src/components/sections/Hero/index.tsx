@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
 import styles from './Hero.module.css'
 import { scrollToSection } from '../../../utils/smoothScroll'
 import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
@@ -32,27 +31,47 @@ export default function Hero() {
       return
     }
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-      tl.from(`.${styles.greeting}`, { opacity: 0, y: 30, duration: 0.6 })
-        .from(`.${styles.name}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-        .from(`.${styles.tagline}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-        .from(`.${styles.description}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-        .from(`.${styles.ctas}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-        .from(`.${styles.socials} a`, { opacity: 0, y: 20, duration: 0.4, stagger: 0.1 }, '-=0.3')
-        .from(`.${styles.scrollIndicator}`, { opacity: 0, duration: 0.6 }, '-=0.2')
+    let cancelled = false
+    let cleanup = () => {}
 
-      gsap.to(`.${styles.scrollIndicator}`, {
-        y: -8,
-        duration: 2,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-        delay: 1.5,
-      })
-    }, heroRef)
+    const setupAnimation = async () => {
+      const { default: gsap } = await import('gsap')
+      if (cancelled) {
+        return
+      }
 
-    return () => ctx.revert()
+      const ctx = gsap.context(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+        tl.from(`.${styles.greeting}`, { opacity: 0, y: 30, duration: 0.6 })
+          .from(`.${styles.name}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
+          .from(`.${styles.tagline}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
+          .from(`.${styles.description}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
+          .from(`.${styles.ctas}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
+          .from(`.${styles.socials} a`, { opacity: 0, y: 20, duration: 0.4, stagger: 0.1 }, '-=0.3')
+          .from(`.${styles.scrollIndicator}`, { opacity: 0, duration: 0.6 }, '-=0.2')
+
+        gsap.to(`.${styles.scrollIndicator}`, {
+          y: -8,
+          duration: 2,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: 1.5,
+        })
+      }, heroRef)
+
+      cleanup = () => ctx.revert()
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      void setupAnimation()
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(rafId)
+      cleanup()
+    }
   }, [disableMotion])
 
   useEffect(() => {

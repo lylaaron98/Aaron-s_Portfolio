@@ -19,7 +19,7 @@ type ProjectMedia = {
   isVideo?: boolean
 }
 
-const GITHUB_LFS_MEDIA_BASE = 'https://media.githubusercontent.com/media/lylaaron98/Aaron-s_Portfolio/main/raw'
+const GITHUB_LFS_MEDIA_BASE = 'https://media.githubusercontent.com/media/lylaaron98/Aaron-s_Portfolio/main'
 
 function createHostedVideoSrc(assetPath: string) {
   return encodeURI(`${GITHUB_LFS_MEDIA_BASE}/public${assetPath}`)

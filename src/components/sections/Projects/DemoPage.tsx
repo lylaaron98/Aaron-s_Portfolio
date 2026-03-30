@@ -13,9 +13,16 @@ type ProjectTheme = {
 
 type ProjectMedia = {
   src: string
+  fallbackSrc?: string
   title: string
   subtitle: string
   isVideo?: boolean
+}
+
+const GITHUB_LFS_MEDIA_BASE = 'https://media.githubusercontent.com/media/lylaaron98/Aaron-s_Portfolio/main/raw'
+
+function createHostedVideoSrc(assetPath: string) {
+  return encodeURI(`${GITHUB_LFS_MEDIA_BASE}/public${assetPath}`)
 }
 
 const projectThemes: Record<string, ProjectTheme> = {
@@ -70,13 +77,15 @@ const aiGallery: ProjectMedia[] = [
 
 const otodecksGallery: ProjectMedia[] = [
   {
-    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
+    src: createHostedVideoSrc('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
+    fallbackSrc: encodeURI('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
     title: 'Demo Recording 1',
     subtitle: 'First Otodecks app demo walkthrough.',
     isVideo: true,
   },
   {
-    src: encodeURI('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
+    src: createHostedVideoSrc('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
+    fallbackSrc: encodeURI('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
     title: 'Demo Recording 2',
     subtitle: 'Second Otodecks app demo walkthrough.',
     isVideo: true,
@@ -138,7 +147,8 @@ const smarthomeGallery: ProjectMedia[] = [
 
 const restaurantPosGallery: ProjectMedia[] = [
   {
-    src: encodeURI('/assets/restaurant_pos/Screen Recording 2026-02-27 122053.mp4'),
+    src: createHostedVideoSrc('/assets/restaurant_pos/Screen Recording 2026-02-27 122053.mp4'),
+    fallbackSrc: encodeURI('/assets/restaurant_pos/Screen Recording 2026-02-27 122053.mp4'),
     title: 'Restaurant POS Demo',
     subtitle: 'Walkthrough of the waiter, kitchen, cashier, and manager flows in the POS app.',
     isVideo: true,
@@ -147,7 +157,8 @@ const restaurantPosGallery: ProjectMedia[] = [
 
 const djangoElearningGallery: ProjectMedia[] = [
   {
-    src: encodeURI('/assets/django_elearning_app/Screen Recording 2024-09-09 143026.mp4'),
+    src: createHostedVideoSrc('/assets/django_elearning_app/Screen Recording 2024-09-09 143026.mp4'),
+    fallbackSrc: encodeURI('/assets/django_elearning_app/Screen Recording 2024-09-09 143026.mp4'),
     title: 'Django E-Learning Demo',
     subtitle:
       'Walkthrough of the student, teacher, course management, and chat experiences in the Django platform.',
@@ -222,6 +233,7 @@ function buildGalleryItems(project: Project, theme: ProjectTheme): ChromaItem[] 
   if (projectMedia?.length) {
     return projectMedia.map((item, index) => ({
       image: item.src,
+      fallbackImage: item.fallbackSrc,
       title: item.title,
       subtitle: item.subtitle,
       handle: `Gallery ${index + 1}`,

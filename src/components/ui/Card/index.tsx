@@ -54,6 +54,13 @@ export default function Card({
     let currentRotateY = 0
     let targetRotateX = 0
     let targetRotateY = 0
+    let rect = el.getBoundingClientRect()
+    let scrollTimeoutId: number | null = null
+    let suspendPointerUpdates = false
+
+    const updateRect = () => {
+      rect = el.getBoundingClientRect()
+    }
 
     const stopAnimation = () => {
       if (frameId !== null) {
@@ -86,8 +93,14 @@ export default function Card({
       }
     }
 
+    const handleEnter = () => {
+      updateRect()
+      suspendPointerUpdates = false
+    }
+
     const handleMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect()
+      if (suspendPointerUpdates) return
+
       const x = (e.clientX - rect.left) / rect.width
       const y = (e.clientY - rect.top) / rect.height
 
@@ -112,15 +125,42 @@ export default function Card({
       startAnimation()
     }
 
+    const handleScroll = () => {
+      suspendPointerUpdates = true
+      updateRect()
+
+      if (scrollTimeoutId !== null) {
+        window.clearTimeout(scrollTimeoutId)
+      }
+
+      scrollTimeoutId = window.setTimeout(() => {
+        suspendPointerUpdates = false
+        scrollTimeoutId = null
+      }, 120)
+    }
+
+    const resizeObserver = new ResizeObserver(updateRect)
+    resizeObserver.observe(el)
+
+    window.addEventListener('resize', updateRect)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    el.addEventListener('mouseenter', handleEnter)
     el.addEventListener('mousemove', handleMove, { passive: true })
     el.addEventListener('mouseleave', handleLeave)
 
     return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateRect)
+      window.removeEventListener('scroll', handleScroll)
+      el.removeEventListener('mouseenter', handleEnter)
       el.removeEventListener('mousemove', handleMove)
       el.removeEventListener('mouseleave', handleLeave)
       stopAnimation()
       el.style.transform = ''
       el.style.willChange = ''
+      if (scrollTimeoutId !== null) {
+        window.clearTimeout(scrollTimeoutId)
+      }
       if (el.contains(glareEl)) el.removeChild(glareEl)
     }
   }, [enableTilt])

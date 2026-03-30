@@ -31,6 +31,10 @@ const projectThemes: Record<string, ProjectTheme> = {
     borderColor: '#38bdf8',
     gradient: 'linear-gradient(155deg, #0f4c81, #020617 72%)',
   },
+  'Django E-Learning App': {
+    borderColor: '#22c55e',
+    gradient: 'linear-gradient(155deg, #166534, #020617 72%)',
+  },
   'UX Portfolio Microsite': {
     borderColor: '#f59e0b',
     gradient: 'linear-gradient(155deg, #7c2d12, #111827 72%)',
@@ -141,6 +145,16 @@ const restaurantPosGallery: ProjectMedia[] = [
   },
 ]
 
+const djangoElearningGallery: ProjectMedia[] = [
+  {
+    src: encodeURI('/assets/django_elearning_app/Screen Recording 2024-09-09 143026.mp4'),
+    title: 'Django E-Learning Demo',
+    subtitle:
+      'Walkthrough of the student, teacher, course management, and chat experiences in the Django platform.',
+    isVideo: true,
+  },
+]
+
 const fallbackTheme: ProjectTheme = {
   borderColor: '#94a3b8',
   gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
@@ -150,6 +164,7 @@ const mediaByProjectTitle: Record<string, ProjectMedia[]> = {
   'AI Chatbot Assistant': aiGallery,
   Otodecks: otodecksGallery,
   MySmartHome: smarthomeGallery,
+  'Django E-Learning App': djangoElearningGallery,
   'Restaurant POS System': restaurantPosGallery,
 }
 

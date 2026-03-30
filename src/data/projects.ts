@@ -32,6 +32,16 @@ export const projects: Project[] = [
     category: 'personal',
   },
   {
+    title: 'Django E-Learning App',
+    description:
+      'A Django 5.1 eLearning platform with custom student and teacher authentication, course creation and enrollment workflows, downloadable course materials, enrollment-based feedback, REST API endpoints, and real-time chat powered by Django Channels and WebSockets.',
+    tech: ['Python', 'Django 5.1', 'Django REST Framework', 'Django Channels', 'WebSockets', 'SQLite', 'Bootstrap 5'],
+    github: '',
+    live: '',
+    featured: true,
+    category: 'personal',
+  },
+  {
     title: 'UX Portfolio Microsite',
     description:
       'A professional 4-page portfolio microsite for a client, who is a junior UX Designer, inspired by Apple Store aesthetics. Features a modern, glassmorphism design, responsive layout, and an interactive interview scheduling form. Built with HTML5, CSS3, JavaScript (ES6+), and Bootstrap 5. Includes advanced CSS techniques (variables, glassmorphism, gradient text, keyframe animations), semantic HTML5, accessibility, and modular JavaScript for form validation and micro-interactions. Demonstrates color theory, typography, and a component-based design system. Delivered for job application purposes to hiring managers and recruiters in the UX/design industry.',

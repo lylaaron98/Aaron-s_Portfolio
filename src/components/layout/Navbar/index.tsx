@@ -4,6 +4,7 @@ import { useTheme } from '../../../context/ThemeContext'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [hidden, setHidden] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const lastScrollRef = useRef(0)
   const hiddenRef = useRef(false)
@@ -41,9 +42,9 @@ export default function Navbar() {
 
   // Hide on scroll down, show on scroll up
   useEffect(() => {
-    let gsapPromise: Promise<typeof import('gsap')> | null = null
+    let rafId: number | null = null
 
-    const handleScroll = () => {
+    const updateFromScroll = () => {
       const current = window.scrollY
       const nextScrolled = current > 50
       if (nextScrolled !== scrolledRef.current) {
@@ -51,34 +52,42 @@ export default function Navbar() {
         setScrolled(nextScrolled)
       }
 
-      if (!navRef.current) return
-
       const shouldHide = current > lastScrollRef.current && current > 100
       if (shouldHide !== hiddenRef.current) {
         hiddenRef.current = shouldHide
-        gsapPromise ??= import('gsap')
-        void gsapPromise.then(({ default: gsap }) => {
-          if (!navRef.current) {
-            return
-          }
-
-          gsap.to(navRef.current, {
-            y: shouldHide ? '-100%' : 0,
-            duration: 0.3,
-            ease: 'power2.out',
-            overwrite: 'auto',
-          })
-        })
+        setHidden(shouldHide)
       }
 
       lastScrollRef.current = current
     }
+
+    const handleScroll = () => {
+      if (rafId !== null) {
+        return
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        updateFromScroll()
+        rafId = null
+      })
+    }
+
+    updateFromScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId)
+      }
+    }
   }, [])
 
   return (
-    <header ref={navRef} className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
+    <header
+      ref={navRef}
+      className={`${styles.navbar} ${scrolled ? styles.scrolled : ''} ${hidden ? styles.navbarHidden : ''}`}
+    >
       <div className={styles.inner}>
         <a href="#hero" className={styles.logo}>
           <span className={styles.logoBracket}>&lt;</span>

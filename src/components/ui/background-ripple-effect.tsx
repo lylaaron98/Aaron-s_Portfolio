@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, type CSSProperties, type MutableRefObject } from 'react'
 import { cn } from '../../lib/utils'
 
 export const BackgroundRippleEffect = ({
@@ -19,8 +19,27 @@ export const BackgroundRippleEffect = ({
   interactive?: boolean
   animate?: boolean
 }) => {
-  const [clickedCell, setClickedCell] = useState<{ row: number; col: number } | null>(null)
-  const [rippleKey, setRippleKey] = useState(0)
+  const cellRefs = useRef<Array<HTMLDivElement | null>>([])
+
+  const applyRipple = (origin: { row: number; col: number }) => {
+    cellRefs.current.forEach((cell, idx) => {
+      if (!cell) return
+
+      const rowIdx = Math.floor(idx / cols)
+      const colIdx = idx % cols
+      const distance = Math.hypot(origin.row - rowIdx, origin.col - colIdx)
+      const delay = Math.max(0, distance * 55)
+      const duration = 200 + distance * 80
+
+      cell.style.setProperty('--delay', `${delay}ms`)
+      cell.style.setProperty('--duration', `${duration}ms`)
+      cell.classList.remove('animate-cell-ripple')
+    })
+
+    window.requestAnimationFrame(() => {
+      cellRefs.current.forEach((cell) => cell?.classList.add('animate-cell-ripple'))
+    })
+  }
 
   useEffect(() => {
     if (!animate || interactive) {
@@ -34,8 +53,7 @@ export const BackgroundRippleEffect = ({
       const row = Math.max(1, Math.min(rows - 2, Math.floor(Math.random() * rows)))
       const col = Math.max(1, Math.min(cols - 2, Math.floor(Math.random() * cols)))
 
-      setClickedCell({ row, col })
-      setRippleKey((key) => key + 1)
+      applyRipple({ row, col })
 
       if (cancelled) return
       timeoutId = window.setTimeout(triggerRipple, 1800 + Math.round(Math.random() * 1200))
@@ -61,25 +79,23 @@ export const BackgroundRippleEffect = ({
       )}
       style={style}
     >
-      <div className="relative h-auto w-auto overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-hidden" />
-        <DivGrid
-          key={`base-${rippleKey}`}
-          className="mask-radial-from-20% mask-radial-at-top opacity-60"
-          rows={rows}
-          cols={cols}
-          cellSize={cellSize}
-          borderColor='var(--cell-border-color)'
-          fillColor='var(--cell-fill-color)'
-          clickedCell={clickedCell}
-          onCellClick={(row, col) => {
-            if (!interactive) return
-            setClickedCell({ row, col })
-            setRippleKey((k) => k + 1)
-          }}
-          interactive={interactive}
-        />
-      </div>
+        <div className="relative h-auto w-auto overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-hidden" />
+          <DivGrid
+            className="mask-radial-from-20% mask-radial-at-top opacity-60"
+            rows={rows}
+            cols={cols}
+            cellSize={cellSize}
+            borderColor='var(--cell-border-color)'
+            fillColor='var(--cell-fill-color)'
+            cellRefs={cellRefs}
+            onCellClick={(row, col) => {
+              if (!interactive) return
+              applyRipple({ row, col })
+            }}
+            interactive={interactive}
+          />
+        </div>
     </div>
   )
 }
@@ -90,15 +106,10 @@ type DivGridProps = {
   cols: number
   cellSize: number
   borderColor: string
+  cellRefs: MutableRefObject<Array<HTMLDivElement | null>>
   fillColor: string
-  clickedCell: { row: number; col: number } | null
   onCellClick?: (row: number, col: number) => void
   interactive?: boolean
-}
-
-type CellStyle = CSSProperties & {
-  '--delay'?: string
-  '--duration'?: string
 }
 
 const DivGrid = ({
@@ -107,8 +118,8 @@ const DivGrid = ({
   cols = 30,
   cellSize = 56,
   borderColor = '#3f3f46',
+  cellRefs,
   fillColor = 'rgba(14,165,233,0.3)',
-  clickedCell = null,
   onCellClick = () => {},
   interactive = false,
 }: DivGridProps) => {
@@ -131,32 +142,21 @@ const DivGrid = ({
       {cells.map((idx) => {
         const rowIdx = Math.floor(idx / cols)
         const colIdx = idx % cols
-        const distance = clickedCell
-          ? Math.hypot(clickedCell.row - rowIdx, clickedCell.col - colIdx)
-          : 0
-        const delay = clickedCell ? Math.max(0, distance * 55) : 0
-        const duration = 200 + distance * 80
-
-        const style: CellStyle = clickedCell
-          ? {
-              '--delay': `${delay}ms`,
-              '--duration': `${duration}ms`,
-            }
-          : {}
 
         return (
           <div
             key={idx}
+            ref={(node) => {
+              cellRefs.current[idx] = node
+            }}
             className={cn(
               'cell relative border-[0.5px] opacity-30 transition-opacity duration-150 will-change-transform dark:shadow-[0px_0px_24px_1px_var(--cell-shadow-color)_inset]',
               interactive && 'hover:opacity-70',
-              clickedCell && 'animate-cell-ripple [animation-fill-mode:none]',
               !interactive && 'pointer-events-none',
             )}
             style={{
               backgroundColor: fillColor,
               borderColor,
-              ...style,
             }}
             onClick={
               interactive ? () => onCellClick?.(rowIdx, colIdx) : undefined

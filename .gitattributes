@@ -1,0 +1,2 @@
+# Store large demo recordings in Git LFS instead of regular Git blobs.
+public/assets/**/*.mp4 filter=lfs diff=lfs merge=lfs -text

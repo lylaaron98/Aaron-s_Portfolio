@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, MouseEventHandler, PointerEvent as ReactPointerEvent } from 'react'
 import gsap from 'gsap'
 import './ChromaGrid.css'
 
 export interface ChromaItem {
   image?: string
+  fallbackImage?: string
   title: string
   subtitle: string
   handle?: string
@@ -29,6 +30,42 @@ export interface ChromaGridProps {
 }
 
 type SetterFn = (value: number | string) => void
+
+function ChromaCardMedia({ item }: { item: ChromaItem }) {
+  const [src, setSrc] = useState(item.image)
+
+  useEffect(() => {
+    setSrc(item.image)
+  }, [item.image])
+
+  const handleFallback = () => {
+    if (item.fallbackImage && src !== item.fallbackImage) {
+      setSrc(item.fallbackImage)
+    }
+  }
+
+  if (!src) {
+    return null
+  }
+
+  if (item.isVideo) {
+    return (
+      <video
+        key={src}
+        controls
+        preload="metadata"
+        playsInline
+        onError={handleFallback}
+        style={{ width: '100%', height: '100%', borderRadius: 12, display: 'block', background: '#18181b' }}
+      >
+        <source src={src} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    )
+  }
+
+  return <img src={src} alt={item.title} loading="lazy" onError={handleFallback} />
+}
 
 const demoItems: ChromaItem[] = [
   {
@@ -205,18 +242,7 @@ export default function ChromaGrid({
         >
           {item.image && (
             <div className="chroma-img-wrapper">
-              {item.isVideo ? (
-                <video
-                  src={item.image}
-                  controls
-                  style={{ width: '100%', height: '100%', borderRadius: 12, display: 'block', background: '#18181b' }}
-                  poster={undefined}
-                >
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <img src={item.image} alt={item.title} loading="lazy" />
-              )}
+              <ChromaCardMedia item={item} />
             </div>
           )}
           <footer className="chroma-info">

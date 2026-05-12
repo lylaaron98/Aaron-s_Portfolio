@@ -5,7 +5,7 @@
   transform: translateX(-50%);
   z-index: 1000;
   height: 56px;
-  width: max(min(92vw, 720px), 320px);
+  width: max(min(96vw, 1080px), 320px);
   transition: var(--transition);
   padding: 0 28px;
   background: rgba(20, 20, 28, 0.55);
@@ -55,6 +55,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .logo {
@@ -101,6 +102,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navLinks::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Theme toggle switch ── */
@@ -163,6 +178,10 @@
 }
 
 .navLink:hover {
+  color: var(--cyan);
+}
+
+.demoLink {
   color: var(--cyan);
 }
 
@@ -231,51 +250,42 @@
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 25px;
-  }
-
-  .hamburger {
-    display: flex;
-  }
-
-  .overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 25, 47, 0.7);
-    z-index: 999;
+    top: 12px;
+    height: 52px;
+    padding: 0 12px;
+    width: 96vw;
   }
 
   .nav {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: min(75vw, 320px);
-    height: 100vh;
-    background: var(--navy-light);
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    z-index: 1050;
-    transition: right 0.3s ease;
-    box-shadow: -10px 0 30px rgba(2, 12, 27, 0.7);
-    padding: 50px 20px;
-  }
-
-  .nav.navOpen {
-    right: 0;
+    gap: 6px;
   }
 
   .navLink {
-    font-size: 1rem;
-    padding: 12px 20px;
+    font-size: 0.8rem;
+    padding: 6px 8px;
   }
 
-  .resumeBtn {
-    margin-left: 0;
-    margin-top: 10px;
-    padding: 14px 32px;
-    font-size: 0.95rem;
+  .logo {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .toggleTrack {
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggleThumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  .toggleThumb.toggleLight {
+    transform: translateX(20px);
+  }
+
+  .toggleThumb svg {
+    width: 12px;
+    height: 12px;
   }
 }

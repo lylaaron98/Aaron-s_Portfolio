@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './Navbar.module.css'
 import { useTheme } from '../../../context/ThemeContext'
+import { navLinks } from '../../../data/navigation'
+import { PROJECTS_DEMO_ROUTE } from '../../../constants/routes'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -96,6 +98,16 @@ export default function Navbar() {
         </a>
 
         <nav className={styles.nav}>
+          <div className={styles.navLinks}>
+            {navLinks.map((link) => (
+              <a key={link.href} href={link.href} className={styles.navLink}>
+                {link.label}
+              </a>
+            ))}
+            <a href={PROJECTS_DEMO_ROUTE} className={`${styles.navLink} ${styles.demoLink}`}>
+              Demo
+            </a>
+          </div>
           <button
             className={styles.themeToggle}
             onClick={toggleTheme}

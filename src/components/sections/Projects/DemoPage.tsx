@@ -42,6 +42,10 @@ const projectThemes: Record<string, ProjectTheme> = {
     borderColor: '#22c55e',
     gradient: 'linear-gradient(155deg, #166534, #020617 72%)',
   },
+  'Lifestyle App': {
+    borderColor: '#2dd4bf',
+    gradient: 'linear-gradient(155deg, #115e59, #1e1b4b 72%)',
+  },
   'UX Portfolio Microsite': {
     borderColor: '#f59e0b',
     gradient: 'linear-gradient(155deg, #7c2d12, #111827 72%)',

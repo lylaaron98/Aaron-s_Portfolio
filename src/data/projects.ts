@@ -12,6 +12,16 @@ export const projects: Project[] = [
     category: 'personal',
   },
   {
+    title: 'Lifestyle App',
+    description:
+      'A local-first lifestyle management app built with Expo and React Native in a pnpm monorepo. It brings together finance tracking, savings pots, calendar integrations, daily mood journaling, profile preferences, light/dark theming, and a context-aware AI assistant powered by Gemini or Groq directly from the client, with AsyncStorage persistence and scaffolded Express, OpenAPI, and Drizzle packages ready for backend expansion.',
+    tech: ['Expo', 'React Native', 'TypeScript', 'Expo Router', 'AsyncStorage', 'Gemini/Groq'],
+    github: '',
+    live: '',
+    featured: true,
+    category: 'personal',
+  },
+  {
     title: 'Otodecks',
     description:
       'A fully interactive DJ deck simulator built with C++ and the JUCE framework, featuring real-time audio playback, mixing, and waveform visualization. Includes modular audio components, custom event-driven UI with responsive knobs, sliders, and cue buttons, with latency optimization for seamless track blending.',

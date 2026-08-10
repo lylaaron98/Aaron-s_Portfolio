@@ -64,9 +64,11 @@
 .greeting {
   font-family: var(--font-sans);
   font-size: 1.18rem;
-  color: var(--accent);
+  color: #d8d8e6;
   margin-bottom: 24px;
   letter-spacing: 0.08em;
+  font-weight: 600;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.48);
 }
 
 .name {
@@ -100,14 +102,15 @@
 .tagline {
   font-size: clamp(28px, 5vw, 52px);
   font-weight: 700;
-  color: var(--slate);
+  color: #e2e4ee;
   line-height: 1.2;
   margin-bottom: 30px;
   min-height: 1.3em;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.48);
 }
 
 .typewriter {
-  color: var(--accent);
+  color: #f0f0f5;
 }
 
 .cursor {
@@ -124,9 +127,10 @@
 .description {
   max-width: 600px;
   font-size: 1.05rem;
-  color: var(--slate);
+  color: #d4d6e4;
   line-height: 1.8;
   margin-bottom: 40px;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.42);
 }
 
 .ctas {
@@ -190,10 +194,12 @@
 .socials {
   display: flex;
   gap: 20px;
+  justify-content: center;
+  margin-bottom: clamp(4.5rem, 9vh, 6.5rem);
 }
 
 .socials a {
-  color: var(--slate);
+  color: #e2e4ee;
   transition: var(--transition);
   display: flex;
   align-items: center;
@@ -201,43 +207,51 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 32px -24px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .socials a:hover {
   color: var(--white);
-  border-color: rgba(192, 192, 200, 0.3);
-  background: rgba(192, 192, 200, 0.08);
+  border-color: rgba(192, 192, 200, 0.42);
+  background: rgba(192, 192, 200, 0.12);
   transform: translateY(-3px);
-  box-shadow: 0 4px 20px rgba(192, 192, 200, 0.1);
+  box-shadow: 0 4px 20px rgba(192, 192, 200, 0.14);
 }
 
 .scrollIndicator {
   position: absolute;
-  bottom: 30px;
+  bottom: max(12px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  color: var(--slate);
+  gap: 5px;
+  color: #e2e4ee;
   font-family: var(--font-sans);
-  font-size: 0.85rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
   letter-spacing: 0.2em;
   text-transform: uppercase;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.5);
 }
 
 .scrollLine {
   width: 2px;
-  height: 90px;
-  background: linear-gradient(to bottom, var(--accent), transparent);
+  height: clamp(30px, 5vh, 42px);
+  background: linear-gradient(to bottom, #f0f0f5, rgba(192, 192, 200, 0));
   animation: scrollPulse 2s ease infinite;
+  transform-origin: top;
 }
 
 @keyframes scrollPulse {
-  0%, 100% { transform: scaleY(1); opacity: 1; }
-  50% { transform: scaleY(0.7); opacity: 0.5; }
+  0%, 100% { transform: scaleY(0.62); opacity: 0.62; }
+  50% { transform: scaleY(1); opacity: 1; }
 }
 
 @keyframes fadeInUp {
@@ -264,6 +278,10 @@
 
   .scrollIndicator {
     display: none;
+  }
+
+  .socials {
+    margin-bottom: 0;
   }
 }
 

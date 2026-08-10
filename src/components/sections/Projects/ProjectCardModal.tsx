@@ -1,12 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 import { createPortal } from 'react-dom'
 import type { Project } from '../../../types/project'
 import Badge from '../../ui/Badge'
-import { PROJECTS_DEMO_ROUTE } from '../../../constants/routes'
+import { projectDemoRoute } from '../../../constants/routes'
 import { cx } from '../../../utils/classNames'
 import styles from './Projects.module.css'
 
-const CLOSE_DURATION_MS = 420
+const OPEN_DURATION_MS = 460
+const CLOSE_DURATION_MS = 340
 
 export interface RectSnapshot {
   top: number
@@ -32,68 +41,45 @@ function getProjectLabel(project: Project) {
   return project.category === 'client' ? 'Client Project' : 'Personal Project'
 }
 
-function hasDedicatedLiveDemo(project: Project) {
-  return Boolean(project.live && project.live !== project.github)
-}
-
-function hasPortfolioDemo(project: Project) {
-  return !project.hideLiveDemoCard
-}
-
 function snapshotRect(rect: DOMRect | RectSnapshot): RectSnapshot {
-  return {
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height,
-  }
-}
-
-function getTargetRect(): RectSnapshot {
-  const isCompact = window.innerWidth <= 680
-  const padding = isCompact ? 12 : 24
-  const width = Math.min(1120, window.innerWidth - padding * 2)
-  const height = Math.min(isCompact ? window.innerHeight * 0.94 : window.innerHeight * 0.9, 920)
-
-  return {
-    top: Math.max(padding, (window.innerHeight - height) / 2),
-    left: Math.max(padding, (window.innerWidth - width) / 2),
-    width,
-    height,
-  }
+  return { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
 }
 
 function getOriginRect(state: ProjectModalState): RectSnapshot {
-  if (state.opener?.isConnected) {
-    return snapshotRect(state.opener.getBoundingClientRect())
-  }
-
+  if (state.opener?.isConnected) return snapshotRect(state.opener.getBoundingClientRect())
   return state.originRect
 }
 
-function getRadius(rect: RectSnapshot) {
-  return rect.width >= 720 ? 32 : 24
+/**
+ * FLIP: express the card's rect as a transform of the shell's own final rect.
+ *
+ * The previous implementation animated top/left/width/height/border-radius with
+ * a matching `will-change`. Those are layout properties — every frame of a
+ * 520ms transition forced a full layout and paint of a full-screen dialog, and
+ * `will-change` could not help because there is no layer to promote for layout.
+ * Transform and opacity are the only two things the compositor can animate on
+ * its own, so that is all this animates now.
+ */
+function flipTransform(from: RectSnapshot, to: DOMRect): string {
+  const scaleX = Math.max(from.width, 1) / Math.max(to.width, 1)
+  const scaleY = Math.max(from.height, 1) / Math.max(to.height, 1)
+  const dx = from.left + from.width / 2 - (to.left + to.width / 2)
+  const dy = from.top + from.height / 2 - (to.top + to.height / 2)
+
+  return `translate3d(${dx}px, ${dy}px, 0) scale(${scaleX}, ${scaleY})`
 }
 
 export default function ProjectCardModal({ state, onClosed }: ProjectCardModalProps) {
+  const shellRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
-  const openRafRef = useRef<number | null>(null)
   const closeTimeoutRef = useRef<number | null>(null)
+  const rafRef = useRef<number | null>(null)
+
   const [displayState, setDisplayState] = useState<ProjectModalState | null>(null)
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [phase, setPhase] = useState<ModalPhase>('closed')
-  const [shellRect, setShellRect] = useState<RectSnapshot | null>(null)
-  const galleryImages = useMemo(() => displayState?.project.images ?? [], [displayState])
 
-  // These three touch only refs and setters, so [] deps are correct and they
-  // stay referentially stable — which is what lets requestClose below be a
-  // real dependency of the Escape-key effect instead of a stale capture.
-  const clearPendingOpenAnimation = useCallback(() => {
-    if (openRafRef.current !== null) {
-      window.cancelAnimationFrame(openRafRef.current)
-      openRafRef.current = null
-    }
-  }, [])
+  const galleryImages = useMemo(() => displayState?.project.images ?? [], [displayState])
 
   const clearPendingClose = useCallback(() => {
     if (closeTimeoutRef.current !== null) {
@@ -102,183 +88,203 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     }
   }, [])
 
+  const clearPendingFrame = useCallback(() => {
+    if (rafRef.current !== null) {
+      window.cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+  }, [])
+
   const resetModal = useCallback(() => {
     setDisplayState(null)
     setActiveImage(null)
-    setShellRect(null)
     setPhase('closed')
   }, [])
 
-  // Declared before the effect that uses it. It used to be defined ~30 lines
-  // below the Escape handler that called it, so the handler closed over
-  // whichever binding existed when the effect ran (react-hooks/immutability).
-  const requestClose = useCallback(() => {
-    if (!displayState || phase === 'closing' || phase === 'closed') return
-
-    clearPendingOpenAnimation()
-
-    const currentState = displayState
-    setPhase('closing')
-    setShellRect(getOriginRect(currentState))
-
-    clearPendingClose()
-    closeTimeoutRef.current = window.setTimeout(() => {
-      currentState.opener?.focus()
-      resetModal()
-      onClosed()
-      closeTimeoutRef.current = null
-    }, CLOSE_DURATION_MS)
-  }, [
-    clearPendingClose,
-    clearPendingOpenAnimation,
-    displayState,
-    onClosed,
-    phase,
-    resetModal,
-  ])
-
+  // Adopt a newly opened project.
   useEffect(() => {
     if (!state) return
 
     clearPendingClose()
-    clearPendingOpenAnimation()
+    clearPendingFrame()
 
-    openRafRef.current = window.requestAnimationFrame(() => {
-      setDisplayState(state)
-      setActiveImage(state.project.images?.[0] ?? null)
-      setShellRect(getOriginRect(state))
-      setPhase('opening')
+    setDisplayState(state)
+    setActiveImage(state.project.images?.[0] ?? null)
+    setPhase('opening')
+  }, [clearPendingClose, clearPendingFrame, state])
 
-      openRafRef.current = window.requestAnimationFrame(() => {
-        setShellRect(getTargetRect())
+  /**
+   * The FLIP measure-and-invert, before the browser paints. The shell is
+   * already at its final geometry in the DOM; we stamp on the inverse transform
+   * with transitions off, then release it on the next frame so the transition
+   * runs from card to dialog.
+   */
+  useLayoutEffect(() => {
+    const shell = shellRef.current
+    if (!shell || phase !== 'opening' || !displayState) return
+
+    const target = shell.getBoundingClientRect()
+    shell.style.transition = 'none'
+    shell.style.transform = flipTransform(getOriginRect(displayState), target)
+    shell.style.opacity = '0.4'
+
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = window.requestAnimationFrame(() => {
+        shell.style.transition = ''
+        shell.style.transform = ''
+        shell.style.opacity = ''
         setPhase('open')
-        closeButtonRef.current?.focus()
-        openRafRef.current = null
+        closeButtonRef.current?.focus({ preventScroll: true })
+        rafRef.current = null
       })
     })
 
-    return clearPendingOpenAnimation
-  }, [clearPendingClose, clearPendingOpenAnimation, state])
+    return clearPendingFrame
+  }, [clearPendingFrame, displayState, phase])
 
+  const requestClose = useCallback(() => {
+    const shell = shellRef.current
+    if (!displayState || phase === 'closing' || phase === 'closed') return
+
+    clearPendingFrame()
+    setPhase('closing')
+
+    if (shell) {
+      // Fly back to wherever the card is now — it may have scrolled since.
+      shell.style.transform = flipTransform(getOriginRect(displayState), shell.getBoundingClientRect())
+      shell.style.opacity = '0.4'
+    }
+
+    const opener = displayState.opener
+    clearPendingClose()
+    closeTimeoutRef.current = window.setTimeout(() => {
+      opener?.focus({ preventScroll: true })
+      resetModal()
+      onClosed()
+      closeTimeoutRef.current = null
+    }, CLOSE_DURATION_MS)
+  }, [clearPendingClose, clearPendingFrame, displayState, onClosed, phase, resetModal])
+
+  // Escape to close, and lock the page behind the dialog.
   useEffect(() => {
     if (!displayState) return
 
     const previousBodyOverflow = document.body.style.overflow
     const previousHtmlOverflow = document.documentElement.style.overflow
-
     document.body.style.overflow = 'hidden'
     document.documentElement.style.overflow = 'hidden'
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         requestClose()
+        return
+      }
+
+      // Minimal focus trap: keep Tab inside the dialog.
+      if (event.key !== 'Tab') return
+      const shell = shellRef.current
+      if (!shell) return
+
+      const focusable = shell.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement
+
+      if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
       }
     }
 
-    const handleResize = () => {
-      if (phase === 'closing') return
-
-      setShellRect(getTargetRect())
-    }
-
     window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('resize', handleResize)
 
     return () => {
       document.body.style.overflow = previousBodyOverflow
       document.documentElement.style.overflow = previousHtmlOverflow
       window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('resize', handleResize)
     }
-  }, [displayState, phase, requestClose])
+  }, [displayState, requestClose])
 
-  useEffect(() => {
-    return () => {
-      clearPendingOpenAnimation()
+  useEffect(
+    () => () => {
+      clearPendingFrame()
       clearPendingClose()
-    }
-  }, [clearPendingClose, clearPendingOpenAnimation])
+    },
+    [clearPendingClose, clearPendingFrame],
+  )
 
-  if (!displayState || !shellRect) return null
+  if (!displayState) return null
 
   const project = displayState.project
-  const showPortfolioDemo = hasPortfolioDemo(project)
-  const showDedicatedLiveDemo = hasDedicatedLiveDemo(project)
+  const demoHref = projectDemoRoute(project.title)
+  const showLiveDemo = Boolean(project.live && project.live !== project.github)
   const shellStyle: CSSProperties = {
-    top: `${shellRect.top}px`,
-    left: `${shellRect.left}px`,
-    width: `${shellRect.width}px`,
-    height: `${shellRect.height}px`,
-    borderRadius: `${getRadius(shellRect)}px`,
-  }
-
-  const renderHero = () => {
-    if (activeImage) {
-      return (
-        <div className={styles.modalHeroMedia}>
-          <img src={activeImage} alt={`${project.title} preview`} className={styles.modalHeroImage} />
-        </div>
-      )
-    }
-
-    return (
-      <div className={styles.modalHeroFallback} data-category={project.category}>
-        <span className={styles.modalHeroEyebrow}>{getProjectLabel(project)}</span>
-        <h2 className={styles.modalHeroTitle}>{project.title}</h2>
-        <p className={styles.modalHeroSummary}>
-          {project.featured ? 'Featured build with a polished delivery focus.' : 'Built with a strong engineering and product mindset.'}
-        </p>
-        <div className={styles.modalHeroTags}>
-          {project.tech.slice(0, 4).map((tech) => (
-            <span key={tech} className={styles.modalHeroTag}>{tech}</span>
-          ))}
-        </div>
-      </div>
-    )
+    ['--open-duration' as string]: `${OPEN_DURATION_MS}ms`,
+    ['--close-duration' as string]: `${CLOSE_DURATION_MS}ms`,
   }
 
   return createPortal(
     <div
-      className={cx(
-        styles.modalOverlay,
-        phase !== 'closing' && styles.modalOverlayVisible,
-      )}
+      className={cx(styles.modalOverlay, phase !== 'closing' && styles.modalOverlayVisible)}
       onClick={requestClose}
     >
       <div
-        className={cx(
-          styles.modalShell,
-          phase === 'closing' && styles.modalShellClosing,
-        )}
+        ref={shellRef}
+        className={cx(styles.modalShell, phase === 'closing' && styles.modalShellClosing)}
         style={shellStyle}
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-modal-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className={styles.modalScrollArea}>
-          <button
-            ref={closeButtonRef}
-            type="button"
-            className={styles.modalClose}
-            onClick={requestClose}
-            aria-label={`Close ${project.title} details`}
-          >
-            <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path strokeLinecap="round" d="M5 5 15 15" />
-              <path strokeLinecap="round" d="M15 5 5 15" />
-            </svg>
-          </button>
+        <button
+          ref={closeButtonRef}
+          type="button"
+          className={styles.modalClose}
+          onClick={requestClose}
+          aria-label={`Close ${project.title} details`}
+        >
+          <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" d="M5 5 15 15" />
+            <path strokeLinecap="round" d="M15 5 5 15" />
+          </svg>
+        </button>
 
-          <div
-            className={cx(
-              styles.modalContent,
-              phase === 'open' && styles.modalContentVisible,
-            )}
-          >
+        <div className={styles.modalScrollArea}>
+          <div className={cx(styles.modalContent, phase === 'open' && styles.modalContentVisible)}>
             <div className={styles.modalLayout}>
               <div className={styles.modalHero}>
-                {renderHero()}
+                {activeImage ? (
+                  <img
+                    src={activeImage}
+                    alt={`${project.title} preview`}
+                    className={styles.modalHeroImage}
+                    // The first gallery image is the LCP candidate once the
+                    // dialog opens, so it is the one thing here not lazied.
+                    decoding="async"
+                    width={1200}
+                    height={750}
+                  />
+                ) : (
+                  <div className={styles.modalHeroFallback}>
+                    <span className={styles.modalHeroEyebrow}>{getProjectLabel(project)}</span>
+                    <h2 className={styles.modalHeroTitle}>{project.title}</h2>
+                    <div className={styles.modalHeroTags}>
+                      {project.tech.slice(0, 4).map((tech) => (
+                        <span key={tech} className={styles.modalHeroTag}>
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className={styles.modalBody}>
@@ -287,24 +293,27 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
                     <span className={styles.modalCategory}>{getProjectLabel(project)}</span>
                     {project.featured && <Badge variant="outline">Featured</Badge>}
                   </div>
-                  <h2 id="project-modal-title" className={styles.modalTitle}>{project.title}</h2>
+                  <h2 id="project-modal-title" className={styles.modalTitle}>
+                    {project.title}
+                  </h2>
                   <p className={styles.modalDescription}>{project.description}</p>
                 </div>
 
                 <div className={styles.modalActions}>
-                  {showPortfolioDemo && (
-                    <a href={PROJECTS_DEMO_ROUTE} className={styles.modalPrimaryAction}>
-                      View Demo Page
-                    </a>
-                  )}
-                  {showDedicatedLiveDemo && (
+                  <a href={demoHref} className={styles.modalPrimaryAction}>
+                    Open demo page
+                    <svg aria-hidden="true" viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.9">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 10h12m0 0-4.5-4.5M16 10l-4.5 4.5" />
+                    </svg>
+                  </a>
+                  {showLiveDemo && (
                     <a
                       href={project.live}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={showPortfolioDemo ? styles.modalSecondaryAction : styles.modalPrimaryAction}
+                      className={styles.modalSecondaryAction}
                     >
-                      Open Live Demo
+                      Live site
                     </a>
                   )}
                   {project.github && (
@@ -312,53 +321,49 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={showPortfolioDemo || showDedicatedLiveDemo ? styles.modalSecondaryAction : styles.modalPrimaryAction}
+                      className={styles.modalSecondaryAction}
                     >
-                      View Repository
+                      Repository
                     </a>
                   )}
                 </div>
 
                 <section className={styles.modalSection}>
-                  <h3 className={styles.modalSectionTitle}>Technology Stack</h3>
+                  <h3 className={styles.modalSectionTitle}>Technology</h3>
                   <div className={styles.modalTechGrid}>
                     {project.tech.map((tech) => (
-                      <Badge key={tech} className={styles.modalTechBadge}>{tech}</Badge>
+                      <Badge key={tech} className={styles.modalTechBadge}>
+                        {tech}
+                      </Badge>
                     ))}
-                  </div>
-                </section>
-
-                <section className={styles.modalSection}>
-                  <h3 className={styles.modalSectionTitle}>Project Snapshot</h3>
-                  <div className={styles.modalSummaryGrid}>
-                    <div className={styles.modalSummaryCard}>
-                      <span className={styles.modalSummaryLabel}>Category</span>
-                      <strong>{getProjectLabel(project)}</strong>
-                    </div>
-                    <div className={styles.modalSummaryCard}>
-                      <span className={styles.modalSummaryLabel}>Delivery</span>
-                      <strong>{project.featured ? 'Featured Portfolio Work' : 'Portfolio Project'}</strong>
-                    </div>
-                    <div className={styles.modalSummaryCard}>
-                      <span className={styles.modalSummaryLabel}>Screens</span>
-                      <strong>{galleryImages.length > 0 ? `${galleryImages.length} captured views` : 'Preview on request'}</strong>
-                    </div>
                   </div>
                 </section>
 
                 {galleryImages.length > 0 && (
                   <section className={styles.modalSection}>
-                    <h3 className={styles.modalSectionTitle}>Gallery</h3>
+                    <h3 className={styles.modalSectionTitle}>
+                      Gallery
+                      <span className={styles.modalSectionCount}>{galleryImages.length}</span>
+                    </h3>
                     <div className={styles.modalGallery}>
                       {galleryImages.map((image, index) => (
                         <button
-                          key={`${project.title}-gallery-${index}`}
+                          key={image}
                           type="button"
-                          className={`${styles.modalThumb} ${activeImage === image ? styles.modalThumbActive : ''}`}
+                          className={cx(styles.modalThumb, activeImage === image && styles.modalThumbActive)}
                           onClick={() => setActiveImage(image)}
-                          aria-label={`Show screenshot ${index + 1} for ${project.title}`}
+                          aria-label={`Show screenshot ${index + 1} of ${galleryImages.length}`}
+                          aria-pressed={activeImage === image}
                         >
-                          <img src={image} alt={`${project.title} screenshot ${index + 1}`} className={styles.modalThumbImage} />
+                          <img
+                            src={image}
+                            alt=""
+                            className={styles.modalThumbImage}
+                            loading="lazy"
+                            decoding="async"
+                            width={320}
+                            height={200}
+                          />
                         </button>
                       ))}
                     </div>

@@ -32,15 +32,12 @@ export interface ChromaGridProps {
 type SetterFn = (value: number | string) => void
 
 function ChromaCardMedia({ item }: { item: ChromaItem }) {
-  const [src, setSrc] = useState(item.image)
-
-  useEffect(() => {
-    setSrc(item.image)
-  }, [item.image])
+  const [fallbackFor, setFallbackFor] = useState<string | undefined>()
+  const src = fallbackFor === item.image && item.fallbackImage ? item.fallbackImage : item.image
 
   const handleFallback = () => {
-    if (item.fallbackImage && src !== item.fallbackImage) {
-      setSrc(item.fallbackImage)
+    if (item.image && item.fallbackImage && fallbackFor !== item.image) {
+      setFallbackFor(item.image)
     }
   }
 

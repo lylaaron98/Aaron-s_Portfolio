@@ -17,7 +17,6 @@ Main view:
 
 ```text
 ThemeProvider
-  CursorOverlay
   Navbar
   main
     Hero
@@ -34,7 +33,6 @@ Demo view:
 
 ```text
 ThemeProvider
-  CursorOverlay
   Navbar
   main
     DemoPage
@@ -60,8 +58,6 @@ src/
       Experience/
       Projects/
         DemoPage.tsx
-        Galaxy.tsx
-        ProjectSections.tsx
     ui/
       Badge/
       Button/
@@ -69,7 +65,6 @@ src/
       ScrollToTop/
       SectionContainer/
       ShinyText/
-      CursorOverlay.tsx
   constants/
     routes.ts               Shared hash-route constants
   context/

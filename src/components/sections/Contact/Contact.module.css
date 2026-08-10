@@ -48,8 +48,8 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  background: rgba(192, 192, 200, 0.06);
-  border: 1px solid rgba(192, 192, 200, 0.12);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
   border-radius: 50%;
   color: var(--accent);
   flex-shrink: 0;
@@ -57,9 +57,9 @@
 }
 
 .contactItem:hover .contactIcon {
-  background: rgba(192, 192, 200, 0.12);
-  border-color: rgba(192, 192, 200, 0.3);
-  box-shadow: 0 0 16px rgba(192, 192, 200, 0.1);
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--fg) 10%, transparent);
 }
 
 .form {
@@ -76,7 +76,7 @@
 }
 
 .successMsg {
-  background: rgba(192, 192, 200, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   border: 1px solid var(--accent);
   border-radius: var(--border-radius-lg);
   padding: 12px 16px;
@@ -130,7 +130,7 @@
 .formGroup input:focus,
 .formGroup textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(192, 192, 200, 0.08), 0 0 20px rgba(192, 192, 200, 0.04);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 8%, transparent), 0 0 20px color-mix(in srgb, var(--fg) 4%, transparent);
 }
 
 .inputError {
@@ -154,10 +154,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border: 1px dashed color-mix(in srgb, var(--fg) 14%, transparent);
   border-radius: var(--border-radius);
   color: var(--slate);
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--fg) 2%, transparent);
   font-size: 0.9rem;
 }
 
@@ -171,4 +171,13 @@
     grid-template-columns: 1fr;
     gap: 40px;
   }
+}
+
+/* Referenced by Contact/index.tsx since it was written, but never defined —
+   React rendered class="undefined" on this element. It is the left column of
+   the two-up contact layout. */
+.infoBlock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }

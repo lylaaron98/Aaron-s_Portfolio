@@ -1,6 +1,20 @@
-import { forwardRef, useLayoutEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame, useThree, type RootState } from '@react-three/fiber'
-import { Color, Mesh, ShaderMaterial, type IUniform } from 'three'
+import { useEffect, useRef } from 'react'
+
+/**
+ * Animated silk background.
+ *
+ * Renders a single full-screen quad with a hand-written fragment shader using
+ * raw WebGL. This previously went through three.js + @react-three/fiber, which
+ * pulled 868 kB of library in to draw two triangles.
+ *
+ * The silk pattern is unchanged; what it is coloured with is not. The fragment
+ * shader now blends between two hues across the pattern's own luminance, which
+ * is what turns a single-hue wash into the Aurora colour field. Both hues come
+ * from --shader-base / --shader-tint, so the background re-themes.
+ *
+ * The render loop is gated on both viewport visibility (IntersectionObserver)
+ * and tab visibility, so it costs nothing once scrolled past.
+ */
 
 type NormalizedRgb = [number, number, number]
 
@@ -12,37 +26,27 @@ const hexToNormalizedRgb = (hex: string): NormalizedRgb => {
   return [r, g, b]
 }
 
-interface UniformValue<T = number | Color> {
-  value: T
-}
-
-interface SilkUniforms {
-  uSpeed: UniformValue<number>
-  uScale: UniformValue<number>
-  uNoiseIntensity: UniformValue<number>
-  uColor: UniformValue<Color>
-  uRotation: UniformValue<number>
-  uTime: UniformValue<number>
-  [uniform: string]: IUniform
-}
-
+// Full-screen quad in clip space. The original drew a unit plane scaled to the
+// viewport through projectionMatrix * modelViewMatrix; the result is the same
+// screen coverage and the same 0..1 uv range, so vUv semantics are preserved.
 const vertexShader = `
+attribute vec2 aPosition;
 varying vec2 vUv;
-varying vec3 vPosition;
 
 void main() {
-  vPosition = position;
-  vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  vUv = aPosition * 0.5 + 0.5;
+  gl_Position = vec4(aPosition, 0.0, 1.0);
 }
 `
 
 const fragmentShader = `
+precision mediump float;
+
 varying vec2 vUv;
-varying vec3 vPosition;
 
 uniform float uTime;
 uniform vec3  uColor;
+uniform vec3  uColorB;
 uniform float uSpeed;
 uniform float uScale;
 uniform float uRotation;
@@ -77,42 +81,39 @@ void main() {
                                    0.02 * tOffset) +
                            sin(20.0 * (tex.x + tex.y - 0.1 * tOffset)));
 
-  vec4 col = vec4(uColor, 1.0) * vec4(pattern) - rnd / 15.0 * uNoiseIntensity;
+  // Hue blends base -> tint across the pattern; the pattern is then reapplied
+  // as shading so the silk structure survives the colour mix.
+  vec3 hue = mix(uColor, uColorB, smoothstep(0.18, 1.0, pattern));
+  vec3 shaded = hue * (0.45 + 0.55 * pattern);
+
+  vec4 col = vec4(shaded, 1.0) - rnd / 15.0 * uNoiseIntensity;
   col.a = 1.0;
   gl_FragColor = col;
 }
 `
 
-interface SilkPlaneProps {
-  uniforms: SilkUniforms
+function compile(gl: WebGLRenderingContext, type: number, source: string) {
+  const shader = gl.createShader(type)
+  if (!shader) return null
+  gl.shaderSource(shader, source)
+  gl.compileShader(shader)
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    gl.deleteShader(shader)
+    return null
+  }
+  return shader
 }
 
-const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
-  const { viewport } = useThree()
-
-  useLayoutEffect(() => {
-    if (!ref || typeof ref === 'function' || !ref.current) return
-    ref.current.scale.set(viewport.width, viewport.height, 1)
-  }, [ref, viewport.height, viewport.width])
-
-  useFrame((_state: RootState, delta: number) => {
-    if (!ref || typeof ref === 'function' || !ref.current) return
-    const material = ref.current.material as ShaderMaterial & { uniforms: SilkUniforms }
-    material.uniforms.uTime.value += 0.1 * delta
-  })
-
-  return (
-    <mesh ref={ref}>
-      <planeGeometry args={[1, 1, 1, 1]} />
-      <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
-    </mesh>
-  )
-})
+// Matches the previous dpr={[1, 1.25]} clamp from the react-three-fiber Canvas.
+const MAX_DPR = 1.25
 
 export interface SilkProps {
   speed?: number
   scale?: number
+  /** First hue of the blend. */
   color?: string
+  /** Second hue. Defaults to `color`, which reproduces a single-hue wash. */
+  colorB?: string
   noiseIntensity?: number
   rotation?: number
 }
@@ -120,31 +121,163 @@ export interface SilkProps {
 export default function Silk({
   speed = 5,
   scale = 1,
-  color = '#7B7481',
+  color = '#3a2fd6',
+  colorB = color,
   noiseIntensity = 1.5,
   rotation = 0,
 }: SilkProps) {
-  const meshRef = useRef<Mesh>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const uniforms = useMemo<SilkUniforms>(
-    () => ({
-      uSpeed: { value: speed },
-      uScale: { value: scale },
-      uNoiseIntensity: { value: noiseIntensity },
-      uColor: { value: new Color(...hexToNormalizedRgb(color)) },
-      uRotation: { value: rotation },
-      uTime: { value: 0 },
-    }),
-    [speed, scale, noiseIntensity, color, rotation],
-  )
+  // Latest prop values, read by the render loop without restarting it.
+  const propsRef = useRef({ speed, scale, color, colorB, noiseIntensity, rotation })
+  propsRef.current = { speed, scale, color, colorB, noiseIntensity, rotation }
 
-  return (
-    <Canvas
-      dpr={[1, 1.25]}
-      frameloop="always"
-      gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
-    >
-      <SilkPlane ref={meshRef} uniforms={uniforms} />
-    </Canvas>
-  )
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const gl = canvas.getContext('webgl', {
+      antialias: false,
+      // The shader writes col.a = 1.0, so the canvas is fully opaque. Declaring
+      // it opaque lets the compositor skip blending it against the page.
+      alpha: false,
+      depth: false,
+      stencil: false,
+      powerPreference: 'low-power',
+    })
+    if (!gl) return
+
+    const vs = compile(gl, gl.VERTEX_SHADER, vertexShader)
+    const fs = compile(gl, gl.FRAGMENT_SHADER, fragmentShader)
+    if (!vs || !fs) return
+
+    const program = gl.createProgram()
+    if (!program) return
+    gl.attachShader(program, vs)
+    gl.attachShader(program, fs)
+    gl.linkProgram(program)
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return
+    gl.useProgram(program)
+
+    const buffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
+
+    const aPosition = gl.getAttribLocation(program, 'aPosition')
+    gl.enableVertexAttribArray(aPosition)
+    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0)
+
+    const uTime = gl.getUniformLocation(program, 'uTime')
+    const uColor = gl.getUniformLocation(program, 'uColor')
+    const uColorB = gl.getUniformLocation(program, 'uColorB')
+    const uSpeed = gl.getUniformLocation(program, 'uSpeed')
+    const uScale = gl.getUniformLocation(program, 'uScale')
+    const uRotation = gl.getUniformLocation(program, 'uRotation')
+    const uNoiseIntensity = gl.getUniformLocation(program, 'uNoiseIntensity')
+
+    let width = 0
+    let height = 0
+    let didFirstDraw = false
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+      const w = Math.max(1, Math.round(canvas.clientWidth * dpr))
+      const h = Math.max(1, Math.round(canvas.clientHeight * dpr))
+      if (w === width && h === height) return
+      width = w
+      height = h
+      canvas.width = w
+      canvas.height = h
+      gl.viewport(0, 0, w, h)
+      // Resizing clears the drawing buffer. If the loop is paused (tab hidden or
+      // hero scrolled away) nothing would repaint it, so redraw immediately.
+      if (didFirstDraw) draw()
+    }
+
+    const resizeObserver = new ResizeObserver(resize)
+    resizeObserver.observe(canvas)
+
+    let time = 0
+    let last = 0
+    let rafId: number | null = null
+    let inView = true
+    let pageVisible = !document.hidden
+
+    const draw = () => {
+      const p = propsRef.current
+      const [r, g, b] = hexToNormalizedRgb(p.color)
+      const [r2, g2, b2] = hexToNormalizedRgb(p.colorB)
+      gl.uniform1f(uTime, time)
+      gl.uniform3f(uColor, r, g, b)
+      gl.uniform3f(uColorB, r2, g2, b2)
+      gl.uniform1f(uSpeed, p.speed)
+      gl.uniform1f(uScale, p.scale)
+      gl.uniform1f(uRotation, p.rotation)
+      gl.uniform1f(uNoiseIntensity, p.noiseIntensity)
+      gl.drawArrays(gl.TRIANGLES, 0, 3)
+    }
+
+    const frame = (ts: number) => {
+      if (last === 0) last = ts
+      // Clamp delta so returning to a backgrounded tab doesn't jump the pattern.
+      const delta = Math.min((ts - last) / 1000, 1 / 30)
+      last = ts
+
+      // Matches the previous useFrame body: uTime += 0.1 * delta
+      time += 0.1 * delta
+
+      draw()
+      rafId = requestAnimationFrame(frame)
+    }
+
+    const sync = () => {
+      const shouldRun = inView && pageVisible
+      if (shouldRun && rafId === null) {
+        last = 0
+        rafId = requestAnimationFrame(frame)
+      } else if (!shouldRun && rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
+    }
+
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        inView = entries.some((entry) => entry.isIntersecting)
+        sync()
+      },
+      { threshold: 0 },
+    )
+    intersectionObserver.observe(canvas)
+
+    const onVisibility = () => {
+      pageVisible = !document.hidden
+      sync()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
+    // Always paint one frame up front. The context is opaque (alpha: false), so
+    // a canvas that has never drawn is solid black — which is what a visitor
+    // would see if the page loaded in a background tab, or if the hero was
+    // already scrolled past on load. Painting once means pausing simply freezes
+    // the pattern instead of blanking it.
+    resize()
+    draw()
+    didFirstDraw = true
+
+    sync()
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      document.removeEventListener('visibilitychange', onVisibility)
+      intersectionObserver.disconnect()
+      resizeObserver.disconnect()
+      gl.deleteBuffer(buffer)
+      gl.deleteProgram(program)
+      gl.deleteShader(vs)
+      gl.deleteShader(fs)
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
+    }
+  }, [])
+
+  return <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
 }

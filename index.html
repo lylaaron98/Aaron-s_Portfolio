@@ -2,19 +2,64 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- public/favicon.svg genuinely exists now; this used to 404 on every load. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#070912" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f8fd" media="(prefers-color-scheme: light)" />
+
+    <!--
+      Resolve the theme before first paint. ThemeProvider sets the same
+      attribute on mount, but that happens after React hydrates — long enough
+      to flash a dark page at a light-mode visitor. Reading the same storage key
+      here keeps the two in agreement.
+    -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('portfolio-theme');
+          if (!t) {
+            t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Variable-font ranges (wght@400..800) fetch one file per family instead of
+      one per static weight. Fira Code is gone — its only consumer was a
+      --font-mono token that had been deleted, so it was downloaded and never
+      rendered. JetBrains Mono replaces it and is actually used, for every mono
+      label, section index and metadata key in the design.
+    -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400..600&display=swap"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Aaron - Frontend & Fullstack Software Engineer specializing in web and mobile development" />
-    <title>Aaron | Frontend & Fullstack Engineer</title>
+
+    <title>Aaron Lee — Software Engineer, Full Stack &amp; Applied AI</title>
+    <meta
+      name="description"
+      content="Aaron Lee - Software Engineer in Singapore. Full stack, frontend, and applied AI: computer vision and OCR pipelines, enterprise modernization, and production web applications."
+    />
+    <link rel="canonical" href="https://lylaaron98.github.io/Aaron-s_Portfolio/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Aaron Lee — Software Engineer, Full Stack &amp; Applied AI" />
+    <meta
+      property="og:description"
+      content="Production experience across banking, government, sustainability and Japanese enterprise. Now working independently on applied AI."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,55 +1,285 @@
-:root {
-  /* ── Chrome Silver palette ── */
-  --navy: #141418;
-  --navy-light: #1c1c24;
-  --navy-lighter: #32323e;
-  --navy-darkest: #0c0c10;
-  --cyan: #c0c0c8;
-  --cyan-dim: rgba(192, 192, 200, 0.1);
-  --cyan-glow: rgba(192, 192, 200, 0.15);
-  --white: #f0f0f5;
-  --lightest-slate: #d4d4dc;
-  --slate: #8888a0;
-  --slate-light: #a8a8c0;
-  --accent: #b8b8c8;
-  --chrome-highlight: rgba(255, 255, 255, 0.12);
-  --chrome-shine: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 60%);
+/* ============================================================================
+   Design tokens — "Aurora"
+   ----------------------------------------------------------------------------
+   Three layers, in dependency order:
 
-  --font-sans: 'Inter', sans-serif;
-  --font-mono: 'Fira Code', monospace;
-  --transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  --border-radius: 6px;
-  --border-radius-lg: 16px;
-  --border-radius-xl: 24px;
-  --nav-height: 70px;
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px rgba(192, 192, 200, 0.06);
-  --shadow-3d: 0 6px 0 rgba(0, 0, 0, 0.25), 0 10px 20px rgba(0, 0, 0, 0.3);
-  --shadow-3d-hover: 0 2px 0 rgba(0, 0, 0, 0.25), 0 4px 10px rgba(0, 0, 0, 0.3);
+     1. PRIMITIVES  raw values. Never referenced outside this file.
+     2. SEMANTIC    role-named tokens (--bg, --fg-mute, --brand). This is the
+                    layer components are allowed to use.
+     3. LEGACY      the old --navy / --cyan / --slate names, re-pointed at the
+                    semantic layer so pre-existing colour references keep
+                    working. Delete an alias once nothing references it.
+
+   Theming works by overriding the SEMANTIC layer under
+   :root[data-theme="light"]. Nothing below that line needs to know a theme
+   exists — which is the whole point.
+
+   Aurora is a colour field: indigo into teal into magenta, glass surfaces
+   floating on top, depth from blur and glow rather than from drawn edges.
+   ========================================================================== */
+
+:root {
+  /* ── 1. PRIMITIVES ──────────────────────────────────────────────────── */
+
+  /* Neutral ramp, cast blue so it sits inside the colour field rather than
+     on top of it. A pure grey scale reads dirty against saturated indigo. */
+  --n-950: #070912;
+  --n-900: #0b0f1e;
+  --n-850: #10152a;
+  --n-800: #1a2038;
+  --n-700: #272e4c;
+  --n-500: #6f7597;
+  --n-400: #a3a8c4;
+  --n-300: #c9cde2;
+  --n-200: #ccd1e8;
+  --n-150: #e0e3f4;
+  --n-100: #eceefa;
+  --n-050: #f7f8fd;
+  --n-000: #ffffff;
+  --n-ink: #0e1120;
+  --n-fg: #f0f2fb;
+
+  /* The three aurora hues. Each has a darkened variant for light mode, where
+     the saturated version fails contrast as text. */
+  --au-indigo: #5b5bf0;
+  --au-indigo-lt: #4a4ade;
+  --au-teal: #19c3b2;
+  --au-teal-lt: #0f9c8e;
+  --au-magenta: #e0489c;
+  --au-magenta-lt: #c62f83;
+
+  /* ── 2. SEMANTIC ────────────────────────────────────────────────────── */
+
+  /* Surfaces. Glass is a tint of the foreground, not a fixed white — so it
+     inverts correctly in light mode instead of staying a pale wash. */
+  --bg: var(--n-950);
+  --surface: color-mix(in srgb, var(--fg) 4.5%, transparent);
+  --surface-2: color-mix(in srgb, var(--fg) 7.5%, transparent);
+  --surface-solid: var(--n-900);
+  --surface-sunk: #05070f;
+  --glass-blur: 18px;
+
+  --line: color-mix(in srgb, var(--fg) 10%, transparent);
+  --line-strong: color-mix(in srgb, var(--fg) 17%, transparent);
+
+  /* Text, in descending prominence. Every one clears 4.5:1 on --bg. */
+  --fg: var(--n-fg);
+  --fg-soft: var(--n-300);
+  --fg-mute: var(--n-400);
+  --fg-dim: var(--n-500);
+
+  /* Brand.
+       --brand         the ink role: eyebrows, section indices, link hover.
+                       Teal, because it is the most legible of the three.
+       --brand-2/-3    indigo and magenta, the gradient endpoints.
+       --brand-fill    a solid you put --brand-on-fill text on.
+       --brand-gradient the signature sweep, for primary actions and display
+                       type. */
+  --brand: var(--au-teal);
+  --brand-2: var(--au-indigo);
+  --brand-3: var(--au-magenta);
+  --brand-fill: var(--au-indigo);
+  --brand-on-fill: #ffffff;
+  --brand-gradient: linear-gradient(96deg, var(--brand-2) 0%, var(--brand-3) 100%);
+  --brand-text-gradient: linear-gradient(
+    96deg,
+    var(--fg) 4%,
+    #b9c0ff 34%,
+    #8fe6dc 62%,
+    #f7a8d0 96%
+  );
+  --brand-dim: color-mix(in srgb, var(--au-teal) 12%, transparent);
+  --brand-line: color-mix(in srgb, var(--au-teal) 30%, transparent);
+  --brand-glow: color-mix(in srgb, var(--au-indigo) 34%, transparent);
+
+  /* Status */
+  --ok: #33e0a0;
+  --warn: #ffc247;
+  --err: #ff6b8a;
+
+  /* The hero shader samples these. Two colours now: the silk pattern blends
+     from base to tint across its own luminance, which is what turns a
+     single-hue wash into an actual aurora. */
+  --shader-base: #3a2fd6;
+  --shader-tint: #12b3a3;
+  --shader-alpha: 0.8;
+
+  /* ── Typography ─────────────────────────────────────────────────────── */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Code', monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: clamp(1.625rem, 3vw, 2.125rem);
+  --text-3xl: clamp(2rem, 4vw, 2.75rem);
+  --text-display: clamp(3.25rem, 8vw, 6.5rem);
+
+  --leading-display: 0.95;
+  --leading-tight: 1.2;
+  --leading-snug: 1.45;
+  --leading-body: 1.66;
+  --leading-relaxed: 1.78;
+
+  --tracking-display: -0.045em;
+  --tracking-tight: -0.022em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.06em;
+  --tracking-mono: 0.13em;
+  --tracking-label: 0.2em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semi: 600;
+  --weight-bold: 700;
+  --weight-black: 800;
+
+  /* ── Space — 8pt grid, with a 4px half-step at the bottom ───────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+  --space-9: 4rem;
+  --space-10: 5rem;
+  --space-11: 6rem;
+  --space-12: 8rem;
+
+  /* Layout */
+  --measure: 60ch;
+  --content-max: 1180px;
+  --gutter: var(--space-7);
+  --gutter-sm: var(--space-5);
+  --nav-height: 60px;
+  --dot-grid: 26px;
+
+  /* ── Radius — Aurora is soft. Glass panels want generous corners. ───── */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 280ms;
+  --dur-4: 460ms;
+
+  /* ── Elevation. Aurora leans on glow as much as shadow. ─────────────── */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+  --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+  --shadow-brand: 0 14px 40px -14px var(--brand-glow);
+
+  /* ── Z-index — a scale, so no more guessing at 9999 ─────────────────── */
+  --z-below: -1;
+  --z-base: 0;
+  --z-raised: 1;
+  --z-sticky: 100;
+  --z-nav: 1000;
+  --z-overlay: 1500;
+  --z-modal: 2000;
+  --z-toast: 3000;
+
+  /* ── 3. LEGACY ALIASES ──────────────────────────────────────────────
+     Old names kept alive so existing modules render correctly mid-migration.
+     Each maps to the role it actually played, not to its literal old colour:
+     --cyan was the accent role, --accent was really "prominent grey text".
+     Mapping --accent onto --brand would have flooded the page with teal. */
+  --navy: var(--bg);
+  --navy-light: var(--surface-solid);
+  --navy-lighter: var(--line-strong);
+  --cyan: var(--brand);
+  --cyan-dim: var(--brand-dim);
+  --cyan-glow: var(--brand-glow);
+  --white: var(--fg);
+  --slate: var(--fg-mute);
+  --slate-light: var(--fg-soft);
+  --accent: var(--fg-soft);
+  --transition: all var(--dur-3) var(--ease-out);
+  --border-radius: var(--radius-sm);
+  --border-radius-lg: var(--radius-lg);
+  --border-radius-xl: var(--radius-pill);
+  --shadow-3d: var(--shadow-md);
+  --shadow-3d-hover: var(--shadow-sm);
 }
 
-/* ── Light mode overrides ── */
-:root[data-theme="light"] {
-  --navy: #f5f5f8;
-  --navy-light: #eaeaef;
-  --navy-lighter: #d8d8e0;
-  --navy-darkest: #fafafe;
-  --cyan: #555568;
-  --cyan-dim: rgba(85, 85, 104, 0.1);
-  --cyan-glow: rgba(85, 85, 104, 0.12);
-  --white: #1a1a24;
-  --lightest-slate: #2a2a38;
-  --slate: #5a5a72;
-  --slate-light: #4a4a60;
-  --accent: #48485c;
-  --chrome-highlight: rgba(0, 0, 0, 0.06);
-  --chrome-shine: linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 60%);
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.15);
-  --shadow-glow: 0 0 40px rgba(85, 85, 104, 0.06);
-  --shadow-3d: 0 6px 0 rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.1);
-  --shadow-3d-hover: 0 2px 0 rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.1);
+/* ============================================================================
+   Light theme — overrides the SEMANTIC layer only.
+
+   Aurora is the one direction where light mode needs its own art direction
+   rather than a token flip: the colour field has to lighten to pastel or the
+   type stops being legible over it. That is what --shader-* and the reduced
+   --shader-alpha do here.
+   ========================================================================== */
+:root[data-theme='light'] {
+  --bg: var(--n-050);
+  --surface: color-mix(in srgb, var(--n-ink) 4%, transparent);
+  --surface-2: color-mix(in srgb, var(--n-ink) 7%, transparent);
+  --surface-solid: #ffffff;
+  --surface-sunk: #eef0fa;
+
+  --line: color-mix(in srgb, var(--n-ink) 11%, transparent);
+  --line-strong: color-mix(in srgb, var(--n-ink) 18%, transparent);
+
+  --fg: var(--n-ink);
+  --fg-soft: #333a55;
+  --fg-mute: #5f6584;
+  --fg-dim: #7d84a3;
+
+  --brand: var(--au-teal-lt);
+  --brand-2: var(--au-indigo-lt);
+  --brand-3: var(--au-magenta-lt);
+  --brand-fill: var(--au-indigo-lt);
+  --brand-on-fill: #ffffff;
+  --brand-text-gradient: linear-gradient(
+    96deg,
+    var(--n-ink) 4%,
+    #3b3bc4 36%,
+    #0d8d80 64%,
+    #b62b78 96%
+  );
+  --brand-dim: color-mix(in srgb, var(--au-teal-lt) 12%, transparent);
+  --brand-line: color-mix(in srgb, var(--au-teal-lt) 30%, transparent);
+  --brand-glow: color-mix(in srgb, var(--au-indigo-lt) 26%, transparent);
+
+  --ok: #129a63;
+  --warn: #9a6400;
+  --err: #c2354f;
+
+  --shader-base: #b9bdf7;
+  --shader-tint: #a5e6dd;
+  --shader-alpha: 0.62;
+
+  --shadow-sm: 0 1px 2px rgb(14 17 32 / 0.07);
+  --shadow-md: 0 10px 30px -10px rgb(14 17 32 / 0.14);
+  --shadow-pop: 0 24px 60px -20px rgb(14 17 32 / 0.2);
+}
+
+/* Honour the OS preference until the user makes an explicit choice.
+   ThemeContext writes data-theme on mount, so this only governs the very first
+   paint — but that is exactly the flash we want to avoid. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }

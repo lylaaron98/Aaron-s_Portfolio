@@ -85,13 +85,25 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     const INITIAL_TAU = 0.6;
     let initialUntil = 0;
 
-    const setVarsFromXY = (x: number, y: number) => {
-      const shell = shellRef.current;
-      const wrap = wrapRef.current;
-      if (!shell || !wrap) return;
+    // Cached so the animation loop stops forcing layout on every frame. Kept in
+    // sync by the ResizeObserver installed alongside the pointer listeners.
+    let cachedWidth = 0;
+    let cachedHeight = 0;
 
-      const width = shell.clientWidth || 1;
-      const height = shell.clientHeight || 1;
+    const measure = () => {
+      const shell = shellRef.current;
+      if (!shell) return;
+      cachedWidth = shell.clientWidth || 1;
+      cachedHeight = shell.clientHeight || 1;
+    };
+
+    const setVarsFromXY = (x: number, y: number) => {
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+
+      if (cachedWidth === 0 || cachedHeight === 0) measure();
+      const width = cachedWidth || 1;
+      const height = cachedHeight || 1;
 
       const percentX = clamp((100 / width) * x);
       const percentY = clamp((100 / height) * y);
@@ -129,8 +141,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       setVarsFromXY(currentX, currentY);
 
       const stillFar = Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05;
+      const stillEasingIn = ts < initialUntil;
 
-      if (stillFar || document.hasFocus()) {
+      // Previously this read `stillFar || document.hasFocus()`. document.hasFocus()
+      // is true for as long as the tab is focused, so the loop never exited: it
+      // ran at 60fps from mount onward, forcing layout and repainting the card's
+      // blended gradient layers even when the card was miles off-screen.
+      if (stillFar || stillEasingIn) {
         rafId = requestAnimationFrame(step);
       } else {
         running = false;
@@ -177,7 +194,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         rafId = null;
         running = false;
         lastTs = 0;
-      }
+      },
+      measure
     };
   }, [enableTilt]);
 
@@ -267,6 +285,10 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     const pointerLeaveHandler = handlePointerLeave as EventListener;
     const deviceOrientationHandler = handleDeviceOrientation as EventListener;
 
+    tiltEngine.measure();
+    const resizeObserver = new ResizeObserver(() => tiltEngine.measure());
+    resizeObserver.observe(shell);
+
     shell.addEventListener('pointerenter', pointerEnterHandler);
     shell.addEventListener('pointermove', pointerMoveHandler);
     shell.addEventListener('pointerleave', pointerLeaveHandler);
@@ -296,6 +318,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     tiltEngine.beginInitial(ANIMATION_CONFIG.INITIAL_DURATION);
 
     return () => {
+      resizeObserver.disconnect();
       shell.removeEventListener('pointerenter', pointerEnterHandler);
       shell.removeEventListener('pointermove', pointerMoveHandler);
       shell.removeEventListener('pointerleave', pointerLeaveHandler);

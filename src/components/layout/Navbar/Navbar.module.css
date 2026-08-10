@@ -1,114 +1,72 @@
+/* Aurora navbar: a floating glass pill, hovering over the colour field. */
+
 .navbar {
   position: fixed;
-  top: 16px;
+  top: var(--space-3);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
-  height: 56px;
-  width: max(min(96vw, 1080px), 320px);
-  transition: var(--transition);
-  padding: 0 28px;
-  background: rgba(20, 20, 28, 0.55);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.35),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  z-index: var(--z-nav);
+  height: var(--nav-height);
+  width: max(min(94vw, 1040px), 320px);
+  padding: 0 var(--space-3) 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  transition:
+    background-color var(--dur-3) var(--ease-out),
+    border-color var(--dur-3) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out);
+}
+
+.scrolled {
+  background: var(--surface);
+  border-color: var(--line);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  box-shadow: var(--shadow-md);
 }
 
 .navbarHidden {
-  transform: translateX(-50%) translateY(calc(-100% - 16px));
-}
-
-.navbar.scrolled {
-  background: rgba(16, 16, 22, 0.75);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
-}
-
-:root[data-theme="light"] .navbar {
-  background: rgba(245, 245, 248, 0.6);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.1),
-    0 1px 0 rgba(255, 255, 255, 0.8) inset;
-}
-
-:root[data-theme="light"] .navbar.scrolled {
-  background: rgba(240, 240, 244, 0.8);
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  transform: translateX(-50%) translateY(calc(-100% - var(--space-3)));
 }
 
 .inner {
-  max-width: 1100px;
-  margin: 0 auto;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
+/* ── Logo ── */
 .logo {
-  font-family: var(--font-sans);
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--white);
-  transition: var(--transition);
-  text-decoration: none;
-}
-
-.shinyText {
-  display: inline-block;
-  position: relative;
-  background: linear-gradient(90deg, #fff 10%, #b8b8c8 40%, #fff 90%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow:
-    0 2px 8px rgba(192,192,200,0.10),
-    0 1px 0 rgba(255,255,255,0.15),
-    0 0.5px 0 rgba(255,255,255,0.10);
-  animation: shiny-move 2s linear infinite;
-}
-
-@keyframes shiny-move {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-.logo:hover {
-  color: var(--cyan);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08em;
+  flex: none;
 }
 
 .logoBracket {
-  color: var(--cyan);
+  color: var(--brand);
+  font-weight: var(--weight-medium);
 }
 
+/* ── Links ── */
 .nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -118,155 +76,86 @@
   display: none;
 }
 
-/* ── Theme toggle switch ── */
+.navLink {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg-mute);
+  white-space: nowrap;
+  transition:
+    color var(--dur-2) var(--ease-out),
+    background-color var(--dur-2) var(--ease-out);
+}
+
+.navLink:hover {
+  color: var(--fg);
+  background: var(--surface-2);
+}
+
+.demoLink {
+  color: var(--brand);
+}
+
+/* ── Theme toggle ── */
 .themeToggle {
-  background: none;
-  border: none;
+  flex: none;
   padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+  margin-left: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+.themeToggle:hover {
+  border-color: var(--line-strong);
 }
 
 .toggleTrack {
   position: relative;
-  width: 52px;
-  height: 28px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border-color 0.3s ease;
   display: flex;
   align-items: center;
+  width: 50px;
+  height: 26px;
   padding: 3px;
 }
 
-:root[data-theme="light"] .toggleTrack {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.12);
-}
-
 .toggleThumb {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  background: var(--cyan);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  background: var(--brand-gradient);
+  color: var(--brand-on-fill);
+  box-shadow: var(--shadow-brand);
+  transition: transform var(--dur-3) var(--ease-spring);
 }
 
-.toggleThumb.toggleLight {
+.toggleLight {
   transform: translateX(24px);
 }
 
 .toggleThumb svg {
-  width: 14px;
-  height: 14px;
-  color: var(--navy);
-}
-
-.navLink {
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  color: var(--slate-light);
-  transition: var(--transition);
-  font-family: var(--font-sans);
-  text-decoration: none;
-}
-
-.navLink:hover {
-  color: var(--cyan);
-}
-
-.demoLink {
-  color: var(--cyan);
-}
-
-.navNum {
-  color: var(--cyan);
-  margin-right: 2px;
-  font-size: 0.75rem;
-}
-
-.resumeBtn {
-  margin-left: 16px;
-  padding: 10px 20px;
-  border: 1px solid rgba(192, 192, 200, 0.3);
-  border-radius: var(--border-radius-xl);
-  color: var(--accent);
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  transition: var(--transition);
-  text-decoration: none;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
-  box-shadow: 0 3px 0 rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.resumeBtn:hover {
-  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
-  border-color: rgba(192, 192, 200, 0.5);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.2);
-  transform: translateY(2px);
-}
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  padding: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1100;
-}
-
-.hamburger span {
-  display: block;
-  width: 25px;
-  height: 2px;
-  background: var(--cyan);
-  transition: var(--transition);
-  transform-origin: center;
-}
-
-.hamburger.hamburgerOpen span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.hamburger.hamburgerOpen span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.hamburgerOpen span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
-
-.overlay {
-  display: none;
+  width: 12px;
+  height: 12px;
 }
 
 @media (max-width: 768px) {
   .navbar {
-    top: 12px;
-    height: 52px;
-    padding: 0 12px;
+    top: var(--space-2);
     width: 96vw;
-  }
-
-  .nav {
-    gap: 6px;
+    padding: 0 var(--space-2) 0 var(--space-4);
   }
 
   .navLink {
-    font-size: 0.8rem;
-    padding: 6px 8px;
+    font-size: var(--text-xs);
+    padding: var(--space-2);
   }
 
   .logo {
-    font-size: 1rem;
+    font-size: var(--text-base);
     white-space: nowrap;
   }
 
@@ -280,12 +169,7 @@
     height: 18px;
   }
 
-  .toggleThumb.toggleLight {
+  .toggleLight {
     transform: translateX(20px);
-  }
-
-  .toggleThumb svg {
-    width: 12px;
-    height: 12px;
   }
 }

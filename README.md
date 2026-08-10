@@ -11,7 +11,7 @@ Personal portfolio site for Aaron, built as a Vite + React + TypeScript single-p
 - GSAP + ScrollTrigger
 - react-icons
 - Web3Forms for contact delivery
-- @react-three/fiber, three, react-bits, ogl, and motion for visual effects
+- @react-three/fiber and three for the animated Silk hero background
 
 ## Current Features
 

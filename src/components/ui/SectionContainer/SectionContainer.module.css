@@ -1,15 +1,50 @@
 .section {
-  padding: 120px 0;
   position: relative;
   overflow: hidden;
+  /* Lets the browser skip layout and paint for sections that are off-screen.
+     The intrinsic size keeps the scrollbar honest. */
   content-visibility: auto;
   contain-intrinsic-size: 900px;
 }
 
+/* ── Backgrounds ── */
+.bgNavy {
+  background: var(--bg);
+}
+
+.bgLight {
+  background: var(--surface-sunk);
+}
+
+/* ── Aurora ambience ─────────────────────────────────────────────────────
+   Two soft blooms and a dot field. Replaces the 240-cell DOM grid every
+   section used to mount: no nodes, no rAF, no compositing, re-themes free. */
+.ambience {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background:
+    radial-gradient(42% 38% at 88% 4%, color-mix(in srgb, var(--brand-2) 16%, transparent), transparent 64%),
+    radial-gradient(38% 34% at 6% 92%, color-mix(in srgb, var(--brand-3) 12%, transparent), transparent 66%);
+}
+
+.dots {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--fg) 11%, transparent) 1px, transparent 1px);
+  background-size: var(--dot-grid) var(--dot-grid);
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, black 8%, transparent 76%);
+  opacity: 0.5;
+}
+
+/* Optional DOM ripple, opt-in per section rather than mounted on all five. */
 .backgroundLayer {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-base);
   pointer-events: none;
 }
 
@@ -20,87 +55,58 @@
 
 .content {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-raised);
 }
 
-/* Ambient glow on navy sections */
-.bgNavy {
-  background: var(--navy);
-}
-
-.bgNavy::before {
-  content: '';
-  position: absolute;
-  top: 20%;
-  right: -15%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(192, 192, 200, 0.02) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-/* Ambient glow on light sections */
-.bgLight {
-  background: var(--navy-light);
-}
-
-.bgLight::before {
-  content: '';
-  position: absolute;
-  top: 30%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(192, 192, 200, 0.015) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-/* ── Section title ── */
-.sectionTitle {
+/* ── Section header — centred, eyebrow above a display title ──────────── */
+.header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-  font-weight: 700;
-  margin-bottom: 56px;
-  font-family: 'Inter', var(--font-sans), sans-serif;
-  letter-spacing: 0.01em;
-  color: var(--white);
+  text-align: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
 }
 
-.num {
-  font-family: var(--font-sans);
-  font-size: 0.9em;
-  color: var(--cyan);
-  font-weight: 400;
-}
-
-.titleWords {
+.eyebrow {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.3em;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--brand);
 }
 
-.titleWord {
-  line-height: 1.05;
+.title {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+  color: var(--fg);
+  margin: 0;
 }
 
-.line {
-  display: block;
-  height: 1px;
-  flex: 1 1 120px;
-  background: linear-gradient(to right, var(--navy-lighter), transparent);
-  min-width: 40px;
+.rule {
+  width: 64px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-gradient);
+}
+
+.lede {
+  max-width: 60ch;
+  margin: 0 auto var(--space-8);
+  text-align: center;
+  color: var(--fg-mute);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
 }
 
 @media (max-width: 768px) {
-  .section {
-    padding: 80px 0;
-  }
-
-  .rippleBackground {
-    opacity: 0.4;
+  .header {
+    margin-bottom: var(--space-6);
   }
 }

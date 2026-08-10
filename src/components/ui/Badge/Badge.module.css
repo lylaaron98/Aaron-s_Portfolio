@@ -2,7 +2,7 @@
   display: inline-block;
   font-family: var(--font-sans);
   letter-spacing: 0.03em;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
 }
 
@@ -10,23 +10,23 @@
 .filled {
   font-size: 0.72rem;
   color: var(--accent);
-  background: rgba(192, 192, 200, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   padding: 4px 12px;
-  border: 1px solid rgba(192, 192, 200, 0.15);
+  border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
   transition: var(--transition);
 }
 
 .filled:hover {
-  background: rgba(192, 192, 200, 0.15);
-  border-color: rgba(192, 192, 200, 0.3);
+  background: color-mix(in srgb, var(--fg) 15%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 30%, transparent);
 }
 
 .outline {
   font-size: 0.7rem;
   color: var(--accent);
   background: transparent;
-  border: 1px solid rgba(192, 192, 200, 0.3);
-  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  border-radius: var(--radius-lg);
   padding: 3px 12px;
   letter-spacing: 0.05em;
 }

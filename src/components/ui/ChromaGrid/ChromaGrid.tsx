@@ -32,12 +32,18 @@ export interface ChromaGridProps {
 type SetterFn = (value: number | string) => void
 
 function ChromaCardMedia({ item }: { item: ChromaItem }) {
-  const [fallbackFor, setFallbackFor] = useState<string | undefined>()
-  const src = fallbackFor === item.image && item.fallbackImage ? item.fallbackImage : item.image
+  // The displayed source is derived, not stored. The previous version kept
+  // `src` in state and re-synced it from an effect body on every item.image
+  // change — an extra render per change, and a react-hooks/set-state-in-effect
+  // error. Recording *which* image failed instead means a new item.image
+  // invalidates the fallback for free, with no effect at all.
+  const [failedSrc, setFailedSrc] = useState<string | undefined>(undefined)
+  const src =
+    item.fallbackImage && failedSrc === item.image ? item.fallbackImage : item.image
 
   const handleFallback = () => {
-    if (item.image && item.fallbackImage && fallbackFor !== item.image) {
-      setFallbackFor(item.image)
+    if (item.fallbackImage && failedSrc !== item.image) {
+      setFailedSrc(item.image)
     }
   }
 

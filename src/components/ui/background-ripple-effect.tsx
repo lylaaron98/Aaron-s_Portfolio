@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useMemo, useRef, type CSSProperties, type MutableRefObject } from 'react'
-import { cn } from '../../lib/utils'
+import { cn } from '../../utils/classNames'
 
 export const BackgroundRippleEffect = ({
   className,
@@ -20,6 +20,7 @@ export const BackgroundRippleEffect = ({
   animate?: boolean
 }) => {
   const cellRefs = useRef<Array<HTMLDivElement | null>>([])
+  const rootRef = useRef<HTMLDivElement>(null)
 
   const applyRipple = useCallback((origin: { row: number; col: number }) => {
     cellRefs.current.forEach((cell, idx) => {
@@ -48,6 +49,7 @@ export const BackgroundRippleEffect = ({
 
     let timeoutId: number | null = null
     let cancelled = false
+    let inView = false
 
     const triggerRipple = () => {
       const row = Math.max(1, Math.min(rows - 2, Math.floor(Math.random() * rows)))
@@ -59,18 +61,49 @@ export const BackgroundRippleEffect = ({
       timeoutId = window.setTimeout(triggerRipple, 1800 + Math.round(Math.random() * 1200))
     }
 
-    timeoutId = window.setTimeout(triggerRipple, 500)
+    const stop = () => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId)
+        timeoutId = null
+      }
+    }
+
+    // Every section mounts one of these. Without gating, all five kept firing
+    // ripples across 240 cells each on a timer, forever, regardless of whether
+    // the section was anywhere near the viewport.
+    const schedule = () => {
+      if (!inView || document.hidden || timeoutId !== null) return
+      timeoutId = window.setTimeout(triggerRipple, 500)
+    }
+
+    const host = rootRef.current
+    const observer = new IntersectionObserver(
+      (entries) => {
+        inView = entries.some((entry) => entry.isIntersecting)
+        if (inView) schedule()
+        else stop()
+      },
+      { threshold: 0 },
+    )
+    if (host) observer.observe(host)
+
+    const onVisibility = () => {
+      if (document.hidden) stop()
+      else schedule()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       cancelled = true
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId)
-      }
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
+      stop()
     }
   }, [animate, applyRipple, cols, interactive, rows])
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         'absolute inset-0 h-full w-full',
         '[--cell-border-color:var(--color-neutral-300)] [--cell-fill-color:var(--color-neutral-100)] [--cell-shadow-color:var(--color-neutral-500)]',
@@ -135,6 +168,10 @@ const DivGrid = ({
     width: cols * cellSize,
     height: rows * cellSize,
     marginInline: 'auto',
+    // Lets the browser skip paint for grids that are scrolled out of view. The
+    // size is fixed and declared above, so this costs no layout stability.
+    contentVisibility: 'auto',
+    containIntrinsicSize: `${rows * cellSize}px ${cols * cellSize}px`,
   }
 
   return (
@@ -150,7 +187,10 @@ const DivGrid = ({
               cellRefs.current[idx] = node
             }}
             className={cn(
-              'cell relative border-[0.5px] opacity-30 transition-opacity duration-150 will-change-transform dark:shadow-[0px_0px_24px_1px_var(--cell-shadow-color)_inset]',
+              // No static will-change here. It used to sit on all 1,200 cells at
+              // once, permanently hinting the compositor to promote every one of
+              // them; the ripple class now carries it only while animating.
+              'cell relative border-[0.5px] opacity-30 transition-opacity duration-150 dark:shadow-[0px_0px_24px_1px_var(--cell-shadow-color)_inset]',
               interactive && 'hover:opacity-70',
               !interactive && 'pointer-events-none',
             )}

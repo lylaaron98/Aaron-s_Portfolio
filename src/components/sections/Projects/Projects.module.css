@@ -34,8 +34,8 @@
 .carouselButton {
   width: 44px;
   height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
   background: rgba(14, 14, 18, 0.68);
   color: var(--white);
   display: inline-flex;
@@ -49,7 +49,7 @@
 
 .carouselButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  border-color: rgba(192, 192, 200, 0.22);
+  border-color: color-mix(in srgb, var(--fg) 22%, transparent);
   background: rgba(25, 25, 32, 0.9);
 }
 
@@ -104,18 +104,18 @@
 }
 
 .cardInteractive:focus-visible {
-  outline: 2px solid rgba(192, 192, 200, 0.3);
+  outline: 2px solid color-mix(in srgb, var(--fg) 30%, transparent);
   outline-offset: 3px;
 }
 
 .card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(192, 192, 200, 0.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px color-mix(in srgb, var(--fg) 2%, transparent);
 }
 
 .featured {
-  border-color: rgba(192, 192, 200, 0.2);
-  background: rgba(192, 192, 200, 0.02);
+  border-color: color-mix(in srgb, var(--fg) 20%, transparent);
+  background: color-mix(in srgb, var(--fg) 2%, transparent);
 }
 
 .cardTop {
@@ -133,7 +133,7 @@
   width: 42px;
   height: 42px;
   color: var(--accent);
-  filter: drop-shadow(0 0 8px rgba(192, 192, 200, 0.15));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--fg) 15%, transparent));
 }
 
 .links {
@@ -214,7 +214,7 @@
   z-index: 1200;
   opacity: 0;
   background:
-    radial-gradient(circle at top, rgba(192, 192, 200, 0.14), transparent 38%),
+    radial-gradient(circle at top, color-mix(in srgb, var(--fg) 14%, transparent), transparent 38%),
     rgba(5, 8, 14, 0.84);
   backdrop-filter: blur(18px);
   transition: opacity 0.28s ease;
@@ -226,7 +226,7 @@
 
 .modalShell {
   position: fixed;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55);
   overflow: hidden;
   transition:
@@ -258,8 +258,8 @@
   width: 44px;
   height: 44px;
   margin: 20px 20px -64px auto;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
   background: rgba(16, 19, 28, 0.88);
   color: var(--white);
   display: inline-flex;
@@ -289,9 +289,9 @@
 
 .modalHero {
   min-height: 100%;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid color-mix(in srgb, var(--fg) 6%, transparent);
   background:
-    radial-gradient(circle at top left, rgba(192, 192, 200, 0.12), transparent 42%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--fg) 12%, transparent), transparent 42%),
     linear-gradient(180deg, rgba(14, 18, 30, 0.96), rgba(8, 10, 18, 0.96));
 }
 
@@ -314,7 +314,7 @@
   justify-content: flex-end;
   gap: 18px;
   background:
-    radial-gradient(circle at top left, rgba(192, 192, 200, 0.16), transparent 36%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--fg) 16%, transparent), transparent 36%),
     linear-gradient(135deg, rgba(23, 32, 56, 0.96), rgba(8, 11, 20, 0.96));
 }
 
@@ -328,7 +328,7 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: rgba(255, 255, 255, 0.72);
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
 }
 
 .modalHeroTitle {
@@ -340,7 +340,7 @@
 
 .modalHeroSummary {
   max-width: 24rem;
-  color: rgba(255, 255, 255, 0.76);
+  color: color-mix(in srgb, var(--fg) 76%, transparent);
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -352,12 +352,12 @@
 }
 
 .modalHeroTag {
-  border-radius: 999px;
+  border-radius: var(--radius-lg);
   padding: 0.45rem 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.84);
+  color: color-mix(in srgb, var(--fg) 84%, transparent);
 }
 
 .modalBody {
@@ -413,7 +413,7 @@
   justify-content: center;
   min-height: 46px;
   padding: 0.8rem 1.15rem;
-  border-radius: 999px;
+  border-radius: var(--radius-lg);
   transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
@@ -424,8 +424,8 @@
 }
 
 .modalSecondaryAction {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
   color: var(--white);
 }
 
@@ -444,7 +444,7 @@
 .modalSectionTitle {
   margin: 0;
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: color-mix(in srgb, var(--fg) 90%, transparent);
   letter-spacing: 0.04em;
 }
 
@@ -455,7 +455,7 @@
 }
 
 .modalTechBadge {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
 
 .modalSummaryGrid {
@@ -466,9 +466,9 @@
 
 .modalSummaryCard {
   padding: 18px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -478,7 +478,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.56);
+  color: color-mix(in srgb, var(--fg) 56%, transparent);
 }
 
 .modalGallery {
@@ -489,10 +489,10 @@
 
 .modalThumb {
   padding: 0;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
   transition: transform 0.25s ease, border-color 0.25s ease;
 }
 
@@ -523,7 +523,7 @@
   .modalHero {
     min-height: 360px;
     border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 6%, transparent);
   }
 }
 

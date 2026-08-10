@@ -38,7 +38,7 @@
   width: 100%;
   max-width: 320px;
   min-height: 100%;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid #333;
   transition: border-color 0.3s ease, transform 0.3s ease;
@@ -46,7 +46,7 @@
 
   --mouse-x: 50%;
   --mouse-y: 50%;
-  --spotlight-color: rgba(255, 255, 255, 0.26);
+  --spotlight-color: color-mix(in srgb, var(--fg) 26%, transparent);
 }
 
 .chroma-card.no-image {
@@ -85,7 +85,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   display: block;
 }
 
@@ -185,22 +185,22 @@
     circle var(--r) at var(--x) var(--y),
     white 0%,
     white 15%,
-    rgba(255, 255, 255, 0.9) 30%,
-    rgba(255, 255, 255, 0.78) 45%,
-    rgba(255, 255, 255, 0.65) 60%,
-    rgba(255, 255, 255, 0.5) 75%,
-    rgba(255, 255, 255, 0.32) 88%,
+    color-mix(in srgb, var(--fg) 90%, transparent) 30%,
+    color-mix(in srgb, var(--fg) 78%, transparent) 45%,
+    color-mix(in srgb, var(--fg) 65%, transparent) 60%,
+    color-mix(in srgb, var(--fg) 50%, transparent) 75%,
+    color-mix(in srgb, var(--fg) 32%, transparent) 88%,
     transparent 100%
   );
   -webkit-mask-image: radial-gradient(
     circle var(--r) at var(--x) var(--y),
     white 0%,
     white 15%,
-    rgba(255, 255, 255, 0.9) 30%,
-    rgba(255, 255, 255, 0.78) 45%,
-    rgba(255, 255, 255, 0.65) 60%,
-    rgba(255, 255, 255, 0.5) 75%,
-    rgba(255, 255, 255, 0.32) 88%,
+    color-mix(in srgb, var(--fg) 90%, transparent) 30%,
+    color-mix(in srgb, var(--fg) 78%, transparent) 45%,
+    color-mix(in srgb, var(--fg) 65%, transparent) 60%,
+    color-mix(in srgb, var(--fg) 50%, transparent) 75%,
+    color-mix(in srgb, var(--fg) 32%, transparent) 88%,
     transparent 100%
   );
   opacity: 1;

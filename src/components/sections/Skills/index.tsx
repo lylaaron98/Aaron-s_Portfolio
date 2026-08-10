@@ -11,6 +11,10 @@ import {
   SiAntdesign, SiDjango, SiTensorflow,
   SiGit, SiGitlab, SiDocker, SiKubernetes, SiWebpack, SiJira,
   SiMongodb,
+  SiFastapi, SiSupabase, SiPrisma, SiOpencv, SiFirebase, SiVercel,
+  SiFigma, SiUnity, SiVite, SiCypress, SiPostman, SiSonarqubeserver,
+  SiRedux, SiReactquery, SiGraphql, SiOpenai, SiHuggingface,
+  SiSocketdotio, SiJsonwebtokens, SiWebpack as SiBundler,
 } from 'react-icons/si'
 import { DiCss3, DiJava, DiMsqlServer } from 'react-icons/di'
 import { FaDatabase } from 'react-icons/fa'
@@ -53,13 +57,60 @@ const skillIconMap: Record<string, ComponentType<{ size?: number; color?: string
   'Oracle Database': FaDatabase,
   'MySQL': SiMysql,
   'MongoDB': SiMongodb,
+  // Added alongside the 2026 resume refresh
+  'React': SiReact,
+  'Shadcn UI': SiReact,
+  'Mantine UI': SiReact,
+  'Context API': SiReact,
+  'TanStack Query': SiReactquery,
+  'Redux Toolkit': SiRedux,
+  'Zustand': SiReact,
+  'GSAP': SiJavascript,
+  'Code Splitting': SiBundler,
+  'Lazy Loading': SiBundler,
+  'Memoization': SiBundler,
+  'FastAPI': SiFastapi,
+  'Supabase': SiSupabase,
+  'Prisma': SiPrisma,
+  'REST APIs': SiGraphql,
+  'WebSockets': SiSocketdotio,
+  'JWT Auth': SiJsonwebtokens,
+  'RBAC': SiJsonwebtokens,
+  'OpenAI APIs': SiOpenai,
+  'Claude': SiOpenai,
+  'Claude Vision': SiOpenai,
+  'Groq': SiOpenai,
+  'Prompt Engineering': SiOpenai,
+  'OpenCV': SiOpencv,
+  'Hough Transform': SiOpencv,
+  'Tesseract': SiOpencv,
+  'PaddleOCR': SiOpencv,
+  'Hugging Face': SiHuggingface,
+  'AWS': FaDatabase,
+  'AWS Lambda': FaDatabase,
+  'S3 & SQS': FaDatabase,
+  'Aurora': FaDatabase,
+  'Firebase': SiFirebase,
+  'Vercel': SiVercel,
+  'CI/CD': VscAzureDevops,
+  'ERD Design': FaDatabase,
+  'Vitest': SiVite,
+  'Cypress': SiCypress,
+  'Playwright': SiCypress,
+  'Postman': SiPostman,
+  'SonarQube': SiSonarqubeserver,
+  'Vite': SiVite,
+  'Unity': SiUnity,
+  'Figma': SiFigma,
+  'Jira': SiJira,
+  'Agile / Scrum': SiJira,
 }
 
 export default function Skills() {
   const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`, { stagger: 0.12 })
 
   return (
-    <SectionContainer id="skills" background="navy-light" title="Skills &amp; Technologies">
+    <SectionContainer id="skills" number="02" title="Skills" meta="stack">
       <div ref={ref} className={styles.grid}>
         {skillCategories.map((cat) => (
           <Card

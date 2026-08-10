@@ -1,60 +1,37 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './Navbar.module.css'
+import { cx } from '../../../utils/classNames'
 import { useTheme } from '../../../context/ThemeContext'
 import { navLinks } from '../../../data/navigation'
 import { PROJECTS_DEMO_ROUTE } from '../../../constants/routes'
+import ShinyText from '../../ui/ShinyText'
+import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
-  const navRef = useRef<HTMLElement>(null)
   const lastScrollRef = useRef(0)
   const hiddenRef = useRef(false)
   const scrolledRef = useRef(false)
   const { theme, toggleTheme } = useTheme()
+  const prefersReducedMotion = usePrefersReducedMotion()
 
-  // Entrance animation
-  useEffect(() => {
-    let cancelled = false
-    let cleanup = () => {}
+  // The logo entrance used to dynamically import GSAP for a single 0.5s fade.
+  // It is a CSS animation now, so the navbar pulls in no animation library.
 
-    const setupAnimation = async () => {
-      const { default: gsap } = await import('gsap')
-      if (cancelled) {
-        return
-      }
-
-      const ctx = gsap.context(() => {
-        gsap.from(`.${styles.logo}`, { opacity: 0, y: -20, duration: 0.5, delay: 0.1, ease: 'power2.out' })
-      }, navRef)
-
-      cleanup = () => ctx.revert()
-    }
-
-    const rafId = window.requestAnimationFrame(() => {
-      void setupAnimation()
-    })
-
-    return () => {
-      cancelled = true
-      window.cancelAnimationFrame(rafId)
-      cleanup()
-    }
-  }, [])
-
-  // Hide on scroll down, show on scroll up
+  // Hide on scroll down, show on scroll up.
   useEffect(() => {
     let rafId: number | null = null
 
     const updateFromScroll = () => {
       const current = window.scrollY
-      const nextScrolled = current > 50
+      const nextScrolled = current > 24
       if (nextScrolled !== scrolledRef.current) {
         scrolledRef.current = nextScrolled
         setScrolled(nextScrolled)
       }
 
-      const shouldHide = current > lastScrollRef.current && current > 100
+      const shouldHide = current > lastScrollRef.current && current > 120
       if (shouldHide !== hiddenRef.current) {
         hiddenRef.current = shouldHide
         setHidden(shouldHide)
@@ -64,10 +41,7 @@ export default function Navbar() {
     }
 
     const handleScroll = () => {
-      if (rafId !== null) {
-        return
-      }
-
+      if (rafId !== null) return
       rafId = window.requestAnimationFrame(() => {
         updateFromScroll()
         rafId = null
@@ -79,49 +53,50 @@ export default function Navbar() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId)
-      }
+      if (rafId !== null) window.cancelAnimationFrame(rafId)
     }
   }, [])
 
   return (
-    <header
-      ref={navRef}
-      className={`${styles.navbar} ${scrolled ? styles.scrolled : ''} ${hidden ? styles.navbarHidden : ''}`}
-    >
+    <header className={cx(styles.navbar, scrolled && styles.scrolled, hidden && styles.navbarHidden)}>
       <div className={styles.inner}>
         <a href="#hero" className={styles.logo}>
           <span className={styles.logoBracket}>&lt;</span>
-          <span className={styles.shinyText}>Aaron</span>
-          <span className={styles.logoBracket}> /&gt;</span>
+          {/* Was a local .shinyText copy of this component's CSS, minus its
+              prefers-reduced-motion guard — so the logo animated for
+              reduced-motion users. One implementation now. */}
+          <ShinyText text="Aaron" disabled={prefersReducedMotion} speed={4} />
+          <span className={styles.logoBracket}>/&gt;</span>
         </a>
 
-        <nav className={styles.nav}>
+        <nav className={styles.nav} aria-label="Primary">
           <div className={styles.navLinks}>
             {navLinks.map((link) => (
               <a key={link.href} href={link.href} className={styles.navLink}>
                 {link.label}
               </a>
             ))}
-            <a href={PROJECTS_DEMO_ROUTE} className={`${styles.navLink} ${styles.demoLink}`}>
+            <a href={PROJECTS_DEMO_ROUTE} className={cx(styles.navLink, styles.demoLink)}>
               Demo
             </a>
           </div>
+
           <button
             className={styles.themeToggle}
             onClick={toggleTheme}
             type="button"
+            role="switch"
+            aria-checked={theme === 'light'}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           >
             <span className={styles.toggleTrack}>
-              <span className={`${styles.toggleThumb} ${theme === 'light' ? styles.toggleLight : ''}`}>
+              <span className={cx(styles.toggleThumb, theme === 'light' && styles.toggleLight)}>
                 {theme === 'dark' ? (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                   </svg>
                 ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="5" />
                     <line x1="12" y1="1" x2="12" y2="3" />
                     <line x1="12" y1="21" x2="12" y2="23" />

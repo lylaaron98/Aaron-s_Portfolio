@@ -1,17 +1,30 @@
-import { useEffect, useRef, useState, type HTMLAttributes } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type HTMLAttributes, type ReactNode } from 'react'
 import styles from './SectionContainer.module.css'
 import { cx } from '../../../utils/classNames'
-import ShinyText from '../ShinyText'
-import { BackgroundRippleEffect } from '../background-ripple-effect'
 import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+
+// Only pulled in by sections that opt into the DOM ripple.
+const BackgroundRippleEffect = lazy(() =>
+  import('../background-ripple-effect').then((m) => ({ default: m.BackgroundRippleEffect })),
+)
 
 interface SectionContainerProps extends HTMLAttributes<HTMLElement> {
   id?: string
   background?: 'navy' | 'navy-light'
-  /** Section number shown before the title (e.g. "01") */
+  /** Section index shown in the eyebrow, e.g. "02". */
   number?: string
-  /** Section heading text rendered beside the number */
+  /** Section heading. */
   title?: string
+  /** Eyebrow suffix, e.g. "portfolio" renders as "02 — PORTFOLIO". */
+  meta?: ReactNode
+  /** Supporting line under the heading. */
+  lede?: ReactNode
+  /**
+   * Mount the animated DOM ripple grid behind this section. Off by default:
+   * every section used to mount one, which is 240 cells each and 1,200 in
+   * total. The CSS ambience gives the same visual language for free.
+   */
+  ripple?: boolean
 }
 
 export default function SectionContainer({
@@ -19,76 +32,65 @@ export default function SectionContainer({
   background = 'navy',
   number,
   title,
+  meta,
+  lede,
+  ripple = false,
   className,
   children,
   ...props
 }: SectionContainerProps) {
   const sectionRef = useRef<HTMLElement>(null)
-  const titleRef = useRef<HTMLHeadingElement>(null)
-  const titleWords = title?.split(/\s+/).filter(Boolean) ?? []
+  const headerRef = useRef<HTMLDivElement>(null)
   const prefersReducedMotion = usePrefersReducedMotion()
   const lowPerformanceMode = useLowPerformanceMode()
   const isCompactViewport = useMediaQuery('(max-width: 900px)')
-  const [backgroundActive, setBackgroundActive] = useState(false)
-  const showRipple = !prefersReducedMotion && !lowPerformanceMode && !isCompactViewport
+  const [rippleActive, setRippleActive] = useState(false)
+  const showRipple = ripple && !prefersReducedMotion && !lowPerformanceMode && !isCompactViewport
 
   useEffect(() => {
     const section = sectionRef.current
     if (!section || !showRipple) return
 
+    const observer = new IntersectionObserver(
+      ([entry]) => setRippleActive((prev) => (prev === entry.isIntersecting ? prev : entry.isIntersecting)),
+      { rootMargin: '20% 0px', threshold: 0 },
+    )
+
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [showRipple])
+
+  // Header reveal. Uses the Web Animations API rather than importing GSAP —
+  // this is a single opacity/transform tween and did not justify a 70 kB
+  // dependency being fetched on scroll.
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+
+    if (prefersReducedMotion) return
+
+    el.style.opacity = '0'
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setBackgroundActive(prev => {
-          if (prev !== entry.isIntersecting) return entry.isIntersecting;
-          return prev;
-        });
-      },
-      {
-        rootMargin: '20% 0px 20% 0px',
-        threshold: 0,
-      },
-    );
-
-    observer.observe(section);
-
-    return () => observer.disconnect();
-  }, [showRipple]);
-
-  useEffect(() => {
-    const el = titleRef.current
-    if (!el) return
-
-    el.style.opacity = '0'
-    el.style.transform = 'translate3d(0, 30px, 0)'
-
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (!entry.isIntersecting) {
-          return
-        }
-
+        if (!entry.isIntersecting) return
         observer.disconnect()
-        const { default: gsap } = await import('gsap')
 
-        gsap.to(el, {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: 'power3.out',
-          clearProps: 'transform,opacity',
-        })
+        el.animate(
+          [
+            { opacity: 0, transform: 'translate3d(0, 20px, 0)' },
+            { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+          ],
+          { duration: 640, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'none' },
+        )
+        el.style.opacity = ''
       },
-      {
-        rootMargin: '0px 0px -10% 0px',
-        threshold: 0,
-      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0 },
     )
 
     observer.observe(el)
-
     return () => observer.disconnect()
-  }, [])
+  }, [prefersReducedMotion])
 
   return (
     <section
@@ -97,44 +99,48 @@ export default function SectionContainer({
       className={cx(
         styles.section,
         background === 'navy-light' ? styles.bgLight : styles.bgNavy,
-        className
+        className,
       )}
       {...props}
     >
+      <div className={styles.ambience} aria-hidden="true" />
+      <div className={styles.dots} aria-hidden="true" />
+
       {showRipple && (
         <div className={styles.backgroundLayer} aria-hidden="true">
-          <BackgroundRippleEffect
-            className={styles.rippleBackground}
-            rows={12}
-            cols={20}
-            cellSize={64}
-            interactive={false}
-            animate={backgroundActive}
-            style={{
-              ['--cell-border-color' as string]: 'var(--navy-lighter)',
-              ['--cell-fill-color' as string]: 'var(--cyan-dim)',
-              ['--cell-shadow-color' as string]: 'var(--cyan-glow)',
-            }}
-          />
+          <Suspense fallback={null}>
+            <BackgroundRippleEffect
+              className={styles.rippleBackground}
+              rows={12}
+              cols={20}
+              cellSize={64}
+              interactive={false}
+              animate={rippleActive}
+              style={{
+                ['--cell-border-color' as string]: 'var(--line)',
+                ['--cell-fill-color' as string]: 'var(--brand-dim)',
+                ['--cell-shadow-color' as string]: 'var(--brand-glow)',
+              }}
+            />
+          </Suspense>
         </div>
       )}
+
       <div className={cx('container', styles.content)}>
         {title && (
-          <h2 ref={titleRef} className={styles.sectionTitle}>
-            {number && <span className={styles.num}>{number}.</span>}
-            <span className={styles.titleWords}>
-              {titleWords.map((word, index) => (
-                <ShinyText
-                  key={`${word}-${index}`}
-                  text={word}
-                  disabled={prefersReducedMotion || lowPerformanceMode}
-                  className={styles.titleWord}
-                />
-              ))}
-            </span>
-            <span className={styles.line} />
-          </h2>
+          <div ref={headerRef} className={styles.header}>
+            {(number || meta) && (
+              <span className={styles.eyebrow}>
+                {number}
+                {number && meta ? ' — ' : ''}
+                {meta}
+              </span>
+            )}
+            <h2 className={styles.title}>{title}</h2>
+            <span className={styles.rule} aria-hidden="true" />
+          </div>
         )}
+        {lede && <p className={styles.lede}>{lede}</p>}
         {children}
       </div>
     </section>

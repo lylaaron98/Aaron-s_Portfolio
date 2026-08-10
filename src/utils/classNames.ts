@@ -1,12 +1,25 @@
 /**
- * Joins class names, filtering out falsy values.
- * Lightweight alternative to the `clsx` library.
+ * The single class-name joiner.
  *
- * @example
- * cx(styles.card, isActive && styles.active, 'extra-class')
+ * There used to be two: `cx` here (6 consumers) and `cn` in lib/utils.ts
+ * (1 consumer), the latter wrapping clsx + tailwind-merge. tailwind-merge only
+ * earns its keep when you are overriding conflicting Tailwind utilities across
+ * a component boundary — the one call site that used it passed CSS-module
+ * classes, which never conflict. So there is one implementation now, and `cn`
+ * is kept as an alias so the Tailwind-flavoured call sites read naturally.
  */
-export function cx(
-  ...classes: Array<string | undefined | null | false>
-): string {
-  return classes.filter(Boolean).join(' ')
+export type ClassValue = string | number | false | null | undefined
+
+export function cx(...classes: ClassValue[]): string {
+  let out = ''
+  for (const cls of classes) {
+    if (!cls && cls !== 0) continue
+    out = out ? `${out} ${cls}` : String(cls)
+  }
+  return out
 }
+
+/** Alias of {@link cx}. Reads better alongside Tailwind utility strings. */
+export const cn = cx
+
+export default cx

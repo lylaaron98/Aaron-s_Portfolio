@@ -4,7 +4,6 @@ import ScrollToTop from '../../ui/ScrollToTop'
 import ChromaGrid, { type ChromaItem } from '../../ui/ChromaGrid/ChromaGrid'
 import { projects } from '../../../data/projects'
 import type { Project } from '../../../types/project'
-import Galaxy from './Galaxy'
 
 type ProjectTheme = {
   borderColor: string
@@ -26,6 +25,22 @@ function createHostedVideoSrc(assetPath: string) {
 }
 
 const projectThemes: Record<string, ProjectTheme> = {
+  'Property Website Builder & Agent CRM': {
+    borderColor: '#eab308',
+    gradient: 'linear-gradient(155deg, #854d0e, #020617 72%)',
+  },
+  'AI Architectural Drawing Platform': {
+    borderColor: '#a78bfa',
+    gradient: 'linear-gradient(155deg, #4c1d95, #020617 72%)',
+  },
+  'Workforce Scheduling Platform': {
+    borderColor: '#60a5fa',
+    gradient: 'linear-gradient(155deg, #1e3a8a, #020617 72%)',
+  },
+  'DeFi Portfolio Dashboard': {
+    borderColor: '#4ade80',
+    gradient: 'linear-gradient(155deg, #14532d, #020617 72%)',
+  },
   'AI Chatbot Assistant': {
     borderColor: '#34d399',
     gradient: 'linear-gradient(155deg, #0f766e, #020617 72%)',
@@ -58,22 +73,22 @@ const projectThemes: Record<string, ProjectTheme> = {
 
 const aiGallery: ProjectMedia[] = [
   {
-    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211044.png'),
+    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211044.webp'),
     title: 'Assistant Home',
     subtitle: 'Landing state with the main controls and streamlined chat entry point.',
   },
   {
-    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211104.png'),
+    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211104.webp'),
     title: 'Conversation View',
     subtitle: 'Active chat flow showing the assistant response area and prompt history.',
   },
   {
-    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211555.png'),
+    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211555.webp'),
     title: 'Prompt Settings',
     subtitle: 'Configuration panel for tuning the assistant prompt behavior.',
   },
   {
-    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211604.png'),
+    src: encodeURI('/assets/ai_chatbot_assistant/Screenshot 2026-03-12 211604.webp'),
     title: 'Response Controls',
     subtitle: 'Adjustable response settings for tone, context, and generation flow.',
   },
@@ -98,52 +113,52 @@ const otodecksGallery: ProjectMedia[] = [
 
 const smarthomeGallery: ProjectMedia[] = [
   {
-    src: encodeURI('/assets/smarthome/radiodash.png'),
+    src: encodeURI('/assets/smarthome/radiodash.webp'),
     title: 'Dashboard Overview',
     subtitle: 'Main dashboard for monitoring connected smart-home devices.',
   },
   {
-    src: encodeURI('/assets/smarthome/radiostatus.png'),
+    src: encodeURI('/assets/smarthome/radiostatus.webp'),
     title: 'Device Status',
     subtitle: 'Live status view for a connected radio device.',
   },
   {
-    src: encodeURI('/assets/smarthome/addradiodeviceexample.png'),
+    src: encodeURI('/assets/smarthome/addradiodeviceexample.webp'),
     title: 'Add Device Example',
     subtitle: 'Guided form flow for adding a new radio device to the network.',
   },
   {
-    src: encodeURI('/assets/smarthome/radioadd.png'),
+    src: encodeURI('/assets/smarthome/radioadd.webp'),
     title: 'Add Radio',
     subtitle: 'Input screen for configuring a new radio endpoint.',
   },
   {
-    src: encodeURI('/assets/smarthome/radioaddnotify.png'),
+    src: encodeURI('/assets/smarthome/radioaddnotify.webp'),
     title: 'Add Confirmation',
     subtitle: 'Success feedback after a new radio device is created.',
   },
   {
-    src: encodeURI('/assets/smarthome/updateradio.png'),
+    src: encodeURI('/assets/smarthome/updateradio.webp'),
     title: 'Edit Device',
     subtitle: 'Update flow for changing radio device configuration.',
   },
   {
-    src: encodeURI('/assets/smarthome/updateradio2.png'),
+    src: encodeURI('/assets/smarthome/updateradio2.webp'),
     title: 'Update Details',
     subtitle: 'Secondary edit state with more detailed device settings.',
   },
   {
-    src: encodeURI('/assets/smarthome/updatedradio.png'),
+    src: encodeURI('/assets/smarthome/updatedradio.webp'),
     title: 'Updated Device',
     subtitle: 'Updated radio card after a successful settings change.',
   },
   {
-    src: encodeURI('/assets/smarthome/deleteradioconfirm.png'),
+    src: encodeURI('/assets/smarthome/deleteradioconfirm.webp'),
     title: 'Delete Confirm',
     subtitle: 'Confirmation step before removing a radio device.',
   },
   {
-    src: encodeURI('/assets/smarthome/deletedradio.png'),
+    src: encodeURI('/assets/smarthome/deletedradio.webp'),
     title: 'Delete Result',
     subtitle: 'State after a radio device has been removed.',
   },
@@ -170,12 +185,40 @@ const djangoElearningGallery: ProjectMedia[] = [
   },
 ]
 
+const propertyBuilderGallery: ProjectMedia[] = [
+  {
+    src: encodeURI('/assets/property_website_builder/landing-hero.webp'),
+    title: 'Builder Landing',
+    subtitle: 'Marketing entry point for the agent website builder, with live condo launch data behind it.',
+  },
+  {
+    src: encodeURI('/assets/property_website_builder/features.webp'),
+    title: 'Feature Overview',
+    subtitle: 'Instant subdomain deployment, daily-synced listing data, and per-agent theming controls.',
+  },
+]
+
+const workforceSchedulingGallery: ProjectMedia[] = [
+  {
+    src: encodeURI('/assets/workforce_scheduling/schedule-calendar.webp'),
+    title: 'Schedule Calendar',
+    subtitle: 'Date-based worker allocation across job dates, localized in Japanese for on-site supervisors.',
+  },
+  {
+    src: encodeURI('/assets/workforce_scheduling/employee-master.webp'),
+    title: 'Employee Master',
+    subtitle: 'Employee master record management feeding the scheduling assignments.',
+  },
+]
+
 const fallbackTheme: ProjectTheme = {
   borderColor: '#94a3b8',
   gradient: 'linear-gradient(155deg, #334155, #020617 72%)',
 }
 
 const mediaByProjectTitle: Record<string, ProjectMedia[]> = {
+  'Property Website Builder & Agent CRM': propertyBuilderGallery,
+  'Workforce Scheduling Platform': workforceSchedulingGallery,
   'AI Chatbot Assistant': aiGallery,
   Otodecks: otodecksGallery,
   MySmartHome: smarthomeGallery,
@@ -323,9 +366,6 @@ function DemoPage() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', padding: '2rem', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <Galaxy />
-      </div>
       <ScrollToTop />
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1320, margin: '0 auto' }}>
         <a

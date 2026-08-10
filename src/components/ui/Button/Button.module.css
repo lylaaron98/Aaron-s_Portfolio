@@ -1,71 +1,87 @@
+/* Aurora buttons: pills. Primary carries the indigo→magenta sweep and a
+   coloured glow; secondary is glass. The old variant faked depth with a 6px
+   shadow and a translateY(4px) "push" — Aurora lifts instead of presses. */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 34px;
-  font-size: 0.9rem;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
   font-family: var(--font-sans);
-  border-radius: var(--border-radius-xl);
-  transition: all 0.2s ease;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   position: relative;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled='true'] {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.45;
 }
 
+.btn:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* ── Sizes ── */
+.sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.lg {
+  padding: var(--space-4) var(--space-7);
+  font-size: var(--text-md);
+}
+
+/* ── Primary: the aurora sweep ── */
 .primary {
-  background: linear-gradient(180deg, #d0d0d8 0%, #a0a0b0 50%, #909098 100%);
-  color: var(--navy);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-3d);
-  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  background: var(--brand-gradient);
+  color: var(--brand-on-fill);
+  box-shadow: var(--shadow-brand);
 }
 
-.primary:hover {
-  transform: translateY(4px);
-  box-shadow: var(--shadow-3d-hover);
-  background: linear-gradient(180deg, #e0e0e8 0%, #b0b0c0 50%, #a0a0a8 100%);
+.primary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 46px -14px var(--brand-glow);
 }
 
-.primary:disabled:hover {
-  transform: none;
-  box-shadow: var(--shadow-3d);
-  background: linear-gradient(180deg, #d0d0d8 0%, #a0a0b0 50%, #909098 100%);
-}
-
-.primary:active {
-  transform: translateY(6px);
-  box-shadow: 0 0 0 rgba(0,0,0,0.25);
-}
-
+/* ── Secondary: glass ── */
 .secondary {
-  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-  color: var(--accent);
-  border: 1px solid rgba(192, 192, 200, 0.25);
-  box-shadow: var(--shadow-3d);
+  background: var(--surface);
+  color: var(--fg);
+  border-color: var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
-.secondary:hover {
-  transform: translateY(4px);
-  box-shadow: var(--shadow-3d-hover);
-  border-color: rgba(192, 192, 200, 0.45);
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+.secondary:not(:disabled):hover {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
 }
 
-.secondary:disabled:hover {
-  transform: none;
-  box-shadow: var(--shadow-3d);
-  border-color: rgba(192, 192, 200, 0.25);
-  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+/* ── Ghost: for dense toolbars and inline actions ── */
+.ghost {
+  background: transparent;
+  color: var(--fg-mute);
+  border-color: transparent;
 }
 
-.secondary:active {
-  transform: translateY(6px);
-  box-shadow: 0 0 0 rgba(0,0,0,0.25);
+.ghost:not(:disabled):hover {
+  color: var(--fg);
+  background: var(--surface);
 }

@@ -85,6 +85,9 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   const [shellRect, setShellRect] = useState<RectSnapshot | null>(null)
   const galleryImages = useMemo(() => displayState?.project.images ?? [], [displayState])
 
+  // These three touch only refs and setters, so [] deps are correct and they
+  // stay referentially stable — which is what lets requestClose below be a
+  // real dependency of the Escape-key effect instead of a stale capture.
   const clearPendingOpenAnimation = useCallback(() => {
     if (openRafRef.current !== null) {
       window.cancelAnimationFrame(openRafRef.current)
@@ -106,6 +109,9 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     setPhase('closed')
   }, [])
 
+  // Declared before the effect that uses it. It used to be defined ~30 lines
+  // below the Escape handler that called it, so the handler closed over
+  // whichever binding existed when the effect ran (react-hooks/immutability).
   const requestClose = useCallback(() => {
     if (!displayState || phase === 'closing' || phase === 'closed') return
 

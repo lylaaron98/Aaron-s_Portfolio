@@ -22,11 +22,6 @@
   min-width: 200px;
 }
 
-.icon {
-  font-size: 1.6rem;
-  filter: drop-shadow(0 0 6px rgba(192, 192, 200, 0.2));
-}
-
 .cardTitle {
   font-size: 1.15rem;
   font-weight: 600;

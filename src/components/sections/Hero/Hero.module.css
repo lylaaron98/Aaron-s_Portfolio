@@ -240,22 +240,6 @@
   50% { transform: scaleY(0.7); opacity: 0.5; }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 @media (max-width: 768px) {
   .hero {
     padding: 0 25px;

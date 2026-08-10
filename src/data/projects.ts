@@ -2,6 +2,46 @@ import type { Project } from '../types/project'
 
 export const projects: Project[] = [
   {
+    title: 'Property Website Builder & Agent CRM',
+    description:
+      'A multi-tenant SaaS on Next.js and Supabase that provisions Singapore property agents a branded site at their own slug, with a live-preview customizer for section toggles, theming, and copy editing, secured by row-level security policies. A Playwright scraper on daily cron jobs keeps 90+ new condo launches synced through new-listing detection and scrape logging, so agent sites stay current without manual entry. The visitor tracking and CRM layer feeds page-view, scroll-depth, form, and WhatsApp events into a lead scoring engine and an eight-stage pipeline with Kanban and list views, alongside a blog CMS and a mobile-first redesign at a 390px primary viewport.',
+    tech: ['Next.js', 'Supabase', 'TypeScript', 'Playwright', 'Row-Level Security', 'Cron Jobs', 'Tailwind CSS'],
+    github: '',
+    live: 'https://property-website-clone3.vercel.app',
+    featured: true,
+    category: 'personal',
+  },
+  {
+    title: 'AI Architectural Drawing Platform',
+    description:
+      'A computer vision and OCR platform in Python and FastAPI that restores faded scanned blueprints, removing the manual redrawing step for legacy plans. The four-stage restoration pipeline runs OpenCV enhancement to strip noise and yellowing, Hough Transform line extraction for walls, centerlines, and dimension lines, Tesseract 5 LSTM OCR for dimensions and room labels, and Claude Vision analysis to classify drawing type and grade output quality. Structured as modular, swappable model stages so open-source OCR and vision models can be benchmarked and replaced without rewriting the pipeline; shipped on Firebase with upload and on-site camera capture, Japanese localization, and vector SVG export.',
+    tech: ['Python', 'FastAPI', 'OpenCV', 'Hough Transform', 'Tesseract 5 LSTM', 'Claude Vision', 'Firebase'],
+    github: '',
+    live: 'https://wonq-drawing-poc-5337a.web.app',
+    featured: true,
+    category: 'client',
+  },
+  {
+    title: 'Workforce Scheduling Platform',
+    description:
+      'A client-facing scheduling app for a Japanese contractor. Managers allocate workers across job dates and maintain an employee master record from one responsive interface, shipped fully localized in Japanese with a language selector. Delivered as a working, deployed proof-of-concept inside the client’s short evaluation window, and built mobile-first so on-site supervisors could use it from the field.',
+    tech: ['React', 'TypeScript', 'i18n', 'Mobile-First', 'Vercel'],
+    github: '',
+    live: 'https://work-scheduling-poc.vercel.app',
+    featured: true,
+    category: 'client',
+  },
+  {
+    title: 'DeFi Portfolio Dashboard',
+    description:
+      'A Web3 portfolio tracking platform built with Next.js and wagmi. Feature-first Next.js App Router architecture with repository, service, and use-case layers backed by Prisma, structured to absorb feature expansion without cross-cutting rewrites, with wallet connectivity through wagmi, RainbowKit, and WalletConnect on Tailwind CSS and Mantine UI.',
+    tech: ['Next.js', 'wagmi', 'RainbowKit', 'WalletConnect', 'Prisma', 'Tailwind CSS', 'Mantine UI'],
+    github: '',
+    live: '',
+    featured: true,
+    category: 'personal',
+  },
+  {
     title: 'AI Chatbot Assistant',
     description:
       'Intelligent support interface using Streamlit and GroqAI APIs for real-time conversational responses. Features dynamic context handling, custom parameter tuning for FAQ automation, session memory, and adjustable tone settings. Deployed as an internal prototype at Capgemini.',
@@ -62,17 +102,17 @@ export const projects: Project[] = [
     category: 'client',
     hideLiveDemoCard: true,
     images: [
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215932.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215944.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215952.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215959.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220009.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220017.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220042.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220048.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220052.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220055.png',
-      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220102.png',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215932.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215944.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215952.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 215959.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220009.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220017.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220042.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220048.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220052.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220055.webp',
+      '/assets/upm_portfolio_site/Screenshot 2026-03-12 220102.webp',
     ],
   },
   {

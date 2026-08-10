@@ -39,6 +39,9 @@ export default function Card({
     if (!el || !enableTilt) return
 
     el.style.transformStyle = 'preserve-3d'
+    // Kept permanently rather than toggled per-hover: dropping the promotion at
+    // rest un-layers the card, which flips its text from grayscale to subpixel
+    // antialiasing and visibly changes rendering. Not worth it for the memory.
     el.style.willChange = 'transform'
 
     const glareEl = document.createElement('div')
@@ -54,13 +57,12 @@ export default function Card({
     let currentRotateY = 0
     let targetRotateX = 0
     let targetRotateY = 0
-    let rect = el.getBoundingClientRect()
-    let scrollTimeoutId: number | null = null
-    let suspendPointerUpdates = false
-
-    const updateRect = () => {
-      rect = el.getBoundingClientRect()
-    }
+    // Latest pointer position; converted to a ratio inside the frame callback so
+    // the layout read happens at most once per frame, on the hovered card only.
+    let pointerX = 0
+    let pointerY = 0
+    let glareX = 50
+    let glareY = 50
 
     const stopAnimation = () => {
       if (frameId !== null) {
@@ -70,6 +72,29 @@ export default function Card({
     }
 
     const render = () => {
+      if (isHovering) {
+        // One getBoundingClientRect per frame, and only while this card is
+        // hovered. Previously every card read its rect on every scroll event,
+        // which meant ~16 forced layouts per scroll tick whether hovered or not.
+        const rect = el.getBoundingClientRect()
+        const x = (pointerX - rect.left) / rect.width
+        const y = (pointerY - rect.top) / rect.height
+        targetRotateX = (0.5 - y) * 8
+        targetRotateY = (x - 0.5) * 8
+
+        const nextGlareX = Math.round(x * 100)
+        const nextGlareY = Math.round(y * 100)
+        if (nextGlareX !== glareX || nextGlareY !== glareY) {
+          glareX = nextGlareX
+          glareY = nextGlareY
+          glareEl.style.background = `radial-gradient(
+        circle at ${glareX}% ${glareY}%,
+        rgba(100, 255, 218, 0.1) 0%,
+        transparent 60%
+      )`
+        }
+      }
+
       currentRotateX += (targetRotateX - currentRotateX) * 0.18
       currentRotateY += (targetRotateY - currentRotateY) * 0.18
 
@@ -93,27 +118,11 @@ export default function Card({
       }
     }
 
-    const handleEnter = () => {
-      updateRect()
-      suspendPointerUpdates = false
-    }
-
     const handleMove = (e: MouseEvent) => {
-      if (suspendPointerUpdates) return
-
-      const x = (e.clientX - rect.left) / rect.width
-      const y = (e.clientY - rect.top) / rect.height
-
+      pointerX = e.clientX
+      pointerY = e.clientY
       isHovering = true
-      targetRotateX = (0.5 - y) * 8
-      targetRotateY = (x - 0.5) * 8
-
       glareEl.style.opacity = '1'
-      glareEl.style.background = `radial-gradient(
-        circle at ${x * 100}% ${y * 100}%,
-        rgba(100, 255, 218, 0.1) 0%,
-        transparent 60%
-      )`
       startAnimation()
     }
 
@@ -125,42 +134,15 @@ export default function Card({
       startAnimation()
     }
 
-    const handleScroll = () => {
-      suspendPointerUpdates = true
-      updateRect()
-
-      if (scrollTimeoutId !== null) {
-        window.clearTimeout(scrollTimeoutId)
-      }
-
-      scrollTimeoutId = window.setTimeout(() => {
-        suspendPointerUpdates = false
-        scrollTimeoutId = null
-      }, 120)
-    }
-
-    const resizeObserver = new ResizeObserver(updateRect)
-    resizeObserver.observe(el)
-
-    window.addEventListener('resize', updateRect)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    el.addEventListener('mouseenter', handleEnter)
     el.addEventListener('mousemove', handleMove, { passive: true })
     el.addEventListener('mouseleave', handleLeave)
 
     return () => {
-      resizeObserver.disconnect()
-      window.removeEventListener('resize', updateRect)
-      window.removeEventListener('scroll', handleScroll)
-      el.removeEventListener('mouseenter', handleEnter)
       el.removeEventListener('mousemove', handleMove)
       el.removeEventListener('mouseleave', handleLeave)
       stopAnimation()
       el.style.transform = ''
       el.style.willChange = ''
-      if (scrollTimeoutId !== null) {
-        window.clearTimeout(scrollTimeoutId)
-      }
       if (el.contains(glareEl)) el.removeChild(glareEl)
     }
   }, [enableTilt])

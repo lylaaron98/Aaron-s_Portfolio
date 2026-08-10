@@ -6,73 +6,22 @@ import { useLowPerformanceMode, useMediaQuery, usePrefersReducedMotion } from '.
 const Silk = lazy(() => import('../../ui/Silk/Silk'))
 
 const roles = [
-  'Frontend Engineer',
-  'Full Stack Developer',
   'Software Engineer',
-  'UI/UX Enthusiast',
+  'Full Stack Developer',
+  'AI Engineer',
+  'Frontend Engineer',
 ]
 
-export default function Hero() {
-  const prefersReducedMotion = usePrefersReducedMotion()
-  const lowPerformanceMode = useLowPerformanceMode()
-  const isCompactViewport = useMediaQuery('(max-width: 900px)')
+/**
+ * The typewriter ticks state every 50-80ms. Keeping that state in its own leaf
+ * component stops each tick from re-rendering the whole Hero subtree (and with
+ * it the WebGL background and every social icon).
+ */
+function RoleTypewriter({ disableMotion }: { disableMotion: boolean }) {
   const [roleIndex, setRoleIndex] = useState(0)
   const [displayed, setDisplayed] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [charIndex, setCharIndex] = useState(0)
-  const heroRef = useRef<HTMLDivElement>(null)
-  const disableMotion = prefersReducedMotion || lowPerformanceMode
-  const visibleRole = disableMotion ? roles[0] : displayed
-  const showSilk = !disableMotion && !isCompactViewport
-
-  // GSAP entrance timeline
-  useEffect(() => {
-    if (disableMotion) {
-      return
-    }
-
-    let cancelled = false
-    let cleanup = () => {}
-
-    const setupAnimation = async () => {
-      const { default: gsap } = await import('gsap')
-      if (cancelled) {
-        return
-      }
-
-      const ctx = gsap.context(() => {
-        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-        tl.from(`.${styles.greeting}`, { opacity: 0, y: 30, duration: 0.6 })
-          .from(`.${styles.name}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-          .from(`.${styles.tagline}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-          .from(`.${styles.description}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-          .from(`.${styles.ctas}`, { opacity: 0, y: 30, duration: 0.6 }, '-=0.3')
-          .from(`.${styles.socials} a`, { opacity: 0, y: 20, duration: 0.4, stagger: 0.1 }, '-=0.3')
-          .from(`.${styles.scrollIndicator}`, { opacity: 0, duration: 0.6 }, '-=0.2')
-
-        gsap.to(`.${styles.scrollIndicator}`, {
-          y: -8,
-          duration: 2,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: 1.5,
-        })
-      }, heroRef)
-
-      cleanup = () => ctx.revert()
-    }
-
-    const rafId = window.requestAnimationFrame(() => {
-      void setupAnimation()
-    })
-
-    return () => {
-      cancelled = true
-      window.cancelAnimationFrame(rafId)
-      cleanup()
-    }
-  }, [disableMotion])
 
   useEffect(() => {
     if (disableMotion) return
@@ -104,6 +53,92 @@ export default function Hero() {
     return () => clearTimeout(timeout)
   }, [charIndex, disableMotion, isDeleting, roleIndex])
 
+  return <span className={styles.typewriter}>{disableMotion ? roles[0] : displayed}</span>
+}
+
+export default function Hero() {
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const lowPerformanceMode = useLowPerformanceMode()
+  const isCompactViewport = useMediaQuery('(max-width: 900px)')
+  const heroRef = useRef<HTMLDivElement>(null)
+  const disableMotion = prefersReducedMotion || lowPerformanceMode
+  const showSilk = !disableMotion && !isCompactViewport
+
+  // GSAP entrance timeline
+  useEffect(() => {
+    if (disableMotion) {
+      return
+    }
+
+    let cancelled = false
+    let cleanup = () => {}
+
+    const setupAnimation = async () => {
+      const { default: gsap } = await import('gsap')
+      if (cancelled) {
+        return
+      }
+
+      const ctx = gsap.context(() => {
+        // fromTo, not from. A bare .from() only declares the start state and
+        // leans on whatever GSAP records as "current" for the end state, and its
+        // immediateRender writes that start state to the DOM the moment the
+        // tween is built. If the effect is ever set up twice - React remounting
+        // the subtree when the lazy Silk chunk resolves, HMR, a StrictMode
+        // double-invoke - a second immediateRender can stamp opacity:0 back onto
+        // elements a finished tween had already revealed, and nothing ever
+        // clears it. That is exactly what stranded the three social icons at
+        // opacity 0 on the live site.
+        //
+        // Declaring the end state explicitly and clearing GSAP's inline styles
+        // on completion means the resting state is whatever the CSS says, so a
+        // stray re-render can no longer leave content invisible.
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+        const rise = (opts: { y?: number; duration?: number; stagger?: number } = {}) => ({
+          opacity: 1,
+          y: 0,
+          duration: opts.duration ?? 0.6,
+          ...(opts.stagger ? { stagger: opts.stagger } : {}),
+          clearProps: 'opacity,transform',
+        })
+
+        tl.fromTo(`.${styles.greeting}`, { opacity: 0, y: 30 }, rise())
+          .fromTo(`.${styles.name}`, { opacity: 0, y: 30 }, rise(), '-=0.3')
+          .fromTo(`.${styles.tagline}`, { opacity: 0, y: 30 }, rise(), '-=0.3')
+          .fromTo(`.${styles.description}`, { opacity: 0, y: 30 }, rise(), '-=0.3')
+          .fromTo(`.${styles.ctas}`, { opacity: 0, y: 30 }, rise(), '-=0.3')
+          .fromTo(
+            `.${styles.socials} a`,
+            { opacity: 0, y: 20 },
+            rise({ duration: 0.4, stagger: 0.1 }),
+            '-=0.3',
+          )
+          .fromTo(`.${styles.scrollIndicator}`, { opacity: 0 }, rise(), '-=0.2')
+
+        gsap.to(`.${styles.scrollIndicator}`, {
+          y: -8,
+          duration: 2,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: 1.5,
+        })
+      }, heroRef)
+
+      cleanup = () => ctx.revert()
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      void setupAnimation()
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(rafId)
+      cleanup()
+    }
+  }, [disableMotion])
+
   return (
     <section id="hero" className={styles.hero} ref={heroRef}>
       {showSilk ? (
@@ -128,13 +163,14 @@ export default function Hero() {
         <p className={styles.greeting}>Hi, my name is</p>
         <h1 className={styles.name}>Aaron.</h1>
         <h2 className={styles.tagline}>
-          <span className={styles.typewriter}>{visibleRole}</span>
+          <RoleTypewriter disableMotion={disableMotion} />
           <span className={styles.cursor}>|</span>
         </h2>
         <p className={styles.description}>
-          Frontend and Full Stack Software Engineer with hands-on experience building
-          scalable web applications using various popular frameworks, such as ReactJS and NextJS. Passionate about
-          crafting clean, intuitive user interfaces and architecting efficient backend systems.
+          Software engineer with production experience across banking, government, sustainability,
+          and Japanese enterprise clients. I modernized mission-critical treasury systems at Mizuho Bank
+          and built JTC's real-time land bidding platform. Now working independently on applied AI —
+          computer vision and OCR pipelines, AR/VR prototypes, and full-stack products shipped end to end.
         </p>
         <div className={styles.ctas}>
           <button className={styles.ctaPrimary} onClick={() => scrollToSection('contact')}>

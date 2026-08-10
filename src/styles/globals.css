@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import './tokens.css';
-@import './animations.css';
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -73,6 +72,9 @@ section {
 .animate-cell-ripple {
   animation: cell-ripple var(--duration, 480ms) ease-out;
   animation-delay: var(--delay, 0ms);
+  /* Scoped to the cells that are actually mid-ripple, rather than sitting on
+     all 1,200 cells permanently. */
+  will-change: transform, opacity;
 }
 
 @keyframes cell-ripple {

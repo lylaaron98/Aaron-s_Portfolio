@@ -22,14 +22,14 @@ export default function About() {
             University of London (SIM).
           </p>
           <p>
-            At <span className={styles.highlight}>Mizuho Bank</span> I modernized mission-critical
+            At a<span className={styles.highlight}> Corporate Bank</span> I modernized mission-critical
             treasury systems, moving legacy VB.Net and Oracle applications onto a{' '}
             <span className={styles.highlight}>React</span>,{' '}
             <span className={styles.highlight}>TypeScript</span>, Node.js, and SQL Server
-            architecture. Before that I delivered JTC's real-time land bidding platform on
+            architecture. Before that I delivered a real-time land bidding platform on
             WebSocket infrastructure, cutting frontend load time by over 30%.
           </p>
-          <p>
+          <p> 
             I'm now working independently on applied AI product engineering — computer vision and
             OCR pipelines in <span className={styles.highlight}>Python</span> and{' '}
             <span className={styles.highlight}>FastAPI</span>, AR/VR prototypes in Unity, and

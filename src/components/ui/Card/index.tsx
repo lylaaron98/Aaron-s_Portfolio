@@ -49,7 +49,7 @@ export default function Card({
     if (x === lastGlare.current.x && y === lastGlare.current.y) return
     lastGlare.current = { x, y }
 
-    glare.style.background = `radial-gradient(circle at ${x}% ${y}%, var(--brand-dim) 0%, transparent 60%)`
+    glare.style.background = `radial-gradient(circle at ${x}% ${y}%, color-mix(in srgb, var(--brand) 24%, transparent) 0%, transparent 62%)`
   }, [])
 
   const handleHoverChange = useCallback((hovering: boolean) => {

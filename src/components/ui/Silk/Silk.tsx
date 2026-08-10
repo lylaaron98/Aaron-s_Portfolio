@@ -5,8 +5,12 @@ import { useEffect, useRef } from 'react'
  *
  * Renders a single full-screen quad with a hand-written fragment shader using
  * raw WebGL. This previously went through three.js + @react-three/fiber, which
- * pulled 868 kB of library in to draw two triangles. The shader source below is
- * unchanged from that version, so the output is pixel-identical.
+ * pulled 868 kB of library in to draw two triangles.
+ *
+ * The silk pattern is unchanged; what it is coloured with is not. The fragment
+ * shader now blends between two hues across the pattern's own luminance, which
+ * is what turns a single-hue wash into the Aurora colour field. Both hues come
+ * from --shader-base / --shader-tint, so the background re-themes.
  *
  * The render loop is gated on both viewport visibility (IntersectionObserver)
  * and tab visibility, so it costs nothing once scrolled past.
@@ -42,6 +46,7 @@ varying vec2 vUv;
 
 uniform float uTime;
 uniform vec3  uColor;
+uniform vec3  uColorB;
 uniform float uSpeed;
 uniform float uScale;
 uniform float uRotation;
@@ -76,7 +81,12 @@ void main() {
                                    0.02 * tOffset) +
                            sin(20.0 * (tex.x + tex.y - 0.1 * tOffset)));
 
-  vec4 col = vec4(uColor, 1.0) * vec4(pattern) - rnd / 15.0 * uNoiseIntensity;
+  // Hue blends base -> tint across the pattern; the pattern is then reapplied
+  // as shading so the silk structure survives the colour mix.
+  vec3 hue = mix(uColor, uColorB, smoothstep(0.18, 1.0, pattern));
+  vec3 shaded = hue * (0.45 + 0.55 * pattern);
+
+  vec4 col = vec4(shaded, 1.0) - rnd / 15.0 * uNoiseIntensity;
   col.a = 1.0;
   gl_FragColor = col;
 }
@@ -100,7 +110,10 @@ const MAX_DPR = 1.25
 export interface SilkProps {
   speed?: number
   scale?: number
+  /** First hue of the blend. */
   color?: string
+  /** Second hue. Defaults to `color`, which reproduces a single-hue wash. */
+  colorB?: string
   noiseIntensity?: number
   rotation?: number
 }
@@ -108,15 +121,16 @@ export interface SilkProps {
 export default function Silk({
   speed = 5,
   scale = 1,
-  color = '#7B7481',
+  color = '#3a2fd6',
+  colorB = color,
   noiseIntensity = 1.5,
   rotation = 0,
 }: SilkProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // Latest prop values, read by the render loop without restarting it.
-  const propsRef = useRef({ speed, scale, color, noiseIntensity, rotation })
-  propsRef.current = { speed, scale, color, noiseIntensity, rotation }
+  const propsRef = useRef({ speed, scale, color, colorB, noiseIntensity, rotation })
+  propsRef.current = { speed, scale, color, colorB, noiseIntensity, rotation }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -155,6 +169,7 @@ export default function Silk({
 
     const uTime = gl.getUniformLocation(program, 'uTime')
     const uColor = gl.getUniformLocation(program, 'uColor')
+    const uColorB = gl.getUniformLocation(program, 'uColorB')
     const uSpeed = gl.getUniformLocation(program, 'uSpeed')
     const uScale = gl.getUniformLocation(program, 'uScale')
     const uRotation = gl.getUniformLocation(program, 'uRotation')
@@ -190,8 +205,10 @@ export default function Silk({
     const draw = () => {
       const p = propsRef.current
       const [r, g, b] = hexToNormalizedRgb(p.color)
+      const [r2, g2, b2] = hexToNormalizedRgb(p.colorB)
       gl.uniform1f(uTime, time)
       gl.uniform3f(uColor, r, g, b)
+      gl.uniform3f(uColorB, r2, g2, b2)
       gl.uniform1f(uSpeed, p.speed)
       gl.uniform1f(uScale, p.scale)
       gl.uniform1f(uRotation, p.rotation)

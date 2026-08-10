@@ -1,29 +1,29 @@
-/* Blueprint buttons: monospace, uppercase, near-square, no 3D press.
-   The old variant faked depth with a 6px shadow and a translateY(4px) "push".
-   Blueprint states are drawn, not extruded — border and fill do the work. */
+/* Aurora buttons: pills. Primary carries the indigo→magenta sweep and a
+   coloured glow; secondary is glass. The old variant faked depth with a 6px
+   shadow and a translateY(4px) "push" — Aurora lifts instead of presses. */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
   font-weight: var(--weight-semi);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.2;
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   position: relative;
   white-space: nowrap;
   transition:
-    background-color var(--dur-1) var(--ease-out),
-    border-color var(--dur-1) var(--ease-out),
-    color var(--dur-1) var(--ease-out),
-    transform var(--dur-1) var(--ease-out);
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
 }
 
 .btn:disabled,
@@ -33,49 +33,48 @@
 }
 
 .btn:not(:disabled):active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 /* ── Sizes ── */
 .sm {
   padding: var(--space-2) var(--space-4);
-  font-size: var(--text-2xs);
+  font-size: var(--text-sm);
 }
 
 .lg {
   padding: var(--space-4) var(--space-7);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
 }
 
-/* ── Primary: the acid fill. Identical in both themes, dark text on top. ── */
+/* ── Primary: the aurora sweep ── */
 .primary {
-  background: var(--brand-fill);
+  background: var(--brand-gradient);
   color: var(--brand-on-fill);
-  border-color: var(--brand-fill);
+  box-shadow: var(--shadow-brand);
 }
 
 .primary:not(:disabled):hover {
-  background: var(--brand-fill-hi);
-  border-color: var(--brand-fill-hi);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 46px -14px var(--brand-glow);
 }
 
-.primary:not(:disabled):focus-visible {
-  outline-offset: 3px;
-}
-
-/* ── Secondary: drafted outline. ── */
+/* ── Secondary: glass ── */
 .secondary {
-  background: transparent;
+  background: var(--surface);
   color: var(--fg);
-  border-color: var(--line-strong);
+  border-color: var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .secondary:not(:disabled):hover {
-  background: var(--surface);
-  border-color: var(--fg-dim);
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
 }
 
-/* ── Ghost: for dense toolbars and inline actions. ── */
+/* ── Ghost: for dense toolbars and inline actions ── */
 .ghost {
   background: transparent;
   color: var(--fg-mute);
@@ -85,33 +84,4 @@
 .ghost:not(:disabled):hover {
   color: var(--fg);
   background: var(--surface);
-}
-
-/* ── Group: buttons sitting flush in a lattice, blueprint-style. ──────────
-   Applied by <ButtonGroup>; collapses the shared border between siblings. */
-.group {
-  display: inline-flex;
-}
-
-.group > .btn {
-  border-radius: 0;
-}
-
-.group > .btn:first-child {
-  border-start-start-radius: var(--radius-sm);
-  border-end-start-radius: var(--radius-sm);
-}
-
-.group > .btn:last-child {
-  border-start-end-radius: var(--radius-sm);
-  border-end-end-radius: var(--radius-sm);
-}
-
-.group > .btn + .btn {
-  margin-inline-start: -1px;
-}
-
-.group > .btn:hover,
-.group > .btn:focus-visible {
-  z-index: var(--z-raised);
 }

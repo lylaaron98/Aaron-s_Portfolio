@@ -1,17 +1,19 @@
-/* Blueprint card: drawn edges, flat fill, no blur.
-   The old card stacked backdrop-filter: blur(4px) on every instance; with 16 of
-   them on screen that is 16 backdrop roots for an effect nothing sat behind. */
+/* Aurora card: glass. Tinted foreground, hairline, blur, generous radius.
+   The blur is deliberate here — unlike the old build, something colourful is
+   actually behind it. */
 
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
   padding: var(--space-5);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
-/* ── Variant: recessed, for cards on an already-light surface ── */
+/* ── Variant: recessed, for cards on an already-bright surface ── */
 .navy {
   background: var(--surface-sunk);
   border-color: var(--line);
@@ -20,30 +22,33 @@
 /* ── Hoverable ── */
 .hoverable {
   transition:
-    background-color var(--dur-2) var(--ease-out),
-    border-color var(--dur-2) var(--ease-out),
+    background-color var(--dur-3) var(--ease-out),
+    border-color var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out),
     box-shadow var(--dur-3) var(--ease-out);
 }
 
 .hoverable:hover {
   background: var(--surface-2);
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-pop);
 }
 
-/* ── Corner registration marks. The blueprint tell. ── */
+/* ── Top-edge sheen on hover. The aurora catching the panel edge. ── */
 .hoverable::after {
   content: '';
   position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  width: 7px;
-  height: 7px;
-  border-top: 1px solid var(--brand);
-  border-right: 1px solid var(--brand);
-  opacity: 0;
-  transition: opacity var(--dur-2) var(--ease-out);
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease-out);
+  background: radial-gradient(
+    70% 60% at 50% 0%,
+    color-mix(in srgb, var(--fg) 10%, transparent),
+    transparent 70%
+  );
 }
 
 .hoverable:hover::after {
@@ -56,7 +61,7 @@
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: -100% 0;
-  transition: background-position var(--dur-3) var(--ease-out);
+  transition: background-position var(--dur-4) var(--ease-out);
 }
 
 .gradientOverlay:hover {
@@ -71,10 +76,11 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--brand), transparent);
+  background: var(--brand-gradient);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform var(--dur-3) var(--ease-out);
+  transition: transform var(--dur-4) var(--ease-out);
+  z-index: var(--z-raised);
 }
 
 .topAccent:hover::before {

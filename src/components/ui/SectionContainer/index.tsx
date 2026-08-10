@@ -11,18 +11,18 @@ const BackgroundRippleEffect = lazy(() =>
 interface SectionContainerProps extends HTMLAttributes<HTMLElement> {
   id?: string
   background?: 'navy' | 'navy-light'
-  /** Section index shown before the title, e.g. "02". */
+  /** Section index shown in the eyebrow, e.g. "02". */
   number?: string
-  /** Section heading text. Rendered as a mono rule, not a display heading. */
+  /** Section heading. */
   title?: string
-  /** Right-aligned metadata in the header rule, e.g. "06 entries". */
+  /** Eyebrow suffix, e.g. "portfolio" renders as "02 — PORTFOLIO". */
   meta?: ReactNode
-  /** Large display line under the header rule. */
+  /** Supporting line under the heading. */
   lede?: ReactNode
   /**
    * Mount the animated DOM ripple grid behind this section. Off by default:
    * every section used to mount one, which is 240 cells each and 1,200 in
-   * total. The CSS lattice gives the same visual language for free.
+   * total. The CSS ambience gives the same visual language for free.
    */
   ripple?: boolean
 }
@@ -78,10 +78,10 @@ export default function SectionContainer({
 
         el.animate(
           [
-            { opacity: 0, transform: 'translate3d(0, 18px, 0)' },
+            { opacity: 0, transform: 'translate3d(0, 20px, 0)' },
             { opacity: 1, transform: 'translate3d(0, 0, 0)' },
           ],
-          { duration: 620, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'none' },
+          { duration: 640, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'none' },
         )
         el.style.opacity = ''
       },
@@ -103,7 +103,8 @@ export default function SectionContainer({
       )}
       {...props}
     >
-      <div className={styles.lattice} aria-hidden="true" />
+      <div className={styles.ambience} aria-hidden="true" />
+      <div className={styles.dots} aria-hidden="true" />
 
       {showRipple && (
         <div className={styles.backgroundLayer} aria-hidden="true">
@@ -128,10 +129,15 @@ export default function SectionContainer({
       <div className={cx('container', styles.content)}>
         {title && (
           <div ref={headerRef} className={styles.header}>
-            {number && <span className={styles.index}>[{number}]</span>}
+            {(number || meta) && (
+              <span className={styles.eyebrow}>
+                {number}
+                {number && meta ? ' — ' : ''}
+                {meta}
+              </span>
+            )}
             <h2 className={styles.title}>{title}</h2>
             <span className={styles.rule} aria-hidden="true" />
-            {meta && <span className={styles.meta}>{meta}</span>}
           </div>
         )}
         {lede && <p className={styles.lede}>{lede}</p>}

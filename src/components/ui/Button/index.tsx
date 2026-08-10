@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, AnchorHTMLAttributes } from 'react'
 import styles from './Button.module.css'
 import { cx } from '../../../utils/classNames'
 
@@ -52,18 +52,5 @@ export default function Button({
     <button className={classes} type={type ?? 'button'} {...buttonProps}>
       {children}
     </button>
-  )
-}
-
-/** Flush row of buttons sharing one border, as in the Blueprint hero. */
-export function ButtonGroup({
-  children,
-  className,
-  ...props
-}: { children: ReactNode } & HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cx(styles.group, className)} role="group" {...props}>
-      {children}
-    </div>
   )
 }

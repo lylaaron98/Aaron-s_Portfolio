@@ -113,8 +113,8 @@ button {
 }
 
 ::selection {
-  background: var(--brand-fill);
-  color: var(--brand-on-fill);
+  background: color-mix(in srgb, var(--brand-2) 55%, transparent);
+  color: var(--fg);
 }
 
 /* ----------------------------------------------------------------------------
@@ -134,17 +134,23 @@ main > section {
   width: 100%;
 }
 
-/* ── Blueprint lattice ───────────────────────────────────────────────────
-   The signature background. A single element with two linear-gradients — no
-   DOM cost, no compositing cost, and it re-themes for free. */
-.blueprint-grid {
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: var(--grid-cell) var(--grid-cell);
+/* ── Aurora dot field ────────────────────────────────────────────────────
+   The signature texture. One element, one radial-gradient, masked to fade
+   out — no DOM nodes, no compositing, and it re-themes for free. */
+.dot-field {
+  background-image: radial-gradient(color-mix(in srgb, var(--fg) 13%, transparent) 1px, transparent 1px);
+  background-size: var(--dot-grid) var(--dot-grid);
 }
 
-/* ── Mono label — used everywhere for metadata, section indices, keys ───── */
+/* ── Glass panel — the recurring Aurora surface ─────────────────────────── */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+/* ── Mono label — eyebrows and section indices ──────────────────────────── */
 .mono-label {
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
@@ -174,13 +180,11 @@ main > section {
   left: var(--space-2);
   z-index: var(--z-toast);
   padding: var(--space-2) var(--space-4);
-  background: var(--brand-fill);
+  background: var(--brand-gradient);
   color: var(--brand-on-fill);
-  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  border-radius: var(--radius-sm);
+  font-weight: var(--weight-semi);
+  border-radius: var(--radius-pill);
   transform: translateY(-200%);
 }
 

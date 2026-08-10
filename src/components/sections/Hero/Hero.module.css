@@ -7,13 +7,15 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
 }
 
 /* ── Backgrounds, back to front ──────────────────────────────────────────
-   1. shader canvas (or its static stand-in)
-   2. blueprint lattice
-   3. vignette, so the type never sits on a busy patch
-   All three are absolutely positioned siblings; none of them cause layout. */
+   1. shader canvas — indigo bleeding into teal
+   2. aurora blooms — the magenta the shader does not carry
+   3. dot field
+   4. vignette, so type never sits on a busy patch
+   All four are absolutely positioned siblings; none cause layout. */
 .shaderLayer {
   position: absolute;
   inset: 0;
@@ -27,20 +29,30 @@
   z-index: var(--z-base);
   opacity: var(--shader-alpha);
   background:
-    radial-gradient(70% 55% at 12% 8%, var(--brand-dim), transparent 62%),
-    linear-gradient(150deg, var(--surface) 0%, var(--bg) 55%);
+    radial-gradient(52% 46% at 18% 12%, color-mix(in srgb, var(--brand-2) 55%, transparent), transparent 62%),
+    radial-gradient(46% 42% at 84% 22%, color-mix(in srgb, var(--brand) 40%, transparent), transparent 60%),
+    linear-gradient(160deg, var(--surface-solid) 0%, var(--bg) 60%);
 }
 
-.lattice {
+.blooms {
   position: absolute;
   inset: 0;
   z-index: var(--z-base);
   pointer-events: none;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: var(--grid-cell) var(--grid-cell);
-  opacity: 0.9;
+  background:
+    radial-gradient(58% 52% at 52% 108%, color-mix(in srgb, var(--brand-3) 42%, transparent), transparent 62%),
+    radial-gradient(40% 36% at 88% 6%, color-mix(in srgb, var(--brand) 26%, transparent), transparent 66%);
+}
+
+.dots {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--fg) 14%, transparent) 1px, transparent 1px);
+  background-size: var(--dot-grid) var(--dot-grid);
+  mask-image: radial-gradient(circle at 50% 42%, black 10%, transparent 72%);
+  opacity: 0.55;
 }
 
 .vignette {
@@ -48,35 +60,28 @@
   inset: 0;
   z-index: var(--z-base);
   pointer-events: none;
-  background: radial-gradient(120% 90% at 30% 45%, transparent 30%, var(--bg) 100%);
-  opacity: 0.86;
+  background: radial-gradient(120% 86% at 50% 45%, transparent 38%, var(--bg) 100%);
+  opacity: 0.78;
 }
 
 /* ── Layout ──────────────────────────────────────────────────────────── */
-.grid {
+.inner {
   position: relative;
   z-index: var(--z-raised);
   width: 100%;
-  max-width: var(--content-max);
+  max-width: 860px;
   margin: 0 auto;
-  padding: calc(var(--nav-height) + var(--space-9)) var(--gutter) var(--space-9);
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.95fr);
-  gap: var(--space-8);
+  padding: calc(var(--nav-height) + var(--space-9)) var(--gutter) var(--space-10);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-}
-
-.main {
-  min-width: 0;
-  border-left: 1px solid var(--line-strong);
-  padding-left: var(--space-5);
 }
 
 /* ── Entrance ────────────────────────────────────────────────────────────
    Pure CSS. `both` fill means the end state is opacity 1, so a re-mount can
    never strand an element invisible — which is exactly what the old GSAP
    .from() timeline did to the three social icons on the live site. It also
-   means the hero no longer dynamically imports GSAP at all.
+   means the hero no longer imports GSAP at all.
    The global prefers-reduced-motion rule collapses the duration to ~0. */
 .reveal {
   animation: heroRise var(--dur-4) var(--ease-out) both;
@@ -86,7 +91,7 @@
 @keyframes heroRise {
   from {
     opacity: 0;
-    transform: translate3d(0, 18px, 0);
+    transform: translate3d(0, 20px, 0);
   }
 
   to {
@@ -95,46 +100,87 @@
   }
 }
 
-/* ── Type ────────────────────────────────────────────────────────────── */
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: var(--brand);
-  margin-bottom: var(--space-5);
+/* ── Availability pill ───────────────────────────────────────────────── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  font-size: var(--text-sm);
+  color: var(--fg-mute);
 }
 
+.live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent);
+  animation: heroPulse 2.6s var(--ease-in-out) infinite;
+}
+
+@keyframes heroPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ── Type ────────────────────────────────────────────────────────────── */
 .name {
   font-size: var(--text-display);
   font-weight: var(--weight-black);
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-display);
-  color: var(--fg);
   margin-bottom: var(--space-4);
+  background: var(--brand-text-gradient);
+  background-size: 180% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: auroraShift 9s var(--ease-in-out) infinite alternate;
 }
 
-.period {
-  color: var(--brand);
+@keyframes auroraShift {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 100% 50%;
+  }
 }
 
 .role {
-  font-family: var(--font-mono);
-  font-size: clamp(0.9375rem, 1.9vw, 1.3125rem);
+  font-size: clamp(1.125rem, 2.6vw, 1.875rem);
   font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tight);
   color: var(--fg-mute);
   margin-bottom: var(--space-5);
   min-height: 1.5em;
   display: flex;
   align-items: center;
-  gap: 0.15em;
-}
-
-.prompt {
-  color: var(--fg-dim);
+  justify-content: center;
+  gap: 0.1em;
+  flex-wrap: wrap;
 }
 
 .typewriter {
+  color: #8fe6dc;
+}
+
+:root[data-theme='light'] .typewriter {
   color: var(--brand);
 }
 
@@ -156,11 +202,11 @@
 }
 
 .lede {
-  max-width: 56ch;
+  max-width: 58ch;
   color: var(--fg-mute);
   font-size: var(--text-md);
   line-height: var(--leading-relaxed);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-7);
 }
 
 .lede strong {
@@ -171,110 +217,79 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-8);
+}
+
+/* ── Stats ───────────────────────────────────────────────────────────── */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
   flex-wrap: wrap;
   margin-bottom: var(--space-7);
+  width: 100%;
 }
 
-/* ── Status rail ─────────────────────────────────────────────────────── */
-.rail {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+.stat {
+  flex: 1 1 140px;
+  max-width: 200px;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
-.railGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-2) 0;
-  border-bottom: 1px dashed var(--line-strong);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-}
-
-.key {
-  color: var(--fg-dim);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-mono);
-  flex: none;
-}
-
-.value {
+.statValue {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
   color: var(--fg);
-  text-align: right;
-  min-width: 0;
-  overflow-wrap: anywhere;
 }
 
-.available {
-  color: var(--ok);
-}
-
-.pulse {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  margin-right: 0.5em;
-  animation: heroPulse 2.4s var(--ease-in-out) infinite;
-}
-
-@keyframes heroPulse {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 currentColor;
-  }
-
-  50% {
-    opacity: 0.55;
-    box-shadow: 0 0 0 3px transparent;
-  }
-}
-
-.railLink:hover .value,
-.railLink:focus-visible .value {
-  color: var(--brand);
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-top: var(--space-1);
 }
 
 /* ── Socials ─────────────────────────────────────────────────────────── */
 .socials {
   display: flex;
-  gap: -1px;
+  gap: var(--space-3);
+  justify-content: center;
 }
 
 .socials a {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
+  border-radius: 50%;
   color: var(--fg-mute);
-  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   transition:
-    color var(--dur-1) var(--ease-out),
-    background-color var(--dur-1) var(--ease-out),
-    border-color var(--dur-1) var(--ease-out);
-}
-
-.socials a + a {
-  margin-left: -1px;
+    color var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out);
 }
 
 .socials a:hover {
-  color: var(--brand-on-fill);
-  background: var(--brand-fill);
-  border-color: var(--brand-fill);
-  position: relative;
-  z-index: var(--z-raised);
+  color: var(--fg);
+  transform: translateY(-3px);
+  border-color: var(--brand-line);
+  box-shadow: var(--shadow-brand);
 }
 
 /* ── Scroll cue ──────────────────────────────────────────────────────── */
@@ -285,8 +300,9 @@
   transform: translateX(-50%);
   z-index: var(--z-raised);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   letter-spacing: var(--tracking-label);
@@ -295,47 +311,34 @@
 }
 
 .scrollLine {
-  width: 56px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--brand));
+  width: 1px;
+  height: 54px;
+  background: linear-gradient(to bottom, var(--brand), transparent);
   animation: heroSweep 2.4s var(--ease-in-out) infinite;
-  transform-origin: left;
+  transform-origin: top;
 }
 
 @keyframes heroSweep {
   0%,
   100% {
-    transform: scaleX(0.55);
+    transform: scaleY(0.55);
     opacity: 0.5;
   }
 
   50% {
-    transform: scaleX(1);
+    transform: scaleY(1);
     opacity: 1;
   }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
-@media (max-width: 980px) {
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-7);
-    align-items: start;
-    padding-top: calc(var(--nav-height) + var(--space-8));
-  }
-
-  .rail {
-    max-width: 460px;
-  }
-}
-
 @media (max-width: 768px) {
   .hero {
     min-height: auto;
   }
 
-  .main {
-    padding-left: var(--space-4);
+  .inner {
+    padding-top: calc(var(--nav-height) + var(--space-8));
   }
 
   .scrollCue {
@@ -347,9 +350,15 @@
   .actions {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
   }
 
   .actions > * {
     width: 100%;
+  }
+
+  .stat {
+    flex-basis: 100%;
+    max-width: none;
   }
 }

@@ -138,23 +138,17 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   ])
 
   useEffect(() => {
-    if (!state) {
-      if (phase !== 'closing') {
-        resetModal()
-      }
-
-      return
-    }
+    if (!state) return
 
     clearPendingClose()
     clearPendingOpenAnimation()
 
-    setDisplayState(state)
-    setActiveImage(state.project.images?.[0] ?? null)
-    setShellRect(getOriginRect(state))
-    setPhase('opening')
-
     openRafRef.current = window.requestAnimationFrame(() => {
+      setDisplayState(state)
+      setActiveImage(state.project.images?.[0] ?? null)
+      setShellRect(getOriginRect(state))
+      setPhase('opening')
+
       openRafRef.current = window.requestAnimationFrame(() => {
         setShellRect(getTargetRect())
         setPhase('open')
@@ -164,7 +158,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     })
 
     return clearPendingOpenAnimation
-  }, [state])
+  }, [clearPendingClose, clearPendingOpenAnimation, state])
 
   useEffect(() => {
     if (!displayState) return
@@ -203,7 +197,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
       clearPendingOpenAnimation()
       clearPendingClose()
     }
-  }, [])
+  }, [clearPendingClose, clearPendingOpenAnimation])
 
   if (!displayState || !shellRect) return null
 

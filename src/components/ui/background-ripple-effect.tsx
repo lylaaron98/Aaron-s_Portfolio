@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useRef, type CSSProperties, type MutableRefObject } from 'react'
+import { useCallback, useEffect, useMemo, useRef, type CSSProperties, type MutableRefObject } from 'react'
 import { cn } from '../../utils/classNames'
 
 export const BackgroundRippleEffect = ({
@@ -22,7 +22,7 @@ export const BackgroundRippleEffect = ({
   const cellRefs = useRef<Array<HTMLDivElement | null>>([])
   const rootRef = useRef<HTMLDivElement>(null)
 
-  const applyRipple = (origin: { row: number; col: number }) => {
+  const applyRipple = useCallback((origin: { row: number; col: number }) => {
     cellRefs.current.forEach((cell, idx) => {
       if (!cell) return
 
@@ -40,7 +40,7 @@ export const BackgroundRippleEffect = ({
     window.requestAnimationFrame(() => {
       cellRefs.current.forEach((cell) => cell?.classList.add('animate-cell-ripple'))
     })
-  }
+  }, [cols])
 
   useEffect(() => {
     if (!animate || interactive) {
@@ -99,7 +99,7 @@ export const BackgroundRippleEffect = ({
       document.removeEventListener('visibilitychange', onVisibility)
       stop()
     }
-  }, [animate, cols, interactive, rows])
+  }, [animate, applyRipple, cols, interactive, rows])
 
   return (
     <div

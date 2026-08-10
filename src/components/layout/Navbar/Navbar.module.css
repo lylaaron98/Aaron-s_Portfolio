@@ -39,20 +39,16 @@
   gap: var(--space-3);
 }
 
-/* ── Logo ── */
+/* ── Logo ──
+   Only the link box lives here; the mark owns its own colour. The font-size
+   stays because <Logo> scales off it in em — this is the one knob that
+   resizes the mark. */
 .logo {
   font-size: var(--text-md);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-tight);
   display: inline-flex;
   align-items: center;
-  gap: 0.08em;
   flex: none;
-}
-
-.logoBracket {
-  color: var(--brand);
-  font-weight: var(--weight-medium);
+  border-radius: var(--radius-sm);
 }
 
 /* ── Links ── */

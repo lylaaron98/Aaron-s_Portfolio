@@ -4,8 +4,7 @@ import { cx } from '../../../utils/classNames'
 import { useTheme } from '../../../context/ThemeContext'
 import { navLinks } from '../../../data/navigation'
 import { PROJECTS_DEMO_ROUTE } from '../../../constants/routes'
-import ShinyText from '../../ui/ShinyText'
-import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+import Logo from '../../ui/Logo'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -14,10 +13,6 @@ export default function Navbar() {
   const hiddenRef = useRef(false)
   const scrolledRef = useRef(false)
   const { theme, toggleTheme } = useTheme()
-  const prefersReducedMotion = usePrefersReducedMotion()
-
-  // The logo entrance used to dynamically import GSAP for a single 0.5s fade.
-  // It is a CSS animation now, so the navbar pulls in no animation library.
 
   // Hide on scroll down, show on scroll up.
   useEffect(() => {
@@ -60,13 +55,8 @@ export default function Navbar() {
   return (
     <header className={cx(styles.navbar, scrolled && styles.scrolled, hidden && styles.navbarHidden)}>
       <div className={styles.inner}>
-        <a href="#hero" className={styles.logo}>
-          <span className={styles.logoBracket}>&lt;</span>
-          {/* Was a local .shinyText copy of this component's CSS, minus its
-              prefers-reduced-motion guard — so the logo animated for
-              reduced-motion users. One implementation now. */}
-          <ShinyText text="Aaron" disabled={prefersReducedMotion} speed={4} />
-          <span className={styles.logoBracket}>/&gt;</span>
+        <a href="#hero" className={styles.logo} aria-label="Aaron Lee — home">
+          <Logo variant="solid" />
         </a>
 
         <nav className={styles.nav} aria-label="Primary">

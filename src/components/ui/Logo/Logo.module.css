@@ -1,0 +1,54 @@
+/* Aurora monogram. No wordmark — the mark carries the brand alone, so it is
+   sized a touch larger than a paired lockup would be. */
+
+/* 2.5em against the navbar's 1rem base is a 40px mark in a 60px pill — the
+   largest that still leaves the tile visibly floating rather than wedged
+   against the pill's edges. */
+.mark {
+  width: 2.5em;
+  height: 2.5em;
+  display: block;
+  flex: none;
+  overflow: visible;
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    filter var(--dur-3) var(--ease-out);
+}
+
+.bloom {
+  opacity: 0.9;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+
+/* The bare variant has no housing to give it presence, so it leans on a
+   permanent soft glow instead. */
+.bare {
+  filter: drop-shadow(0 2px 8px var(--brand-glow));
+}
+
+/* ── Hover ──
+   The old logo shimmered on a loop. A mark that moves only on intent reads
+   more expensive and stops competing with the hero. The glow lives on the
+   parent link so the whole target responds as one object. */
+:global(a):hover .mark,
+:global(a):focus-visible .mark {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 4px 14px var(--brand-glow));
+}
+
+:global(a):hover .bloom,
+:global(a):focus-visible .bloom {
+  opacity: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark,
+  .bloom {
+    transition: none;
+  }
+
+  :global(a):hover .mark,
+  :global(a):focus-visible .mark {
+    transform: none;
+  }
+}

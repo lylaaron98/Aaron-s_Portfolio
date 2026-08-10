@@ -1,71 +1,117 @@
+/* Blueprint buttons: monospace, uppercase, near-square, no 3D press.
+   The old variant faked depth with a 6px shadow and a translateY(4px) "push".
+   Blueprint states are drawn, not extruded — border and fill do the work. */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 34px;
-  font-size: 0.9rem;
-  font-family: var(--font-sans);
-  border-radius: var(--border-radius-xl);
-  transition: all 0.2s ease;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   position: relative;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled='true'] {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.45;
 }
 
+.btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+/* ── Sizes ── */
+.sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-2xs);
+}
+
+.lg {
+  padding: var(--space-4) var(--space-7);
+  font-size: var(--text-sm);
+}
+
+/* ── Primary: the acid fill. Identical in both themes, dark text on top. ── */
 .primary {
-  background: linear-gradient(180deg, #d0d0d8 0%, #a0a0b0 50%, #909098 100%);
-  color: var(--navy);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-3d);
-  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  background: var(--brand-fill);
+  color: var(--brand-on-fill);
+  border-color: var(--brand-fill);
 }
 
-.primary:hover {
-  transform: translateY(4px);
-  box-shadow: var(--shadow-3d-hover);
-  background: linear-gradient(180deg, #e0e0e8 0%, #b0b0c0 50%, #a0a0a8 100%);
+.primary:not(:disabled):hover {
+  background: var(--brand-fill-hi);
+  border-color: var(--brand-fill-hi);
 }
 
-.primary:disabled:hover {
-  transform: none;
-  box-shadow: var(--shadow-3d);
-  background: linear-gradient(180deg, #d0d0d8 0%, #a0a0b0 50%, #909098 100%);
+.primary:not(:disabled):focus-visible {
+  outline-offset: 3px;
 }
 
-.primary:active {
-  transform: translateY(6px);
-  box-shadow: 0 0 0 rgba(0,0,0,0.25);
-}
-
+/* ── Secondary: drafted outline. ── */
 .secondary {
-  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-  color: var(--accent);
-  border: 1px solid rgba(192, 192, 200, 0.25);
-  box-shadow: var(--shadow-3d);
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--line-strong);
 }
 
-.secondary:hover {
-  transform: translateY(4px);
-  box-shadow: var(--shadow-3d-hover);
-  border-color: rgba(192, 192, 200, 0.45);
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+.secondary:not(:disabled):hover {
+  background: var(--surface);
+  border-color: var(--fg-dim);
 }
 
-.secondary:disabled:hover {
-  transform: none;
-  box-shadow: var(--shadow-3d);
-  border-color: rgba(192, 192, 200, 0.25);
-  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+/* ── Ghost: for dense toolbars and inline actions. ── */
+.ghost {
+  background: transparent;
+  color: var(--fg-mute);
+  border-color: transparent;
 }
 
-.secondary:active {
-  transform: translateY(6px);
-  box-shadow: 0 0 0 rgba(0,0,0,0.25);
+.ghost:not(:disabled):hover {
+  color: var(--fg);
+  background: var(--surface);
+}
+
+/* ── Group: buttons sitting flush in a lattice, blueprint-style. ──────────
+   Applied by <ButtonGroup>; collapses the shared border between siblings. */
+.group {
+  display: inline-flex;
+}
+
+.group > .btn {
+  border-radius: 0;
+}
+
+.group > .btn:first-child {
+  border-start-start-radius: var(--radius-sm);
+  border-end-start-radius: var(--radius-sm);
+}
+
+.group > .btn:last-child {
+  border-start-end-radius: var(--radius-sm);
+  border-end-end-radius: var(--radius-sm);
+}
+
+.group > .btn + .btn {
+  margin-inline-start: -1px;
+}
+
+.group > .btn:hover,
+.group > .btn:focus-visible {
+  z-index: var(--z-raised);
 }

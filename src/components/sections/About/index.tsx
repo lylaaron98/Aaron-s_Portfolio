@@ -12,7 +12,7 @@ export default function About() {
   const enableProfileTilt = hasFinePointer && isDesktop && !prefersReducedMotion && !lowPerformanceMode
 
   return (
-    <SectionContainer id="about" title="About Me">
+    <SectionContainer id="about" number="01" title="About" meta="profile">
       <div className={styles.inner}>
         <div className={styles.textBlock}>
           <p>

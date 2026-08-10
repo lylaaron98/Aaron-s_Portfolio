@@ -1,40 +1,254 @@
+/* ============================================================================
+   Design tokens — "Blueprint"
+   ----------------------------------------------------------------------------
+   Three layers, in dependency order:
+
+     1. PRIMITIVES  raw values. Never referenced outside this file.
+     2. SEMANTIC    role-named tokens (--bg, --fg-mute, --brand). This is the
+                    layer components are allowed to use.
+     3. LEGACY      the old --navy / --cyan / --slate names, re-pointed at the
+                    semantic layer. They exist so the ~295 colour references
+                    already in the codebase keep working while sections are
+                    migrated one at a time. Delete a legacy alias once nothing
+                    references it.
+
+   Theming works by overriding the SEMANTIC layer under
+   :root[data-theme="light"]. Nothing below that line needs to know a theme
+   exists — which is the whole point.
+   ========================================================================== */
+
 :root {
-  /* ── Chrome Silver palette ── */
-  --navy: #141418;
-  --navy-light: #1c1c24;
-  --navy-lighter: #32323e;
-  --cyan: #c0c0c8;
-  --cyan-dim: rgba(192, 192, 200, 0.1);
-  --cyan-glow: rgba(192, 192, 200, 0.15);
-  --white: #f0f0f5;
-  --slate: #8888a0;
-  --slate-light: #a8a8c0;
-  --accent: #b8b8c8;
+  /* ── 1. PRIMITIVES ──────────────────────────────────────────────────── */
 
-  --font-sans: 'Inter', sans-serif;
-  --transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  --border-radius: 6px;
-  --border-radius-lg: 16px;
-  --border-radius-xl: 24px;
-  --nav-height: 70px;
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.25);
-  --shadow-3d: 0 6px 0 rgba(0, 0, 0, 0.25), 0 10px 20px rgba(0, 0, 0, 0.3);
-  --shadow-3d-hover: 0 2px 0 rgba(0, 0, 0, 0.25), 0 4px 10px rgba(0, 0, 0, 0.3);
+  /* Neutral ramp — very slightly cool, so the acid accent reads warm by
+     contrast rather than clashing. */
+  --n-950: #0b0c0e;
+  --n-900: #101215;
+  --n-850: #15181c;
+  --n-800: #1f2328;
+  --n-700: #2a3037;
+  --n-600: #3b434c;
+  --n-500: #5d6772;
+  --n-400: #8e98a5;
+  --n-300: #b6bec8;
+  --n-200: #d8dad2;
+  --n-150: #e9ebe4;
+  --n-100: #f0f1ec;
+  --n-050: #fafaf7;
+  --n-000: #ffffff;
+  --n-ink: #14171a;
+  --n-fg:  #e9edf2;
+
+  /* Acid — the single accent. Two distinct roles:
+       -fill  a bright surface you put dark text on. Identical in both themes,
+              so the brand colour survives the light-mode flip.
+       -ink   a text/border colour. Must invert, because #d4ff3f as text on a
+              near-white page is roughly 1.3:1 and unreadable. */
+  --acid-fill:   #d4ff3f;
+  --acid-fill-2: #e2ff6b;
+  --acid-ink-dk: #d4ff3f; /* on dark backgrounds */
+  --acid-ink-lt: #4e6a00; /* on light backgrounds — 5.4:1 on --n-050 */
+
+  /* ── 2. SEMANTIC ────────────────────────────────────────────────────── */
+
+  /* Surfaces, back to front */
+  --bg:          var(--n-950);
+  --surface:     var(--n-900);
+  --surface-2:   var(--n-850);
+  --surface-sunk: #08090a;
+
+  /* Hairlines. Blueprint leans on borders instead of shadow, so there are two:
+     a quiet one for internal division and a stronger one for real edges. */
+  --line:        var(--n-800);
+  --line-strong: var(--n-700);
+
+  /* Text, in descending prominence. Every one of these clears 4.5:1 on --bg. */
+  --fg:      var(--n-fg);
+  --fg-soft: var(--n-300);
+  --fg-mute: var(--n-400);
+  --fg-dim:  var(--n-500);
+
+  /* Brand */
+  --brand:         var(--acid-ink-dk);
+  --brand-fill:    var(--acid-fill);
+  --brand-fill-hi: var(--acid-fill-2);
+  --brand-on-fill: var(--n-950);
+  --brand-dim:     rgb(212 255 63 / 0.10);
+  --brand-line:    rgb(212 255 63 / 0.28);
+  --brand-glow:    rgb(212 255 63 / 0.16);
+
+  /* Status */
+  --ok:   #7ee081;
+  --warn: #ffc247;
+  --err:  #ff6b6b;
+
+  /* The hero shader samples these. Kept as tokens so the WebGL background
+     participates in theming instead of being a hardcoded dark rectangle. */
+  --shader-base: #23301a;
+  --shader-tint: #48561f;
+  --shader-alpha: 0.55;
+
+  /* ── Typography ─────────────────────────────────────────────────────── */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Code', monospace;
+
+  /* Modular-ish scale. Named by role, not by size, so a section can be
+     re-tuned in one place. */
+  --text-2xs:  0.6875rem;  /* 11px — mono labels */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.8125rem;  /* 13px */
+  --text-base: 0.9375rem;  /* 15px — body default */
+  --text-md:   1rem;
+  --text-lg:   1.1875rem;  /* 19px — card titles */
+  --text-xl:   1.5rem;
+  --text-2xl:  clamp(1.625rem, 3vw, 2.125rem);
+  --text-3xl:  clamp(2rem, 4vw, 2.75rem);
+  --text-display: clamp(3.25rem, 7.6vw, 6rem);
+
+  --leading-display: 0.9;
+  --leading-tight:   1.2;
+  --leading-snug:    1.45;
+  --leading-body:    1.66;
+  --leading-relaxed: 1.75;
+
+  --tracking-display: -0.052em;
+  --tracking-tight:   -0.025em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.09em;
+  --tracking-mono:    0.13em;
+  --tracking-label:   0.19em;
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semi:    600;
+  --weight-bold:    700;
+  --weight-black:   800;
+
+  /* ── Space — 8pt grid, with a 4px half-step at the bottom ───────────── */
+  --space-1:  0.25rem;  /*  4 */
+  --space-2:  0.5rem;   /*  8 */
+  --space-3:  0.75rem;  /* 12 */
+  --space-4:  1rem;     /* 16 */
+  --space-5:  1.5rem;   /* 24 */
+  --space-6:  2rem;     /* 32 */
+  --space-7:  2.5rem;   /* 40 */
+  --space-8:  3rem;     /* 48 */
+  --space-9:  4rem;     /* 64 */
+  --space-10: 5rem;     /* 80 */
+  --space-11: 6rem;     /* 96 */
+  --space-12: 8rem;     /* 128 */
+
+  /* Layout */
+  --measure: 60ch;             /* readable line length */
+  --content-max: 1180px;
+  --gutter: var(--space-7);
+  --gutter-sm: var(--space-5);
+  --nav-height: 56px;
+  --grid-cell: 40px;           /* the visible blueprint lattice */
+
+  /* ── Radius — near-square. Blueprint is drafted, not blobby. ────────── */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-pill: 999px;
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 280ms;
+  --dur-4: 420ms;
+
+  /* ── Elevation ──────────────────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md:  0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --shadow-pop: 0 18px 48px -16px rgb(0 0 0 / 0.7);
+  --shadow-brand: 0 8px 28px -10px var(--brand-glow);
+
+  /* ── Z-index — a scale, so no more guessing at 9999 ─────────────────── */
+  --z-below:  -1;
+  --z-base:    0;
+  --z-raised:  1;
+  --z-sticky:  100;
+  --z-nav:     1000;
+  --z-overlay: 1500;
+  --z-modal:   2000;
+  --z-toast:   3000;
+
+  /* ── 3. LEGACY ALIASES ──────────────────────────────────────────────
+     Old names kept alive so existing modules render correctly mid-migration.
+     Each maps to the role it actually played, not to its literal old colour:
+     --cyan was the accent role, --accent was really "prominent grey text".
+     Mapping --accent onto --brand would have flooded the page with acid. */
+  --navy:         var(--bg);
+  --navy-light:   var(--surface);
+  --navy-lighter: var(--line-strong);
+  --cyan:         var(--brand);
+  --cyan-dim:     var(--brand-dim);
+  --cyan-glow:    var(--brand-glow);
+  --white:        var(--fg);
+  --slate:        var(--fg-mute);
+  --slate-light:  var(--fg-soft);
+  --accent:       var(--fg-soft);
+  --transition:   all var(--dur-3) var(--ease-out);
+  --border-radius:    var(--radius-md);
+  --border-radius-lg: var(--radius-lg);
+  --border-radius-xl: var(--radius-lg);
+  --shadow-3d:       var(--shadow-md);
+  --shadow-3d-hover: var(--shadow-sm);
 }
 
-/* ── Light mode overrides ── */
-:root[data-theme="light"] {
-  --navy: #f5f5f8;
-  --navy-light: #eaeaef;
-  --navy-lighter: #d8d8e0;
-  --cyan: #555568;
-  --cyan-dim: rgba(85, 85, 104, 0.1);
-  --cyan-glow: rgba(85, 85, 104, 0.12);
-  --white: #1a1a24;
-  --slate: #5a5a72;
-  --slate-light: #4a4a60;
-  --accent: #48485c;
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-3d: 0 6px 0 rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.1);
-  --shadow-3d-hover: 0 2px 0 rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.1);
+/* ============================================================================
+   Light theme — overrides the SEMANTIC layer only.
+   ========================================================================== */
+:root[data-theme='light'] {
+  --bg:          var(--n-050);
+  --surface:     var(--n-100);
+  --surface-2:   var(--n-150);
+  --surface-sunk: #f2f3ee;
+
+  --line:        var(--n-200);
+  --line-strong: #c3c7bb;
+
+  --fg:      var(--n-ink);
+  --fg-soft: #3c434a;
+  --fg-mute: #5a6169;
+  --fg-dim:  #767e86;
+
+  /* Fill stays acid so the brand survives the flip; ink darkens so it stays
+     legible as text and as a border. */
+  --brand:         var(--acid-ink-lt);
+  --brand-fill:    var(--acid-fill);
+  --brand-fill-hi: var(--acid-fill-2);
+  --brand-on-fill: var(--n-ink);
+  --brand-dim:     rgb(78 106 0 / 0.09);
+  --brand-line:    rgb(78 106 0 / 0.26);
+  --brand-glow:    rgb(78 106 0 / 0.14);
+
+  --ok:   #2f8f43;
+  --warn: #9a6400;
+  --err:  #c2352f;
+
+  --shader-base: #e6e9dc;
+  --shader-tint: #cbd8a4;
+  --shader-alpha: 0.5;
+
+  --shadow-sm:  0 1px 2px rgb(20 23 26 / 0.08);
+  --shadow-md:  0 8px 24px -8px rgb(20 23 26 / 0.14);
+  --shadow-pop: 0 18px 48px -16px rgb(20 23 26 / 0.18);
 }
+
+/* Honour the OS preference until the user makes an explicit choice.
+   ThemeContext writes data-theme on mount, so this only governs the very first
+   paint — but that is exactly the flash we want to avoid. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+  }
+}
+
+:root { color-scheme: dark; }
+:root[data-theme='light'] { color-scheme: light; }

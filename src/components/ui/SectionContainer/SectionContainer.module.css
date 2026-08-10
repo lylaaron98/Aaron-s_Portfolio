@@ -1,15 +1,43 @@
 .section {
-  padding: 120px 0;
   position: relative;
   overflow: hidden;
+  /* Lets the browser skip layout and paint for sections that are off-screen.
+     The intrinsic size keeps the scrollbar honest. */
   content-visibility: auto;
   contain-intrinsic-size: 900px;
 }
 
+/* ── Backgrounds ── */
+.bgNavy {
+  background: var(--bg);
+}
+
+.bgLight {
+  background: var(--surface-sunk);
+}
+
+/* ── The blueprint lattice ───────────────────────────────────────────────
+   Replaces the 240-cell DOM grid that every section used to mount. Two
+   linear-gradients on one element: no nodes, no rAF, no compositing, and it
+   re-themes for free because it reads --line. */
+.lattice {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: var(--grid-cell) var(--grid-cell);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 10%, transparent 78%);
+  opacity: 0.85;
+}
+
+/* Optional DOM ripple, opt-in per section rather than mounted on all five. */
 .backgroundLayer {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-base);
   pointer-events: none;
 }
 
@@ -20,87 +48,80 @@
 
 .content {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-raised);
 }
 
-/* Ambient glow on navy sections */
-.bgNavy {
-  background: var(--navy);
-}
-
-.bgNavy::before {
-  content: '';
-  position: absolute;
-  top: 20%;
-  right: -15%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(192, 192, 200, 0.02) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-/* Ambient glow on light sections */
-.bgLight {
-  background: var(--navy-light);
-}
-
-.bgLight::before {
-  content: '';
-  position: absolute;
-  top: 30%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(192, 192, 200, 0.015) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-/* ── Section title ── */
-.sectionTitle {
+/* ── Section header ──────────────────────────────────────────────────────
+   A drafted rule with an index on the left and a count on the right, rather
+   than a large display heading. Keeps the eye on the work, not the chrome. */
+.header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-  font-weight: 700;
-  margin-bottom: 56px;
-  font-family: 'Inter', var(--font-sans), sans-serif;
-  letter-spacing: 0.01em;
-  color: var(--white);
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--line-strong);
 }
 
-.num {
-  font-family: var(--font-sans);
-  font-size: 0.9em;
-  color: var(--cyan);
-  font-weight: 400;
+.index {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-mono);
+  color: var(--brand);
+  flex: none;
 }
 
-.titleWords {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.3em;
+.title {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--fg);
+  margin: 0;
 }
 
-.titleWord {
-  line-height: 1.05;
-}
-
-.line {
-  display: block;
+.rule {
+  flex: 1 1 40px;
+  min-width: var(--space-5);
   height: 1px;
-  flex: 1 1 120px;
-  background: linear-gradient(to right, var(--navy-lighter), transparent);
-  min-width: 40px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--line-strong) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-dim);
+  flex: none;
+}
+
+/* Larger display heading, for sections that want one under the rule. */
+.lede {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  color: var(--fg);
+  max-width: 22ch;
+  margin-bottom: var(--space-7);
 }
 
 @media (max-width: 768px) {
-  .section {
-    padding: 80px 0;
+  .lattice {
+    background-size: calc(var(--grid-cell) * 0.7) calc(var(--grid-cell) * 0.7);
   }
 
   .rippleBackground {
     opacity: 0.4;
+  }
+
+  .header {
+    margin-bottom: var(--space-6);
   }
 }

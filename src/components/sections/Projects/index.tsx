@@ -9,7 +9,7 @@ export default function Projects() {
   const clientProjects = projects.filter((p) => p.category === 'client')
 
   return (
-    <SectionContainer id="projects" title="Projects">
+    <SectionContainer id="projects" number="04" title="Selected work" meta="portfolio">
       <ProjectsCarousel
         heading="Personal Projects"
         projects={personalProjects}

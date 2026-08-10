@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useRef, type CSSProperties, type MutableRefObject } from 'react'
-import { cn } from '../../lib/utils'
+import { cn } from '../../utils/classNames'
 
 export const BackgroundRippleEffect = ({
   className,

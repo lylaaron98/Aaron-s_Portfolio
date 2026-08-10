@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import type { Project } from '../../../types/project'
 import Badge from '../../ui/Badge'
@@ -85,26 +85,57 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   const [shellRect, setShellRect] = useState<RectSnapshot | null>(null)
   const galleryImages = useMemo(() => displayState?.project.images ?? [], [displayState])
 
-  const clearPendingOpenAnimation = () => {
+  // These three touch only refs and setters, so [] deps are correct and they
+  // stay referentially stable — which is what lets requestClose below be a
+  // real dependency of the Escape-key effect instead of a stale capture.
+  const clearPendingOpenAnimation = useCallback(() => {
     if (openRafRef.current !== null) {
       window.cancelAnimationFrame(openRafRef.current)
       openRafRef.current = null
     }
-  }
+  }, [])
 
-  const clearPendingClose = () => {
+  const clearPendingClose = useCallback(() => {
     if (closeTimeoutRef.current !== null) {
       window.clearTimeout(closeTimeoutRef.current)
       closeTimeoutRef.current = null
     }
-  }
+  }, [])
 
-  const resetModal = () => {
+  const resetModal = useCallback(() => {
     setDisplayState(null)
     setActiveImage(null)
     setShellRect(null)
     setPhase('closed')
-  }
+  }, [])
+
+  // Declared before the effect that uses it. It used to be defined ~30 lines
+  // below the Escape handler that called it, so the handler closed over
+  // whichever binding existed when the effect ran (react-hooks/immutability).
+  const requestClose = useCallback(() => {
+    if (!displayState || phase === 'closing' || phase === 'closed') return
+
+    clearPendingOpenAnimation()
+
+    const currentState = displayState
+    setPhase('closing')
+    setShellRect(getOriginRect(currentState))
+
+    clearPendingClose()
+    closeTimeoutRef.current = window.setTimeout(() => {
+      currentState.opener?.focus()
+      resetModal()
+      onClosed()
+      closeTimeoutRef.current = null
+    }, CLOSE_DURATION_MS)
+  }, [
+    clearPendingClose,
+    clearPendingOpenAnimation,
+    displayState,
+    onClosed,
+    phase,
+    resetModal,
+  ])
 
   useEffect(() => {
     if (!state) {
@@ -165,7 +196,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('resize', handleResize)
     }
-  }, [displayState, phase])
+  }, [displayState, phase, requestClose])
 
   useEffect(() => {
     return () => {
@@ -173,24 +204,6 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
       clearPendingClose()
     }
   }, [])
-
-  const requestClose = () => {
-    if (!displayState || phase === 'closing' || phase === 'closed') return
-
-    clearPendingOpenAnimation()
-
-    const currentState = displayState
-    setPhase('closing')
-    setShellRect(getOriginRect(currentState))
-
-    clearPendingClose()
-    closeTimeoutRef.current = window.setTimeout(() => {
-      currentState.opener?.focus()
-      resetModal()
-      onClosed()
-      closeTimeoutRef.current = null
-    }, CLOSE_DURATION_MS)
-  }
 
   if (!displayState || !shellRect) return null
 

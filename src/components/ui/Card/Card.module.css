@@ -1,52 +1,69 @@
+/* Blueprint card: drawn edges, flat fill, no blur.
+   The old card stacked backdrop-filter: blur(4px) on every instance; with 16 of
+   them on screen that is 16 backdrop roots for an effect nothing sat behind. */
+
 .card {
-  background: var(--navy-light);
-  border: 1px solid var(--navy-lighter);
-  border-radius: var(--border-radius-lg);
-  padding: 30px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(4px);
 }
 
-/* ── Variant: navy background ── */
+/* ── Variant: recessed, for cards on an already-light surface ── */
 .navy {
-  background: rgba(14, 14, 18, 0.8);
-  border-color: rgba(42, 42, 53, 0.6);
-}
-
-:root[data-theme="light"] .navy {
-  background: rgba(230, 230, 238, 0.85);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: var(--surface-sunk);
+  border-color: var(--line);
 }
 
 /* ── Hoverable ── */
 .hoverable {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.3s ease,
-              box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out);
 }
 
 .hoverable:hover {
-  border-color: rgba(192, 192, 200, 0.15);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(192, 192, 200, 0.03);
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
 }
 
-/* ── Gradient overlay on hover ── */
-.gradientOverlay::after {
+/* ── Corner registration marks. The blueprint tell. ── */
+.hoverable::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--cyan-dim) 0%, transparent 60%);
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 7px;
+  height: 7px;
+  border-top: 1px solid var(--brand);
+  border-right: 1px solid var(--brand);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--dur-2) var(--ease-out);
   pointer-events: none;
 }
 
-.gradientOverlay:hover::after {
+.hoverable:hover::after {
   opacity: 1;
 }
 
-/* ── Top accent line on hover ── */
+/* ── Gradient overlay on hover ── */
+.gradientOverlay {
+  background-image: linear-gradient(135deg, var(--brand-dim) 0%, transparent 55%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: -100% 0;
+  transition: background-position var(--dur-3) var(--ease-out);
+}
+
+.gradientOverlay:hover {
+  background-position: 0 0;
+}
+
+/* ── Top accent rule on hover ── */
 .topAccent::before {
   content: '';
   position: absolute;
@@ -54,12 +71,28 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--cyan), transparent);
+  background: linear-gradient(90deg, var(--brand), transparent);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform var(--dur-3) var(--ease-out);
 }
 
 .topAccent:hover::before {
   transform: scaleX(1);
+}
+
+/* ── Tilt glare. Was hardcoded rgba(100, 255, 218, .1) — a mint left over from
+   a palette two redesigns ago, which is why it never matched anything. ── */
+.glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: var(--z-raised);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+
+.glareVisible {
+  opacity: 1;
 }

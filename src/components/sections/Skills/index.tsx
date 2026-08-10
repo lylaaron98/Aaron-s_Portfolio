@@ -110,7 +110,7 @@ export default function Skills() {
   const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`, { stagger: 0.12 })
 
   return (
-    <SectionContainer id="skills" background="navy-light" title="Skills &amp; Technologies">
+    <SectionContainer id="skills" number="02" title="Skills" meta="stack">
       <div ref={ref} className={styles.grid}>
         {skillCategories.map((cat) => (
           <Card

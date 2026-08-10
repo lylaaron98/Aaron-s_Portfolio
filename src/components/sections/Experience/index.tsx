@@ -10,7 +10,7 @@ import 'react-vertical-timeline-component/style.min.css'
 export default function Experience() {
 
   return (
-    <SectionContainer id="experience" title="Experience">
+    <SectionContainer id="experience" number="03" title="Experience" meta="timeline">
       <VerticalTimeline animate={true} lineColor="var(--accent)">
         {experiences.map((exp, i) => (
           <VerticalTimelineElement

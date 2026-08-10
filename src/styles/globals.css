@@ -1,7 +1,37 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import './tokens.css';
 
-*, *::before, *::after {
+/* ----------------------------------------------------------------------------
+   Tailwind: teach it about the app's theming.
+
+   Previously `dark:` fell through to prefers-color-scheme while the app themed
+   off :root[data-theme]. A light-mode user on a dark OS therefore got dark
+   Tailwind borders on a light page. Binding the variant to the attribute makes
+   the two systems agree. Absence of the attribute counts as dark, because that
+   is the pre-hydration default.
+   -------------------------------------------------------------------------- */
+@custom-variant dark (&:where(html:not([data-theme='light']) *));
+
+/* Expose the semantic layer to Tailwind utilities (bg-surface, text-fg-mute,
+   border-line, …) so one-off Tailwind components stay on-token. `inline` is
+   what lets these resolve through var() and therefore re-theme. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-fg-mute: var(--fg-mute);
+  --color-fg-dim: var(--fg-dim);
+  --color-brand: var(--brand);
+  --color-brand-fill: var(--brand-fill);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -10,16 +40,20 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* Anchor targets clear the fixed navbar without per-section scroll-margin. */
+  scroll-padding-top: calc(var(--nav-height) + var(--space-5));
 }
 
 body {
-  background-color: var(--navy);
-  color: var(--white);
+  background-color: var(--bg);
+  color: var(--fg);
   font-family: var(--font-sans);
-  line-height: 1.6;
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 a {
@@ -27,7 +61,10 @@ a {
   color: inherit;
 }
 
-img {
+img,
+svg,
+video,
+canvas {
   max-width: 100%;
   display: block;
 }
@@ -40,35 +77,118 @@ button {
   cursor: pointer;
   border: none;
   background: none;
-  font-family: var(--font-sans);
+  font-family: inherit;
+  color: inherit;
 }
 
+/* ── Focus. Blueprint is keyboard-first: one visible, consistent ring. ───── */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--navy);
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--navy-lighter);
-  border-radius: 4px;
+  background: var(--line-strong);
+  border: 2px solid var(--bg);
+  border-radius: var(--radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: var(--fg-dim);
 }
 
 ::selection {
-  background: rgba(192, 192, 200, 0.2);
-  color: var(--white);
+  background: var(--brand-fill);
+  color: var(--brand-on-fill);
 }
 
-section {
-  padding: 100px 0;
+/* ----------------------------------------------------------------------------
+   Was a bare `section { padding: 100px 0 }`, which matched every <section> in
+   the tree — including ProfileCard's `.pc-card` and the three inside
+   ProjectCardModal, which are not page sections and were being padded 100px.
+   Scoping to direct children of <main> restricts it to actual page sections.
+   -------------------------------------------------------------------------- */
+main > section {
+  padding: var(--space-11) 0;
 }
 
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  width: 100%;
+}
+
+/* ── Blueprint lattice ───────────────────────────────────────────────────
+   The signature background. A single element with two linear-gradients — no
+   DOM cost, no compositing cost, and it re-themes for free. */
+.blueprint-grid {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: var(--grid-cell) var(--grid-cell);
+}
+
+/* ── Mono label — used everywhere for metadata, section indices, keys ───── */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  font-weight: var(--weight-medium);
+}
+
+/* Visually hidden but available to assistive tech. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — first tab stop, invisible until focused. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  background: var(--brand-fill);
+  color: var(--brand-on-fill);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ── Ripple cell animation (background-ripple-effect) ───────────────────── */
 .animate-cell-ripple {
   animation: cell-ripple var(--duration, 480ms) ease-out;
   animation-delay: var(--delay, 0ms);
@@ -96,23 +216,34 @@ section {
   }
 }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 50px;
-}
-
 @media (max-width: 768px) {
-  .container {
-    padding: 0 25px;
+  :root {
+    --gutter: var(--gutter-sm);
   }
-  section {
-    padding: 80px 0;
+
+  main > section {
+    padding: var(--space-10) 0;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 0 20px;
+  :root {
+    --gutter: var(--space-4);
+  }
+}
+
+/* One global honour of the OS setting. Individual components still guard their
+   own JS-driven motion via usePrefersReducedMotion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

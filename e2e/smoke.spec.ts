@@ -51,32 +51,21 @@ test('every referenced image on project pages loads', async ({ page }) => {
   expect(failures).toEqual([])
 })
 
-test('project card opens its dialog and Escape closes it', async ({ page }) => {
+test('project card opens its project page', async ({ page }) => {
   await trackFailures(page)
   await page.goto('/#projects')
-  const opener = page.getByRole('button', { name: 'AI Architectural Drawing Platform' })
-  await opener.click()
-  const dialog = page.getByRole('dialog')
-  await expect(dialog).toBeVisible()
-  await expect(dialog.getByRole('img').first()).toBeVisible()
-  // The open animation must finish: focus moves to the close button and the
-  // panel ends at full size and full opacity, not stuck at the card's rect.
-  await expect(dialog.getByRole('button', { name: /close/i }).first()).toBeFocused()
-  await expect(dialog.getByRole('heading', { level: 2 }).first()).toBeInViewport()
-  await expect
-    .poll(() =>
-      dialog.evaluate((shell) => {
-        const content = shell.querySelector('[class*="modalContent"]')
-        return {
-          wide: shell.getBoundingClientRect().width > window.innerWidth * 0.6,
-          shellOpacity: getComputedStyle(shell).opacity,
-          contentOpacity: content ? getComputedStyle(content).opacity : 'missing',
-        }
-      }),
-    )
-    .toEqual({ wide: true, shellOpacity: '1', contentOpacity: '1' })
-  await page.keyboard.press('Escape')
-  await expect(dialog).toBeHidden()
+  await page.getByRole('link', { name: /AI Architectural Drawing Platform/ }).first().click()
+  await expect(page).toHaveURL(/\/projects\/ai-architectural-drawing-platform$/)
+  await expect(page.locator('h1')).toHaveText('AI Architectural Drawing Platform')
+})
+
+test('intro loader counts to 100 and gets out of the way', async ({ page }) => {
+  await trackFailures(page)
+  await page.goto('/')
+  const loader = page.getByRole('progressbar', { name: 'Loading portfolio' })
+  await expect(loader).toBeAttached()
+  await expect(loader).toBeHidden({ timeout: 12_000 })
+  await expect(page.getByRole('heading', { level: 1, name: 'Aaron Lee' })).toBeVisible()
 })
 
 test('legacy hash links redirect to real project URLs', async ({ page }) => {
@@ -86,12 +75,12 @@ test('legacy hash links redirect to real project URLs', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Otodecks')
 })
 
-test('first visit follows the OS colour scheme', async ({ browser }) => {
+test('the redesign renders dark whatever the OS colour scheme', async ({ browser }) => {
   const context = await browser.newContext({ colorScheme: 'light' })
   const page = await context.newPage()
   await page.route(EXTERNAL, (route) => route.abort())
   await page.goto('/')
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await context.close()
 })
 
@@ -115,7 +104,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
 test('résumé button links to a PDF that is served', async ({ page, request }) => {
   await page.goto('/')
-  const href = await page.getByRole('link', { name: /resume/i }).getAttribute('href')
+  const href = await page.getByRole('link', { name: /r[eé]sum[eé]/i }).first().getAttribute('href')
   expect(href).toBeTruthy()
   const response = await request.get(href!)
   expect(response.status()).toBe(200)

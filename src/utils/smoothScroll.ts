@@ -1,3 +1,5 @@
+import { getLenis } from './lenisRef'
+
 /**
  * Smoothly scrolls to a target element by id or CSS selector.
  * Falls back to native scrollIntoView if the element is found.
@@ -5,10 +7,11 @@
  */
 export function smoothScrollTo(target: string): void {
   const selector = target.startsWith('#') ? target : `#${target}`
-  const el = document.querySelector(selector)
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
-  }
+  const el = document.querySelector<HTMLElement>(selector)
+  if (!el) return
+  const lenis = getLenis()
+  if (lenis) lenis.scrollTo(el)
+  else el.scrollIntoView({ behavior: 'smooth' })
 }
 
 /**
@@ -16,13 +19,14 @@ export function smoothScrollTo(target: string): void {
  * @param id - the section element's id attribute
  */
 export function scrollToSection(id: string): void {
-  const el = document.getElementById(id)
-  el?.scrollIntoView({ behavior: 'smooth' })
+  smoothScrollTo(`#${id}`)
 }
 
 /**
  * Smoothly scrolls back to the top of the page.
  */
 export function scrollToTop(): void {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  const lenis = getLenis()
+  if (lenis) lenis.scrollTo(0)
+  else window.scrollTo({ top: 0, behavior: 'smooth' })
 }

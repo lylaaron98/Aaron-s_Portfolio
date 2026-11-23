@@ -1,0 +1,43 @@
+.footer {
+  padding: 0 clamp(16px, 4vw, 48px) 40px;
+  background: #06070c;
+  color: #9aa0bb;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.big {
+  font: 700 clamp(64px, 17vw, 280px) / 0.8 'Space Grotesk', 'Inter', sans-serif;
+  letter-spacing: -0.07em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.12);
+  margin: 0.15em 0 0.2em -0.04em;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.row ul {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+
+.row a {
+  color: #c4c8db;
+}
+
+.row a:hover {
+  color: #fff;
+}
+
+.row a:focus-visible {
+  outline: 2px solid #19c3b2;
+  outline-offset: 3px;
+}

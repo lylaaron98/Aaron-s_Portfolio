@@ -1,0 +1,121 @@
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  padding: clamp(20px, 4vw, 48px);
+  background: #06070c;
+  color: #eef0f8;
+  clip-path: inset(0% 0% 0% 0%);
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font: 500 12px/1.4 'JetBrains Mono', monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aa0bb;
+  overflow: hidden;
+}
+
+.meta span:first-child {
+  color: #19c3b2;
+}
+
+/* Two counter-rotating arcs: a quiet "something is happening" signal. */
+.ring {
+  place-self: center;
+  position: relative;
+  width: min(34vmin, 260px);
+  aspect-ratio: 1;
+}
+
+.ring span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  border-top-color: #19c3b2;
+  border-right-color: rgba(123, 123, 255, 0.6);
+  animation: spin 1.6s linear infinite;
+}
+
+.ring span:last-child {
+  inset: 14%;
+  border-top-color: #e0489c;
+  border-right-color: transparent;
+  border-left-color: rgba(25, 195, 178, 0.4);
+  animation-duration: 2.4s;
+  animation-direction: reverse;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.countWrap {
+  display: flex;
+  align-items: flex-start;
+  line-height: 0.8;
+}
+
+.count {
+  font-weight: 700;
+  font-size: clamp(96px, 20vw, 240px);
+  letter-spacing: -0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.percent {
+  font-size: clamp(24px, 4vw, 48px);
+  color: #19c3b2;
+  margin-left: 8px;
+}
+
+.hint {
+  font: 500 12px/1.4 'JetBrains Mono', monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aa0bb;
+  padding-bottom: 12px;
+}
+
+.track {
+  margin-top: 20px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7b7bff, #19c3b2, #e0489c);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring span {
+    animation: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .hint {
+    display: none;
+  }
+}

@@ -3,6 +3,7 @@ import styles from './Hero.module.css'
 import Button from '../../ui/Button'
 import { scrollToSection } from '../../../utils/smoothScroll'
 import { useTheme } from '../../../context/ThemeContext'
+import { RESUME_URL } from '../../../constants/site'
 import {
   useLowPerformanceMode,
   useMediaQuery,
@@ -149,6 +150,11 @@ export default function Hero() {
           <Button variant="secondary" size="lg" onClick={() => scrollToSection('projects')}>
             View my work
           </Button>
+          {RESUME_URL && (
+            <Button as="a" variant="ghost" size="lg" href={RESUME_URL} target="_blank" rel="noopener">
+              Resume (PDF)
+            </Button>
+          )}
         </div>
 
         <div className={`${styles.stats} ${styles.reveal}`} style={delay(340)}>

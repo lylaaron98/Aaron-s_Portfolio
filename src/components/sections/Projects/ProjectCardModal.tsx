@@ -306,7 +306,12 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
                   <h2 id="project-modal-title" className={styles.modalTitle}>
                     {project.title}
                   </h2>
-                  <p className={styles.modalDescription}>{project.description}</p>
+                  <p className={styles.modalDescription}>{project.summary}</p>
+                  <ul className={styles.modalHighlights}>
+                    {project.highlights.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
                 </div>
 
                 <div className={styles.modalActions}>
@@ -337,6 +342,13 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
                     </a>
                   )}
                 </div>
+                {!showLiveDemo && !project.github && (
+                  <p className={styles.modalAvailability}>
+                    {project.category === 'client'
+                      ? 'Client work: source and deployment are private.'
+                      : 'Source is private. Happy to walk through it on a call.'}
+                  </p>
+                )}
 
                 <section className={styles.modalSection}>
                   <h3 className={styles.modalSectionTitle}>Technology</h3>

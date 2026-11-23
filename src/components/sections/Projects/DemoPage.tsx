@@ -81,7 +81,7 @@ function DemoIndex() {
             <a href={projectDemoRoute(project.title)} className={styles.indexCard}>
               <span className={styles.indexCardMeta}>{categoryLabel(project)}</span>
               <span className={styles.indexCardTitle}>{project.title}</span>
-              <span className={styles.indexCardDesc}>{project.description}</span>
+              <span className={styles.indexCardDesc}>{project.summary}</span>
               <span className={styles.indexCardCta} aria-hidden="true">
                 Open
                 <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.9">

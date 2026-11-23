@@ -47,7 +47,7 @@ export default function About() {
         </div>
         <div className={styles.imageBlock}>
           <ProfileCard
-            avatarUrl="/assets/photo_2026-03-14_21-35-16.jpg"
+            avatarUrl="/assets/profile.webp"
             name="Aaron"
             title="Software Engineer"
             handle="lylaaron98"

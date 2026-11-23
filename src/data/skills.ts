@@ -1,79 +1,42 @@
 import type { SkillCategory } from '../types/skill'
 
-// Labels are kept short and matched to the icon map in the Skills section — long
-// strings fall back to text inside the icon circle and wrap badly.
+// Trimmed to what a reviewer should take away: the daily stack first, then the
+// tools shipped with. Icons are matched by exact name in the Skills section and
+// only where the brand mark is the real one, so nothing borrows a wrong logo.
 export const skillCategories: SkillCategory[] = [
-  {
-    title: 'Languages',
-    icon: '💻',
-    skills: ['TypeScript', 'JavaScript', 'Python', 'SQL', 'Java', 'C#', 'C++', 'HTML', 'CSS', 'VB.Net'],
-  },
   {
     title: 'Frontend',
     icon: '🎨',
-    skills: [
-      'ReactJS',
-      'Next.js',
-      'TailwindCSS',
-      'Ant Design',
-      'Shadcn UI',
-      'Mantine UI',
-      'TanStack Query',
-      'Redux Toolkit',
-      'Zustand',
-      'Context API',
-      'GSAP',
-    ],
+    skills: ['TypeScript', 'JavaScript', 'React', 'Next.js', 'Tailwind CSS', 'Ant Design', 'TanStack Query', 'Redux Toolkit', 'Zustand', 'GSAP', 'HTML & CSS'],
   },
   {
     title: 'Backend & APIs',
     icon: '⚙️',
-    skills: [
-      'Node.js',
-      'Express.js',
-      'FastAPI',
-      'Django',
-      'Supabase',
-      'Prisma',
-      'REST APIs',
-      'WebSockets',
-      'JWT Auth',
-      'RBAC',
-    ],
+    skills: ['Node.js', 'Express', 'Python', 'FastAPI', 'Django', 'REST APIs', 'WebSockets', 'Supabase', 'Prisma'],
   },
   {
-    title: 'AI & Computer Vision',
-    icon: '🧠',
-    skills: [
-      'OpenAI APIs',
-      'Claude Vision',
-      'Groq',
-      'Prompt Engineering',
-      'OpenCV',
-      'Hough Transform',
-      'Tesseract',
-      'PaddleOCR',
-      'Hugging Face',
-    ],
-  },
-  {
-    title: 'Cloud & DevOps',
-    icon: '☁️',
-    skills: ['AWS', 'AWS Lambda', 'S3 & SQS', 'Aurora', 'Azure DevOps', 'Docker', 'Kubernetes', 'Firebase', 'Vercel', 'CI/CD'],
-  },
-  {
-    title: 'Databases',
+    title: 'Data',
     icon: '🗄️',
-    skills: ['Microsoft SQL Server', 'Oracle Database', 'MySQL', 'ERD Design'],
+    skills: ['SQL Server', 'Oracle', 'MySQL', 'MongoDB'],
   },
   {
-    title: 'Testing & Quality',
+    title: 'Applied AI',
+    icon: '🧠',
+    skills: ['OpenCV', 'Tesseract OCR', 'Claude Vision', 'OpenAI APIs', 'Hugging Face'],
+  },
+  {
+    title: 'Cloud & Delivery',
+    icon: '☁️',
+    skills: ['AWS', 'Firebase', 'Vercel', 'Azure DevOps', 'Docker', 'CI/CD'],
+  },
+  {
+    title: 'Quality & Tools',
     icon: '🧪',
-    skills: ['Vitest', 'Cypress', 'Playwright', 'Postman', 'SonarQube'],
+    skills: ['Vitest', 'Playwright', 'Cypress', 'SonarQube', 'Git', 'Figma', 'Unity'],
   },
   {
-    title: 'Tools & Practices',
-    icon: '🛠️',
-    skills: ['Git', 'GitLab', 'Jira', 'Vite', 'Webpack', 'Unity', 'Figma', 'Agile / Scrum'],
+    title: 'Also shipped with',
+    icon: '🧰',
+    skills: ['C++', 'Java', 'C#', 'VB.Net', 'React Native', 'Expo'],
   },
 ]

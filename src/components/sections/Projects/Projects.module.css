@@ -150,9 +150,33 @@
   border-radius: var(--radius-lg);
 }
 
-.card:focus-visible {
+.card {
+  position: relative;
+}
+
+.card:has(.cardOpen:focus-visible) {
   outline: 2px solid var(--brand);
   outline-offset: 3px;
+}
+
+/* The title button stretches over the whole card, so any click on the card
+   opens it, while the GitHub and demo links sit above it and stay separate. */
+.cardOpen {
+  all: unset;
+  cursor: pointer;
+}
+
+.cardOpen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.cardLinks {
+  position: relative;
+  z-index: 2;
 }
 
 .featured {
@@ -251,7 +275,7 @@
 }
 
 .card:hover .cardCta,
-.card:focus-visible .cardCta {
+.card:has(.cardOpen:focus-visible) .cardCta {
   color: var(--brand);
   gap: var(--space-3);
 }
@@ -610,4 +634,36 @@
     transition: opacity var(--dur-2) linear;
     transform: none !important;
   }
+}
+
+.modalHighlights {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fg-soft);
+  line-height: 1.6;
+}
+
+.modalHighlights li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.modalHighlights li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.modalAvailability {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--fg-mute);
 }

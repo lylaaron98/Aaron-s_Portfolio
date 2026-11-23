@@ -1,139 +1,84 @@
+import type { ComponentType } from 'react'
+import {
+  SiTypescript, SiJavascript, SiReact, SiNextdotjs, SiTailwindcss, SiAntdesign, SiReactquery,
+  SiRedux, SiGreensock, SiHtml5, SiNodedotjs, SiExpress, SiPython, SiFastapi, SiDjango,
+  SiSocketdotio, SiSupabase, SiPrisma, SiMysql, SiMongodb, SiOpencv, SiAnthropic, SiOpenai,
+  SiHuggingface, SiFirebase, SiVercel, SiDocker, SiGithubactions, SiVitest, SiCypress,
+  SiSonarqubeserver, SiGit, SiFigma, SiUnity, SiCplusplus, SiOpenjdk, SiDotnet, SiExpo,
+} from 'react-icons/si'
 import styles from './Skills.module.css'
 import { useGsapStaggerReveal } from '../../../hooks/useGsapReveal'
 import { skillCategories } from '../../../data/skills'
 import SectionContainer from '../../ui/SectionContainer'
 import Card from '../../ui/Card'
-import type { ComponentType } from 'react'
-import {
-  SiHtml5, SiJavascript, SiTypescript, SiPython, SiMysql,
-  SiCplusplus, SiDotnet,
-  SiNextdotjs, SiReact, SiNodedotjs, SiExpress, SiTailwindcss,
-  SiAntdesign, SiDjango, SiTensorflow,
-  SiGit, SiGitlab, SiDocker, SiKubernetes, SiWebpack, SiJira,
-  SiMongodb,
-  SiFastapi, SiSupabase, SiPrisma, SiOpencv, SiFirebase, SiVercel,
-  SiFigma, SiUnity, SiVite, SiCypress, SiPostman, SiSonarqubeserver,
-  SiRedux, SiReactquery, SiGraphql, SiOpenai, SiHuggingface,
-  SiSocketdotio, SiJsonwebtokens, SiWebpack as SiBundler,
-} from 'react-icons/si'
-import { DiCss3, DiJava, DiMsqlServer } from 'react-icons/di'
-import { FaDatabase } from 'react-icons/fa'
-import { VscAzureDevops } from 'react-icons/vsc'
-import { SiSharp } from 'react-icons/si'
 
-const skillIconMap: Record<string, ComponentType<{ size?: number; color?: string }>> = {
-  'HTML': SiHtml5,
-  'CSS': DiCss3,
-  'JavaScript': SiJavascript,
-  'TypeScript': SiTypescript,
-  'Python': SiPython,
-  'SQL': SiMysql,
-  'Java': DiJava,
-  'C++': SiCplusplus,
-  'C#': SiSharp,
-  'VB.Net': SiDotnet,
-  'VBA': SiDotnet,
+type Icon = ComponentType<{ size?: number; 'aria-hidden'?: boolean; className?: string }>
+
+// Exact brand marks only. A skill without a true logo shows as a plain chip
+// rather than borrowing a neighbour's icon.
+const skillIcons: Record<string, Icon> = {
+  TypeScript: SiTypescript,
+  JavaScript: SiJavascript,
+  React: SiReact,
+  'React Native': SiReact,
   'Next.js': SiNextdotjs,
-  'ReactJS': SiReact,
-  'React Bits': SiReact,
-  'shadcn/ui': SiReact,
-  'React Icons': SiReact,
-  'React Three Fiber': SiReact,
-  'Node.js': SiNodedotjs,
-  'Express.js': SiExpress,
-  'TailwindCSS': SiTailwindcss,
+  'Tailwind CSS': SiTailwindcss,
   'Ant Design': SiAntdesign,
-  'Django': SiDjango,
-  'TensorFlow': SiTensorflow,
-  'Git': SiGit,
-  'GitLab': SiGitlab,
-  'Azure DevOps': VscAzureDevops,
-  'Docker': SiDocker,
-  'Kubernetes': SiKubernetes,
-  'Webpack': SiWebpack,
-  'Boomi Integration': SiDotnet,
-  'JIRA': SiJira,
-  'Microsoft SQL Server': DiMsqlServer,
-  'Oracle Database': FaDatabase,
-  'MySQL': SiMysql,
-  'MongoDB': SiMongodb,
-  // Added alongside the 2026 resume refresh
-  'React': SiReact,
-  'Shadcn UI': SiReact,
-  'Mantine UI': SiReact,
-  'Context API': SiReact,
   'TanStack Query': SiReactquery,
   'Redux Toolkit': SiRedux,
-  'Zustand': SiReact,
-  'GSAP': SiJavascript,
-  'Code Splitting': SiBundler,
-  'Lazy Loading': SiBundler,
-  'Memoization': SiBundler,
-  'FastAPI': SiFastapi,
-  'Supabase': SiSupabase,
-  'Prisma': SiPrisma,
-  'REST APIs': SiGraphql,
-  'WebSockets': SiSocketdotio,
-  'JWT Auth': SiJsonwebtokens,
-  'RBAC': SiJsonwebtokens,
+  GSAP: SiGreensock,
+  'HTML & CSS': SiHtml5,
+  'Node.js': SiNodedotjs,
+  Express: SiExpress,
+  Python: SiPython,
+  FastAPI: SiFastapi,
+  Django: SiDjango,
+  WebSockets: SiSocketdotio,
+  Supabase: SiSupabase,
+  Prisma: SiPrisma,
+  MySQL: SiMysql,
+  MongoDB: SiMongodb,
+  OpenCV: SiOpencv,
+  'Claude Vision': SiAnthropic,
   'OpenAI APIs': SiOpenai,
-  'Claude': SiOpenai,
-  'Claude Vision': SiOpenai,
-  'Groq': SiOpenai,
-  'Prompt Engineering': SiOpenai,
-  'OpenCV': SiOpencv,
-  'Hough Transform': SiOpencv,
-  'Tesseract': SiOpencv,
-  'PaddleOCR': SiOpencv,
   'Hugging Face': SiHuggingface,
-  'AWS': FaDatabase,
-  'AWS Lambda': FaDatabase,
-  'S3 & SQS': FaDatabase,
-  'Aurora': FaDatabase,
-  'Firebase': SiFirebase,
-  'Vercel': SiVercel,
-  'CI/CD': VscAzureDevops,
-  'ERD Design': FaDatabase,
-  'Vitest': SiVite,
-  'Cypress': SiCypress,
-  'Playwright': SiCypress,
-  'Postman': SiPostman,
-  'SonarQube': SiSonarqubeserver,
-  'Vite': SiVite,
-  'Unity': SiUnity,
-  'Figma': SiFigma,
-  'Jira': SiJira,
-  'Agile / Scrum': SiJira,
+  Firebase: SiFirebase,
+  Vercel: SiVercel,
+  Docker: SiDocker,
+  'CI/CD': SiGithubactions,
+  Vitest: SiVitest,
+  Cypress: SiCypress,
+  SonarQube: SiSonarqubeserver,
+  Git: SiGit,
+  Figma: SiFigma,
+  Unity: SiUnity,
+  'C++': SiCplusplus,
+  Java: SiOpenjdk,
+  'VB.Net': SiDotnet,
+  'C#': SiDotnet,
+  Expo: SiExpo,
 }
 
 export default function Skills() {
-  const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`, { stagger: 0.12 })
+  const ref = useGsapStaggerReveal<HTMLDivElement>(`.${styles.card}`)
 
   return (
     <SectionContainer id="skills" number="02" title="Skills" meta="stack">
       <div ref={ref} className={styles.grid}>
         {skillCategories.map((cat) => (
-          <Card
-            key={cat.title}
-            variant="navy"
-            topAccent
-            tilt
-            className={styles.card}
-          >
-            <div className={styles.cardHeader}>
-              <h3 className={styles.cardTitle}>{cat.title}</h3>
-            </div>
-            <div className={styles.skillList}>
+          <Card key={cat.title} variant="navy" topAccent className={styles.card}>
+            <h3 className={styles.cardTitle}>{cat.title}</h3>
+            <ul className={styles.chips}>
               {cat.skills.map((skill) => {
-                const Icon = skillIconMap[skill]
+                const SkillIcon = skillIcons[skill]
                 return (
-                  <div key={skill} className={styles.skillBall} title={skill}>
-                    {Icon ? <Icon size={28} color="var(--white)" /> : <span className={styles.fallbackText}>{skill}</span>}
-                    <span className={styles.skillLabel}>{skill}</span>
-                  </div>
+                  <li key={skill} className={styles.chip}>
+                    {SkillIcon && <SkillIcon size={15} aria-hidden className={styles.chipIcon} />}
+                    {skill}
+                  </li>
                 )
               })}
-            </div>
+            </ul>
           </Card>
         ))}
       </div>

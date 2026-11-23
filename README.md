@@ -1,113 +1,80 @@
-# Aaron's Portfolio
+# Aaron Lee — Portfolio
 
-Personal portfolio site for Aaron, built as a Vite + React + TypeScript single-page app with a hash-based demo view for project walkthroughs.
+Personal portfolio for Aaron Lee, full-stack developer in Singapore. A Vite + React + TypeScript single-page app, deployed on Vercel at <https://aaron-s-portfolio.vercel.app>.
 
 ## Stack
 
-- React 19
-- TypeScript
-- Vite 7
-- CSS Modules
-- GSAP + ScrollTrigger
+- React 19, TypeScript (strict), Vite 7
+- CSS Modules on a shared token file (`src/styles/tokens.css`), light and dark themes
+- GSAP for scroll reveals; a small raw-WebGL shader (`Silk`) behind the hero
 - react-icons
-- Web3Forms for contact delivery
-- @react-three/fiber and three for the animated Silk hero background
+- Web3Forms + hCaptcha for the contact form
+- Playwright + axe-core for end-to-end and accessibility checks
 
-## Current Features
+## Routes
 
-- Hero section with GSAP entrance animation, rotating role text, and adaptive animated background
-- About, Skills, Experience, Projects, and Contact sections rendered in a single-page portfolio flow
-- Shared `SectionContainer` wrapper with animated section titles and ripple background accents
-- Theme toggle persisted in `localStorage`
-- Project cards with GitHub links and a top-right icon that opens the demo view
-- Demo page available at `#/projects/demo`
-- Contact form wired through Web3Forms when `VITE_WEB3FORMS_ACCESS_KEY` is configured
-- Live email validation with `validator.js` and hCaptcha spam protection for contact submissions
-- Global scroll-to-top control
+| Path | View |
+| --- | --- |
+| `/` | Portfolio (Hero, About, Skills, Experience, Projects, Contact). `/#projects` etc. scroll to a section. |
+| `/projects` | Index of every project demo |
+| `/projects/<slug>` | One project: description, live/repo links, screenshots and recordings |
 
-## Routing Model
+There is no router library. `src/utils/router.ts` is a ~60-line History API helper (`useLocation`, `navigate`, and a click interceptor for same-origin links). Old `#/projects/demo/<slug>` links are redirected to the new paths on load.
 
-This project does not use `react-router-dom`.
+At build time a Vite plugin in `vite.config.ts` writes `dist/projects/<slug>/index.html` for each project with its own title, description, canonical and Open Graph tags, plus `dist/sitemap.xml`. `vercel.json` rewrites every other path to `index.html`.
 
-The app uses `window.location.hash` in `src/app/App.tsx` to switch between:
+## Editing content
 
-- the main portfolio view
-- the project demo view at `#/projects/demo`
+| What | Where |
+| --- | --- |
+| Projects (title, summary, highlights, tech, links, `featured`) | `src/data/projects.ts` |
+| Project screenshots and videos | `public/assets/<project>/`, `public/videos/`, mapped in `src/data/projectMedia.ts` |
+| Experience | `src/data/experience.ts` |
+| Skills | `src/data/skills.ts` |
+| Hero and About copy | `src/components/sections/Hero/index.tsx`, `src/components/sections/About/index.tsx` |
+| Site URL and résumé link | `src/constants/site.ts` |
+| Social preview image | `public/og-image.jpg` (1200×630) |
 
-Hash links such as `#about`, `#skills`, and `#projects` are still used for in-page scrolling on the main view.
+**Résumé button.** Drop the PDF into `public/` (for example `public/aaron-lee-resume.pdf`) and set `RESUME_URL = '/aaron-lee-resume.pdf'` in `src/constants/site.ts`. The Hero shows a "Resume (PDF)" button whenever that value is non-empty.
 
-## Project Structure
+**Employer names.** The bank, the government agency and the Japanese client are anonymised in `src/data/experience.ts` and in the Hero/About copy. Change those strings to name them.
 
-```text
-src/
-  app/                App shell and hash-route switching
-  api/                External service adapters such as Web3Forms
-  components/
-    layout/           Navbar and Footer
-    sections/         Hero, About, Skills, Experience, Projects, Contact
-    ui/               Shared primitives such as Card, Badge, ShinyText, ScrollToTop
-  constants/          Shared route constants
-  context/            Theme context
-  data/               Static portfolio content
-  hooks/              GSAP reveal hooks and viewport helpers
-  styles/             Global stylesheet
-  types/              Shared TypeScript interfaces
-  utils/              Helpers such as smooth scrolling and class merging
-```
+**Images.** Use WebP. Keep videos at 720p H.264 (`ffmpeg -vf scale=-2:720 -c:v libx264 -crf 30 -preset slow -movflags +faststart`); they are served straight from `public/videos/`.
 
-## Local Development
+## Local development
 
 ```bash
 npm install
-npm run dev
+npm run dev          # http://localhost:5173
 ```
 
-## Build
+## Checks
 
 ```bash
+npm run lint
+npm run typecheck
 npm run build
+npx playwright install chromium   # once
+npm run test:e2e                   # builds must exist: runs against `vite preview`
 ```
 
-Production output is written to `dist/`.
+The Playwright suite (`e2e/smoke.spec.ts`) runs on a desktop and a mobile viewport. It checks that every section renders without broken local requests, that every project page and its media load, that the project dialog opens and closes, that legacy hash links redirect, that the first visit follows the OS colour scheme, and that axe finds no serious or critical WCAG 2 AA violations in either theme.
 
-## Environment Variables
+If you already have a Chromium build installed, set `PW_CHROMIUM_PATH=/path/to/chromium` to use it instead.
 
-The contact form can send via Web3Forms if these are defined:
+GitHub Actions (`.github/workflows/ci.yml`) runs lint, build and the Playwright suite on every pull request and on pushes to `main`.
+
+## Environment variables
+
+Copy `.env.example` to `.env`:
 
 ```bash
 VITE_WEB3FORMS_ACCESS_KEY=
 VITE_CONTACT_FROM_NAME=Aaron Lee Portfolio
 ```
 
-Copy `.env.example` to `.env` and fill in your Web3Forms access key.
+Without the key the form shows a configuration error rather than a false success. Turn on hCaptcha for the form in the Web3Forms dashboard to enforce it server-side.
 
-Web3Forms does not require you to maintain a separate email template in the dashboard for this basic setup. The app submits these fields directly:
+## Deployment
 
-```text
-access_key
-from_name
-subject
-name
-email
-replyto
-message
-h-captcha-response
-botcheck
-```
-
-If the required Web3Forms key is missing, the form shows a clear configuration error instead of reporting a false success.
-
-To enforce captcha on submitted forms, enable `hCaptcha` for your form inside the Web3Forms dashboard settings.
-
-## Deployment Notes
-
-- `vite.config.ts` uses `base: './'` so built assets stay relative for static hosting.
-- No `vercel.json` is required for the current setup.
-- The app can be deployed to Vercel, GitHub Pages, Netlify, or any other static host that serves `dist/`.
-
-## Maintenance Notes
-
-- Update project cards in `src/data/projects.ts`
-- Update skills in `src/data/skills.ts`
-- Update experience entries in `src/data/experience.ts`
-- Update contact links inside the Hero, Contact, and Footer components if profile URLs change
+Vercel builds every push through its GitHub integration: pull requests get a preview URL and `main` goes to production. Build command `npm run build`, output `dist/`. `vercel.json` holds the SPA rewrite and long-lived cache headers for `/assets/*`.

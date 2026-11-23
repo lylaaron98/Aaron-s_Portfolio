@@ -4,7 +4,6 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
 } from 'react'
 import type { Project } from '../../../types/project'
 import { useLowPerformanceMode } from '../../../hooks/useMediaQuery'
@@ -31,17 +30,12 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project, index, lowPerformanceMode, onOpen }: ProjectCardProps) {
-  const open = (element: HTMLElement) => {
-    onOpen({ project, originRect: element.getBoundingClientRect(), opener: element })
+  // The title is the card's one button; a stretched ::after makes the whole
+  // card clickable without nesting the GitHub and demo links inside a button.
+  const open = (opener: HTMLElement) => {
+    const card = opener.closest<HTMLElement>(`.${styles.card}`) ?? opener
+    onOpen({ project, originRect: card.getBoundingClientRect(), opener })
   }
-
-  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== 'Enter' && event.key !== ' ') return
-    event.preventDefault()
-    open(event.currentTarget)
-  }
-
-  const stopPropagation = (event: ReactMouseEvent<HTMLAnchorElement>) => event.stopPropagation()
 
   return (
     <Card
@@ -49,12 +43,6 @@ function ProjectCard({ project, index, lowPerformanceMode, onOpen }: ProjectCard
       topAccent
       tilt={!lowPerformanceMode}
       className={cx(styles.card, project.featured && styles.featured)}
-      role="button"
-      tabIndex={0}
-      aria-haspopup="dialog"
-      aria-label={`Open details for ${project.title}`}
-      onClick={(event) => open(event.currentTarget)}
-      onKeyDown={handleKeyDown}
     >
       <div className={styles.cardTop}>
         <span className={styles.cardIndex}>{String(index + 1).padStart(2, '0')}</span>
@@ -65,7 +53,6 @@ function ProjectCard({ project, index, lowPerformanceMode, onOpen }: ProjectCard
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${project.title} repository`}
-              onClick={stopPropagation}
               className={styles.cardLink}
             >
               <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17" aria-hidden="true">
@@ -75,8 +62,7 @@ function ProjectCard({ project, index, lowPerformanceMode, onOpen }: ProjectCard
           )}
           <a
             href={projectDemoRoute(project.title)}
-            aria-label={`${project.title} demo page`}
-            onClick={stopPropagation}
+            aria-label={`${project.title} project page`}
             className={styles.cardLink}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="17" height="17" aria-hidden="true">
@@ -92,8 +78,17 @@ function ProjectCard({ project, index, lowPerformanceMode, onOpen }: ProjectCard
         </Badge>
       )}
 
-      <h3 className={styles.cardTitle}>{project.title}</h3>
-      <p className={styles.cardDesc}>{project.description}</p>
+      <h3 className={styles.cardTitle}>
+        <button
+          type="button"
+          className={styles.cardOpen}
+          aria-haspopup="dialog"
+          onClick={(event) => open(event.currentTarget)}
+        >
+          {project.title}
+        </button>
+      </h3>
+      <p className={styles.cardDesc}>{project.summary}</p>
 
       <div className={styles.techStack}>
         {project.tech.slice(0, 5).map((tech) => (

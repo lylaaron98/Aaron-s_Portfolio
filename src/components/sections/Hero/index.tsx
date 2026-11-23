@@ -3,6 +3,7 @@ import styles from './Hero.module.css'
 import Button from '../../ui/Button'
 import { scrollToSection } from '../../../utils/smoothScroll'
 import { useTheme } from '../../../context/ThemeContext'
+import { RESUME_URL } from '../../../constants/site'
 import {
   useLowPerformanceMode,
   useMediaQuery,
@@ -16,7 +17,7 @@ const ROLES = ['Full Stack Developer', 'AI Engineer', 'Frontend Engineer'] as co
 const STATS: ReadonlyArray<{ value: string; label: string }> = [
   { value: '2+', label: 'Years shipping' },
   { value: '6', label: 'Production systems' },
-  { value: '3', label: 'Industries' },
+  { value: '4', label: 'Industries' },
 ]
 
 /** Stagger helper — feeds the CSS entrance its per-element delay. */
@@ -137,9 +138,9 @@ export default function Hero() {
         <p className={`${styles.lede} ${styles.reveal}`} style={delay(210)}>
           Production experience across banking, government, sustainability and Japanese
           enterprise clients. I modernised mission-critical treasury systems at a{' '}
-          <strong>Corporate Bank</strong> and built <strong>Stakeholders'&rsquo;s</strong> real-time land
-          bidding platform. Now working independently on applied AI — computer vision and OCR
-          pipelines, AR/VR prototypes, and full-stack products shipped end to end.
+          <strong>corporate bank</strong> and built a <strong>government agency&rsquo;s</strong>{' '}
+          real-time land bidding platform. Now working independently on applied AI — computer
+          vision and OCR pipelines, AR/VR prototypes, and full-stack products shipped end to end.
         </p>
 
         <div className={`${styles.actions} ${styles.reveal}`} style={delay(280)}>
@@ -149,6 +150,11 @@ export default function Hero() {
           <Button variant="secondary" size="lg" onClick={() => scrollToSection('projects')}>
             View my work
           </Button>
+          {RESUME_URL && (
+            <Button as="a" variant="ghost" size="lg" href={RESUME_URL} target="_blank" rel="noopener">
+              Resume (PDF)
+            </Button>
+          )}
         </div>
 
         <div className={`${styles.stats} ${styles.reveal}`} style={delay(340)}>

@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom'
 import type { Project } from '../../../types/project'
 import Badge from '../../ui/Badge'
 import { projectDemoRoute } from '../../../constants/routes'
+import { getProjectStills } from '../../../data/projectMedia'
 import { cx } from '../../../utils/classNames'
 import styles from './Projects.module.css'
 
@@ -79,7 +80,10 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [phase, setPhase] = useState<ModalPhase>('closed')
 
-  const galleryImages = useMemo(() => displayState?.project.images ?? [], [displayState])
+  const galleryImages = useMemo(
+    () => (displayState ? getProjectStills(displayState.project) : []),
+    [displayState],
+  )
 
   const clearPendingClose = useCallback(() => {
     if (closeTimeoutRef.current !== null) {
@@ -101,16 +105,22 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     setPhase('closed')
   }, [])
 
-  // Adopt a newly opened project.
+  // Adopt a newly opened project. Done while rendering (React's "adjust state
+  // when a prop changes" pattern) rather than in an effect, so the dialog does
+  // not paint one frame with the previous project first.
+  const [adoptedState, setAdoptedState] = useState<ProjectModalState | null>(null)
+  if (state && state !== adoptedState) {
+    setAdoptedState(state)
+    setDisplayState(state)
+    setActiveImage(getProjectStills(state.project)[0] ?? null)
+    setPhase('opening')
+  }
+
+  // Timers live in refs, so cancelling them is a side effect, not render work.
   useEffect(() => {
     if (!state) return
-
     clearPendingClose()
     clearPendingFrame()
-
-    setDisplayState(state)
-    setActiveImage(state.project.images?.[0] ?? null)
-    setPhase('opening')
   }, [clearPendingClose, clearPendingFrame, state])
 
   /**
@@ -296,7 +306,12 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
                   <h2 id="project-modal-title" className={styles.modalTitle}>
                     {project.title}
                   </h2>
-                  <p className={styles.modalDescription}>{project.description}</p>
+                  <p className={styles.modalDescription}>{project.summary}</p>
+                  <ul className={styles.modalHighlights}>
+                    {project.highlights.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
                 </div>
 
                 <div className={styles.modalActions}>
@@ -327,6 +342,13 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
                     </a>
                   )}
                 </div>
+                {!showLiveDemo && !project.github && (
+                  <p className={styles.modalAvailability}>
+                    {project.category === 'client'
+                      ? 'Client work: source and deployment are private.'
+                      : 'Source is private. Happy to walk through it on a call.'}
+                  </p>
+                )}
 
                 <section className={styles.modalSection}>
                   <h3 className={styles.modalSectionTitle}>Technology</h3>

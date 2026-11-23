@@ -3,60 +3,84 @@ import path from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { projects } from './src/data/projects'
+import { PROJECTS_DEMO_ROUTE, projectDemoRoute } from './src/constants/routes'
+import { SITE_URL } from './src/constants/site'
+
+interface PageMeta {
+  path: string
+  title: string
+  description: string
+}
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 /**
- * Keep the demo screen recordings out of the build.
+ * Writes a real HTML file for every project page, each with its own title,
+ * description, canonical URL and social preview tags, plus sitemap.xml.
  *
- * The four .mp4 files under public/assets are ~274 MB and were making dist
- * 282 MB. They are never fetched from the deployed site: DemoPage streams them
- * from GitHub's LFS media host, whose URLs resolve against the *repository*
- * path `public/assets/...`. So the files have to stay exactly where they are in
- * git — moving them would break the hosted URLs — but there is no reason to
- * copy them into the bundle. Vite's publicDir is all-or-nothing, so the copy is
- * undone after the fact.
+ * The app is still a client-rendered SPA; this only makes sure crawlers and
+ * link previews (LinkedIn, Slack) see the right metadata for /projects/<slug>
+ * without running JavaScript. Vercel serves these files before falling back
+ * to index.html.
  */
-function stripPublicVideos(): Plugin {
-  const EXTENSIONS = new Set(['.mp4', '.mov', '.webm'])
-
+function prerenderProjectPages(): Plugin {
   return {
-    name: 'strip-public-videos',
+    name: 'prerender-project-pages',
     apply: 'build',
     closeBundle() {
       const outDir = path.resolve(__dirname, 'dist')
-      if (!fs.existsSync(outDir)) return
+      const template = fs.readFileSync(path.join(outDir, 'index.html'), 'utf8')
 
-      let removed = 0
-      let bytes = 0
+      const pages: PageMeta[] = [
+        {
+          path: PROJECTS_DEMO_ROUTE,
+          title: 'Project demos — Aaron Lee',
+          description:
+            'Recordings, screenshots and live builds for client and personal projects by Aaron Lee, software engineer in Singapore.',
+        },
+        ...projects.map((project) => ({
+          path: projectDemoRoute(project.title),
+          title: `${project.title} — Aaron Lee`,
+          description: project.summary,
+        })),
+      ]
 
-      const walk = (dir: string) => {
-        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-          const full = path.join(dir, entry.name)
-          if (entry.isDirectory()) {
-            walk(full)
-            // Tidy up directories the removals just emptied.
-            if (fs.readdirSync(full).length === 0) fs.rmdirSync(full)
-            continue
-          }
-          if (!EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue
+      for (const page of pages) {
+        const url = `${SITE_URL}${page.path}`
+        const title = escapeHtml(page.title)
+        const description = escapeHtml(page.description)
 
-          bytes += fs.statSync(full).size
-          fs.unlinkSync(full)
-          removed += 1
-        }
+        const html = template
+          .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
+          .replace(/(<meta\s+name="description"\s+content=")[^"]*(")/, `$1${description}$2`)
+          .replace(/(<link\s+rel="canonical"\s+href=")[^"]*(")/, `$1${url}$2`)
+          .replace(/(<meta\s+property="og:url"\s+content=")[^"]*(")/, `$1${url}$2`)
+          .replace(/(<meta\s+property="og:title"\s+content=")[^"]*(")/, `$1${title}$2`)
+          .replace(/(<meta\s+property="og:description"\s+content=")[^"]*(")/, `$1${description}$2`)
+
+        const file = path.join(outDir, page.path.replace(/^\//, ''), 'index.html')
+        fs.mkdirSync(path.dirname(file), { recursive: true })
+        fs.writeFileSync(file, html)
       }
 
-      walk(outDir)
+      const today = new Date().toISOString().slice(0, 10)
+      const urls = ['/', ...pages.map((page) => page.path)]
+      const sitemap =
+        '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+        urls.map((p) => `  <url><loc>${SITE_URL}${p === '/' ? '/' : p}</loc><lastmod>${today}</lastmod></url>`).join('\n') +
+        '\n</urlset>\n'
+      fs.writeFileSync(path.join(outDir, 'sitemap.xml'), sitemap)
 
-      if (removed > 0) {
-        const mb = (bytes / 1024 / 1024).toFixed(1)
-        this.info(`stripped ${removed} video file(s) from dist, saving ${mb} MB`)
-      }
+      this.info(`prerendered ${pages.length} project pages and sitemap.xml`)
     },
   }
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), stripPublicVideos()],
+  plugins: [react(), tailwindcss(), prerenderProjectPages()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -78,5 +102,6 @@ export default defineConfig({
       },
     },
   },
-  base: './',
+  // Absolute, so assets resolve from nested routes such as /projects/<slug>.
+  base: '/',
 })

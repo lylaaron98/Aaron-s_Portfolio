@@ -69,8 +69,6 @@ export default function SectionContainer({
 
     if (prefersReducedMotion) return
 
-    el.style.opacity = '0'
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return
@@ -78,12 +76,11 @@ export default function SectionContainer({
 
         el.animate(
           [
-            { opacity: 0, transform: 'translate3d(0, 20px, 0)' },
+            { opacity: 0.4, transform: 'translate3d(0, 16px, 0)' },
             { opacity: 1, transform: 'translate3d(0, 0, 0)' },
           ],
           { duration: 640, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'none' },
         )
-        el.style.opacity = ''
       },
       { rootMargin: '0px 0px -10% 0px', threshold: 0 },
     )

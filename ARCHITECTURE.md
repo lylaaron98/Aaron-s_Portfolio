@@ -1,184 +1,88 @@
-# Architecture - Aaron's Portfolio
+# Architecture
 
-This document describes the current application structure as of March 12, 2026.
+Last updated November 2026.
 
 ## Overview
 
-The portfolio is a client-rendered Vite application built with React and TypeScript. It has two UI states:
-
-- the main single-page portfolio
-- a project demo view selected through the hash route `#/projects/demo`
-
-There is no router library in the current implementation. Route selection is handled directly in `src/app/App.tsx` by reading `window.location.hash`.
-
-## Runtime Composition
-
-Main view:
+A client-rendered Vite + React 19 + TypeScript app. Three views share one shell:
 
 ```text
 ThemeProvider
   Navbar
   main
-    Hero
-    About
-    Skills
-    Experience
-    Projects
-    Contact
+    /                 Hero, About, Skills, Experience, Projects, Contact
+    /projects         DemoPage (index)
+    /projects/<slug>  DemoPage (one project)
   Footer
   ScrollToTop
 ```
 
-Demo view:
+`src/app/App.tsx` picks the view from `useLocation().pathname`, sets `document.title` per route, scrolls to `location.hash` on the home view, and replaces unknown paths with `/`.
 
-```text
-ThemeProvider
-  Navbar
-  main
-    DemoPage
-  ScrollToTop
-```
-
-## Directory Layout
+## Directory layout
 
 ```text
 src/
-  api/
-    contact.ts              Web3Forms adapter
-  app/
-    App.tsx                 Root composition and hash-route switching
+  api/contact.ts          Web3Forms adapter
+  app/App.tsx             Shell and view selection
   components/
-    layout/
-      Navbar/
-      Footer/
-    sections/
-      Hero/
-      About/
-      Skills/
-      Experience/
-      Projects/
-        DemoPage.tsx
-    ui/
-      Badge/
-      Button/
-      Card/
-      ScrollToTop/
-      SectionContainer/
-      ShinyText/
+    layout/               Navbar, Footer
+    sections/             Hero, About, Skills, Experience, Projects (+ DemoPage), Contact
+    ui/                   Button, Card, Badge, SectionContainer, ChromaGrid, Silk (WebGL), ...
   constants/
-    routes.ts               Shared hash-route constants
-  context/
-    ThemeContext.tsx
-  data/
-    navigation.ts
-    skills.ts
-    experience.ts
-    projects.ts
-  hooks/
-    useGsapReveal.ts
-    useMediaQuery.ts
-    useMousePosition.ts
-    useScrollProgress.ts
-  styles/
-    globals.css
-  utils/
-    classNames.ts
-    smoothScroll.ts
+    routes.ts             Path helpers: slugifyProject, projectDemoRoute, demoSlugFromPath, pathFromLegacyHash
+    site.ts               SITE_URL, RESUME_URL
+  context/ThemeContext    Theme state, mirrored on <html data-theme>
+  data/                   projects, projectMedia, experience, skills, navigation
+  hooks/                  useGsapReveal, useMediaQuery, useTilt
+  styles/                 tokens.css (primitives → semantic tokens), globals.css
+  types/project.ts
+  utils/                  router.ts, smoothScroll.ts, classNames.ts
+e2e/smoke.spec.ts         Playwright + axe suite
 ```
 
-## State and Data Flow
+## Routing
 
-Most content is static and data-driven.
+`src/utils/router.ts` wraps the History API:
 
-- `src/data/projects.ts` drives the Projects grid and DemoPage content
-- `src/data/skills.ts` drives the Skills categories
-- `src/data/experience.ts` drives the Experience timeline
+- `useLocation()` is a `useSyncExternalStore` over `popstate`, `hashchange` and an internal `app:navigate` event.
+- `navigate(href, { replace })` pushes or replaces state and fires `app:navigate`.
+- `interceptLinkClicks()` turns plain clicks on same-origin `<a>` elements whose pathname differs from the current one into `navigate()` calls. Modified clicks, `target`, `download` and external links are left to the browser.
 
-Local state is used for interactive behavior:
+So components use ordinary `<a href="/projects/otodecks">` links and stay crawlable.
 
-- `App.tsx`: tracks the current hash and whether the demo route is active
-- `ThemeContext.tsx`: stores dark/light theme and persists it to `localStorage`
-- `Hero/index.tsx`: manages the rotating role text
-- `Contact/index.tsx`: manages form inputs, success state, and submit errors
-- `Navbar/index.tsx`: tracks scroll direction and condensed header styling
+## Prerendered project pages
 
-## Navigation Model
+`vite.config.ts` has a `closeBundle` plugin that, after the client build, copies `dist/index.html` into `dist/projects/index.html` and `dist/projects/<slug>/index.html`, swapping in each project's title, description, canonical URL and Open Graph tags. It also writes `dist/sitemap.xml`. The body is still the client-rendered app; the point is per-page metadata for link previews and search. `tsconfig.node.json` includes the data and constants files the plugin imports.
 
-Navigation is split across two patterns:
+## Theme
 
-- In-page navigation uses anchor hashes such as `#hero`, `#about`, and `#projects`
-- Cross-view navigation uses the hash route constant in `src/constants/routes.ts`
+An inline script in `index.html` resolves the theme (saved choice, else `prefers-color-scheme`) and sets `<html data-theme>` before first paint. `ThemeContext` reads that attribute as its initial state and writes `localStorage` only when the user toggles, so an untouched visitor keeps following their OS.
 
-`App.tsx` handles both concerns:
+## Styling
 
-- if the hash starts with `#/`, the app treats it as a view switch
-- otherwise it uses `smoothScrollTo()` to scroll to the matching section in the main view
+`tokens.css` defines raw primitives (the aurora palette, spacing, type scale) and semantic tokens (`--bg`, `--fg`, `--fg-soft`, `--fg-mute`, `--brand`, `--line`, ...) for both themes. Components use CSS Modules and only semantic tokens. Small text colours are chosen to meet WCAG AA (4.5:1) in both themes; the axe test enforces it.
 
-This keeps deployment simple on static hosts and avoids server rewrite requirements.
+## Motion
 
-## Styling System
+- `useGsapReveal` / `useGsapStaggerReveal` animate `transform` only. Content is never hidden with `opacity: 0`, so it stays visible to crawlers, screenshots and users if JavaScript or GSAP is slow.
+- `SectionContainer` header reveals use the Web Animations API rather than GSAP.
+- `prefers-reduced-motion` and a low-performance heuristic switch off the reveals, the hero shader and the ripple grid.
 
-The styling model is split into:
+## Projects UI
 
-- `src/styles/globals.css` for tokens, reset rules, and global utilities
-- co-located CSS Modules for component-specific styling
+- Cards: the title is a `<button>` inside the `<h3>` whose `::after` stretches over the card, so the whole card is clickable without nesting interactive elements. Live/repo links sit above it with `z-index`.
+- The dialog (`ProjectCardModal`) animates from the card's rect, traps focus, closes on Escape, and shows the summary, highlights, stills (`getProjectStills`) and links.
+- `DemoPage` renders the full media gallery (`buildProjectItems`) with a lightbox.
 
-Shared visual primitives:
+## Media
 
-- `Card` provides optional hover lift, gradient overlay, and pointer-based tilt
-- `Badge` is used for tech chips and labels
-- `ShinyText` handles animated gradient text
-- `SectionContainer` standardizes spacing, title layout, and section backgrounds
+Screenshots are WebP under `public/assets/<project>/`. Demo videos are 720p H.264 MP4s under `public/videos/` (no Git LFS). Vercel serves `/assets/*` with immutable cache headers.
 
-The current UI also supports dark/light theme switching via the `data-theme` attribute on `document.documentElement`.
+## Contact
 
-## Animation Strategy
+`src/api/contact.ts` posts to Web3Forms with an hCaptcha token. Without `VITE_WEB3FORMS_ACCESS_KEY` the form reports a configuration error instead of pretending to send.
 
-Animation is primarily GSAP-based.
+## Testing and CI
 
-- `Hero` uses a GSAP timeline for staged entrance animation
-- `Navbar` uses GSAP for hide-on-scroll transitions
-- `useGsapReveal()` reveals a single element on first viewport entry
-- `useGsapStaggerReveal()` reveals child collections with staggered timing
-- `SectionContainer` animates section titles with `ScrollTrigger`
-
-Motion is reduced when `prefers-reduced-motion` is detected, and some heavier background effects are disabled on compact viewports.
-
-## Contact Flow
-
-The contact form submits through `src/api/contact.ts`, which posts to Web3Forms.
-
-Required variables:
-
-```text
-VITE_WEB3FORMS_ACCESS_KEY
-```
-
-If that variable is missing, the app warns and safely avoids attempting delivery.
-
-## Build and Deployment
-
-Build command:
-
-```bash
-npm run build
-```
-
-This runs:
-
-```bash
-tsc -b && vite build
-```
-
-Key deployment characteristics:
-
-- `vite.config.ts` uses `base: './'`
-- output is emitted to `dist/`
-- the app is static-host friendly because route switching is hash-based
-- no custom Vercel config is required in the current setup
-
-## Current Constraints
-
-- `DemoPage.tsx` is still placeholder-heavy for gallery and video content
-- the app includes a large `three-stack` chunk because of Three.js-related dependencies
-- the hash-route approach is intentionally lightweight, but it is not a replacement for a full router if nested views or richer navigation are added later
+`npm run test:e2e` builds nothing itself: it starts `vite preview` on port 4173 against the existing `dist/`. CI (`.github/workflows/ci.yml`) runs `npm ci`, lint, build (which includes `tsc -b`), installs Chromium and runs the suite.

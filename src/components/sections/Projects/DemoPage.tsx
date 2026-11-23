@@ -6,11 +6,12 @@ import { buildProjectItems } from '../../../data/projectMedia'
 import type { Project } from '../../../types/project'
 import {
   PROJECTS_DEMO_ROUTE,
-  demoSlugFromHash,
+  demoSlugFromPath,
   projectDemoRoute,
   slugifyProject,
 } from '../../../constants/routes'
 import { cx } from '../../../utils/classNames'
+import { useLocation } from '../../../utils/router'
 import styles from './DemoPage.module.css'
 
 function categoryLabel(project: Project) {
@@ -81,7 +82,7 @@ function DemoIndex() {
             <a href={projectDemoRoute(project.title)} className={styles.indexCard}>
               <span className={styles.indexCardMeta}>{categoryLabel(project)}</span>
               <span className={styles.indexCardTitle}>{project.title}</span>
-              <span className={styles.indexCardDesc}>{project.description}</span>
+              <span className={styles.indexCardDesc}>{project.summary}</span>
               <span className={styles.indexCardCta} aria-hidden="true">
                 Open
                 <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.9">
@@ -185,13 +186,8 @@ function ProjectView({ project }: { project: Project }) {
 }
 
 export default function DemoPage() {
-  const [slug, setSlug] = useState(() => demoSlugFromHash(window.location.hash) ?? '')
-
-  useEffect(() => {
-    const onHashChange = () => setSlug(demoSlugFromHash(window.location.hash) ?? '')
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
-  }, [])
+  const { pathname } = useLocation()
+  const slug = demoSlugFromPath(pathname) ?? ''
 
   const project = useMemo(
     () => (slug ? projects.find((candidate) => slugifyProject(candidate.title) === slug) : undefined),
@@ -208,7 +204,7 @@ export default function DemoPage() {
 
       <div className={styles.inner}>
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-          <a href="#projects" className={styles.crumb}>
+          <a href="/#projects" className={styles.crumb}>
             <span aria-hidden="true">&larr;</span> Selected work
           </a>
           {slug && (

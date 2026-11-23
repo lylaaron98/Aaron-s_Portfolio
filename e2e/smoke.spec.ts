@@ -110,3 +110,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
     expect(serious).toEqual([])
   })
 }
+
+test('résumé button links to a PDF that is served', async ({ page, request }) => {
+  await page.goto('/')
+  const href = await page.getByRole('link', { name: /resume/i }).getAttribute('href')
+  expect(href).toBeTruthy()
+  const response = await request.get(href!)
+  expect(response.status()).toBe(200)
+  expect(response.headers()['content-type']).toContain('pdf')
+})

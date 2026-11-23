@@ -97,6 +97,8 @@ export function useScene<T extends SceneHandle>(
   enabled: boolean,
   load: () => Promise<(canvas: HTMLCanvasElement) => T>,
   onReady?: (scene: T) => void | (() => void),
+  /** Rebuild the scene when any of these change (for example the theme). */
+  rebuildOn: unknown = null,
 ) {
   useEffect(() => {
     const canvas = canvasRef.current
@@ -128,5 +130,5 @@ export function useScene<T extends SceneHandle>(
     }
     // load/onReady are static for the page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, canvasRef])
+  }, [enabled, canvasRef, rebuildOn])
 }

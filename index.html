@@ -6,8 +6,9 @@
 
     <!-- public/favicon.svg genuinely exists now; this used to 404 on every load. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#06070c" />
-    
+    <meta name="theme-color" content="#070912" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f8fd" media="(prefers-color-scheme: light)" />
+
     <!--
       Resolve the theme before first paint. ThemeProvider sets the same
       attribute on mount, but that happens after React hydrates — long enough
@@ -15,8 +16,17 @@
       here keeps the two in agreement.
     -->
     <script>
-      // The Orbit redesign is dark only for now.
-      document.documentElement.setAttribute('data-theme', 'dark');
+      (function () {
+        try {
+          var t = localStorage.getItem('portfolio-theme');
+          if (!t) {
+            t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,7 +40,7 @@
     -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400..600&family=Space+Grotesk:wght@400..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400..600&display=swap"
     />
 
     <title>Aaron Lee — Software Engineer, Full Stack &amp; Applied AI</title>

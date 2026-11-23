@@ -6,7 +6,7 @@ import { SIMPLEX_3D } from './noise.glsl'
  * around by simplex noise), a faint wireframe shell, and a tilted ring of dust.
  * Scroll progress scatters the core outward as the hero leaves the screen.
  */
-export function createOrbitScene(canvas: HTMLCanvasElement) {
+export function createOrbitScene(canvas: HTMLCanvasElement, light = false) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
 
@@ -17,7 +17,11 @@ export function createOrbitScene(canvas: HTMLCanvasElement) {
   const group = new THREE.Group()
   scene.add(group)
 
+  // On a light page additive glow washes out, so light mode draws darker
+  // inks with normal blending instead.
+  const blending = light ? THREE.NormalBlending : THREE.AdditiveBlending
   const uniforms = {
+    uLight: { value: light ? 1 : 0 },
     uTime: { value: 0 },
     uProgress: { value: 0 },
     uPixelRatio: { value: renderer.getPixelRatio() },
@@ -43,12 +47,13 @@ export function createOrbitScene(canvas: HTMLCanvasElement) {
     uniforms,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending,
     vertexShader: /* glsl */ `
       ${SIMPLEX_3D}
       uniform float uTime;
       uniform float uProgress;
       uniform float uPixelRatio;
+      uniform float uLight;
       attribute float aSeed;
       varying vec3 vColor;
       varying float vAlpha;
@@ -63,9 +68,9 @@ export function createOrbitScene(canvas: HTMLCanvasElement) {
         gl_Position = projectionMatrix * mv;
         gl_PointSize = (2.0 + aSeed * 2.5) * uPixelRatio * (4.5 / -mv.z);
 
-        vec3 indigo = vec3(0.36, 0.36, 0.94);
-        vec3 teal = vec3(0.10, 0.76, 0.70);
-        vec3 magenta = vec3(0.88, 0.28, 0.61);
+        vec3 indigo = mix(vec3(0.36, 0.36, 0.94), vec3(0.29, 0.29, 0.87), uLight);
+        vec3 teal = mix(vec3(0.10, 0.76, 0.70), vec3(0.03, 0.45, 0.41), uLight);
+        vec3 magenta = mix(vec3(0.88, 0.28, 0.61), vec3(0.78, 0.18, 0.51), uLight);
         float t = smoothstep(-0.6, 0.6, n);
         vColor = mix(mix(indigo, teal, t), magenta, smoothstep(0.35, 0.9, n2 + aSeed * 0.3));
         vAlpha = (0.45 + 0.55 * smoothstep(-0.5, 0.8, n)) * (1.0 - uProgress * 0.85);
@@ -87,7 +92,7 @@ export function createOrbitScene(canvas: HTMLCanvasElement) {
   // Wireframe shell
   const shell = new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.35, 1)),
-    new THREE.LineBasicMaterial({ color: 0x8b90ff, transparent: true, opacity: 0.12 }),
+    new THREE.LineBasicMaterial({ color: light ? 0x4a4ade : 0x8b90ff, transparent: true, opacity: 0.12 }),
   )
   group.add(shell)
 
@@ -104,12 +109,12 @@ export function createOrbitScene(canvas: HTMLCanvasElement) {
   const ring = new THREE.Points(
     ringGeometry,
     new THREE.PointsMaterial({
-      color: 0x9fe8df,
+      color: light ? 0x08675e : 0x9fe8df,
       size: 0.018,
       transparent: true,
       opacity: 0.55,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending,
     }),
   )
   ring.rotation.set(1.15, 0, 0.35)
@@ -123,7 +128,7 @@ export function createOrbitScene(canvas: HTMLCanvasElement) {
     renderer.setSize(w, h, false)
     camera.aspect = w / h
     // Keep the core framed on narrow screens.
-    camera.position.z = w < h ? 9.5 : 7
+    camera.position.z = w < h ? 10 : 7.4
     camera.updateProjectionMatrix()
   }
 

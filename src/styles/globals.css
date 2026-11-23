@@ -251,10 +251,3 @@ main > section {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* Orbit redesign: page headings outside the home page use the display face. */
-main h1,
-main h2 {
-  font-family: 'Space Grotesk', var(--font-sans);
-  letter-spacing: -0.03em;
-}

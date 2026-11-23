@@ -5,16 +5,18 @@ import styles from './Loader.module.css'
 
 const MIN_VISIBLE_MS = 1300
 const GIVE_UP_MS = 8000
+const RADIUS = 46
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 /**
- * Full-screen intro: a 0–100 counter and bar driven by real load progress,
- * then a curtain lift into the hero. `onReveal` fires as the curtain starts
+ * Full-screen intro, centred: a ring that fills 0–100 with the count inside,
+ * driven by real load progress, then a circular reveal into the hero. `onReveal` fires as the curtain starts
  * to lift, so the hero entrance overlaps it instead of waiting.
  */
 export default function Loader({ reduced, onReveal, onDone }: { reduced: boolean; onReveal: () => void; onDone: () => void }) {
   const root = useRef<HTMLDivElement>(null)
   const count = useRef<HTMLSpanElement>(null)
-  const bar = useRef<HTMLDivElement>(null)
+  const arc = useRef<SVGCircleElement>(null)
 
   // Hold the page still while the intro plays.
   useLayoutEffect(() => {
@@ -35,8 +37,8 @@ export default function Loader({ reduced, onReveal, onDone }: { reduced: boolean
 
     const paint = () => {
       const value = Math.round(shown.value)
-      if (count.current) count.current.textContent = String(value).padStart(3, '0')
-      if (bar.current) bar.current.style.transform = `scaleX(${shown.value / 100})`
+      if (count.current) count.current.textContent = String(value)
+      if (arc.current) arc.current.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - shown.value / 100))
       root.current?.setAttribute('aria-valuenow', String(value))
     }
 
@@ -48,12 +50,17 @@ export default function Loader({ reduced, onReveal, onDone }: { reduced: boolean
         gsap.to(root.current, { opacity: 0, duration: 0.3, onComplete: onDone })
         return
       }
+      // The dial gathers in, then the screen opens as a circle from the centre.
       gsap
         .timeline({ onComplete: onDone })
-        .to(`.${styles.meta} > *, .${styles.countWrap}`, { yPercent: -110, opacity: 0, duration: 0.6, ease: 'power3.in', stagger: 0.04 })
-        .to(bar.current, { scaleY: 0, transformOrigin: 'bottom', duration: 0.3 }, '<0.2')
-        .add(onReveal, '-=0.1')
-        .to(root.current, { clipPath: 'inset(0% 0% 100% 0%)', duration: 1, ease: 'expo.inOut' }, '-=0.25')
+        .to(`.${styles.center}`, { scale: 0.86, opacity: 0, duration: 0.55, ease: 'power3.in' })
+        .add(onReveal, '-=0.15')
+        .fromTo(
+          root.current,
+          { clipPath: 'circle(150% at 50% 50%)' },
+          { clipPath: 'circle(0% at 50% 50%)', duration: 0.9, ease: 'expo.inOut' },
+          '-=0.2',
+        )
     }
 
     const advance = () => {
@@ -103,25 +110,40 @@ export default function Loader({ reduced, onReveal, onDone }: { reduced: boolean
       aria-valuemax={100}
       aria-valuenow={0}
     >
-      <div className={styles.meta} aria-hidden="true">
-        <span>Aaron Lee</span>
-        <span>Software Engineer — Portfolio ’26</span>
-      </div>
-      <div className={styles.ring} aria-hidden="true">
-        <span />
-        <span />
-      </div>
-      <div className={styles.bottom} aria-hidden="true">
-        <div className={styles.countWrap}>
-          <span ref={count} className={styles.count}>
-            000
-          </span>
-          <span className={styles.percent}>%</span>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.center} aria-hidden="true">
+        <div className={styles.dial}>
+          <svg className={styles.ring} viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="loader-gradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="var(--brand-2)" />
+                <stop offset="50%" stopColor="var(--brand)" />
+                <stop offset="100%" stopColor="var(--brand-3)" />
+              </linearGradient>
+            </defs>
+            <circle className={styles.ringTrack} cx="50" cy="50" r={RADIUS} />
+            <circle
+              ref={arc}
+              className={styles.ringFill}
+              cx="50"
+              cy="50"
+              r={RADIUS}
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={CIRCUMFERENCE}
+            />
+          </svg>
+          <span className={styles.spin} />
+          <div className={styles.countWrap}>
+            <span ref={count} className={styles.count}>
+              0
+            </span>
+            <span className={styles.percent}>%</span>
+          </div>
         </div>
-        <p className={styles.hint}>Loading the experience</p>
-      </div>
-      <div className={styles.track} aria-hidden="true">
-        <div ref={bar} className={styles.bar} />
+        <div className={styles.meta}>
+          <span className={styles.name}>Aaron Lee</span>
+          <span className={styles.hint}>Loading portfolio</span>
+        </div>
       </div>
     </div>
   )

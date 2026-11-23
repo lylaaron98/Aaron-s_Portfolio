@@ -105,16 +105,22 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     setPhase('closed')
   }, [])
 
-  // Adopt a newly opened project.
-  useEffect(() => {
-    if (!state) return
-
-    clearPendingClose()
-    clearPendingFrame()
-
+  // Adopt a newly opened project. Done while rendering (React's "adjust state
+  // when a prop changes" pattern) rather than in an effect, so the dialog does
+  // not paint one frame with the previous project first.
+  const [adoptedState, setAdoptedState] = useState<ProjectModalState | null>(null)
+  if (state && state !== adoptedState) {
+    setAdoptedState(state)
     setDisplayState(state)
     setActiveImage(getProjectStills(state.project)[0] ?? null)
     setPhase('opening')
+  }
+
+  // Timers live in refs, so cancelling them is a side effect, not render work.
+  useEffect(() => {
+    if (!state) return
+    clearPendingClose()
+    clearPendingFrame()
   }, [clearPendingClose, clearPendingFrame, state])
 
   /**

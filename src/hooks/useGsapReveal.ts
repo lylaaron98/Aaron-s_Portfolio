@@ -1,19 +1,22 @@
 import { useEffect, useRef } from 'react'
 
 /**
- * Reveals an element with a smooth fade-up + scale animation when it enters the viewport.
+ * Slides an element up into place when it enters the viewport.
+ *
+ * Opacity is deliberately left alone: content stays visible before it is
+ * revealed, so crawlers, print, full-page captures and anyone who never
+ * scrolls still see it. Only the offset animates.
  */
 export function useGsapReveal<T extends HTMLElement>(
   options: { y?: number; duration?: number; delay?: number; scale?: number } = {}
 ) {
   const ref = useRef<T>(null)
-  const { y = 60, duration = 1, delay = 0, scale = 0.97 } = options
+  const { y = 28, duration = 0.9, delay = 0, scale = 0.985 } = options
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
 
-    el.style.opacity = '0'
     el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`
 
     const observer = new IntersectionObserver(
@@ -30,13 +33,12 @@ export function useGsapReveal<T extends HTMLElement>(
         }
 
         gsap.to(ref.current, {
-          opacity: 1,
           y: 0,
           scale: 1,
           duration,
           delay,
           ease: 'power3.out',
-          clearProps: 'transform,opacity',
+          clearProps: 'transform',
         })
       },
       {
@@ -61,7 +63,7 @@ export function useGsapStaggerReveal<T extends HTMLElement>(
   options: { y?: number; duration?: number; stagger?: number; scale?: number } = {}
 ) {
   const ref = useRef<T>(null)
-  const { y = 50, duration = 0.8, stagger = 0.12, scale = 0.95 } = options
+  const { y = 24, duration = 0.7, stagger = 0.08, scale = 0.98 } = options
 
   useEffect(() => {
     const el = ref.current
@@ -72,7 +74,6 @@ export function useGsapStaggerReveal<T extends HTMLElement>(
 
     children.forEach((child) => {
       const node = child as HTMLElement
-      node.style.opacity = '0'
       node.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`
     })
 
@@ -86,13 +87,12 @@ export function useGsapStaggerReveal<T extends HTMLElement>(
         const { default: gsap } = await import('gsap')
 
         gsap.to(children, {
-          opacity: 1,
           y: 0,
           scale: 1,
           duration,
           stagger,
           ease: 'power3.out',
-          clearProps: 'transform,opacity',
+          clearProps: 'transform',
         })
       },
       {

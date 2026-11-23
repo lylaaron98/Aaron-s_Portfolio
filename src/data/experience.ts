@@ -7,7 +7,7 @@ export const experiences: Experience[] = [
     startDate: 'Jan 2026',
     endDate: 'Present',
     description: [
-      'Deliver proof-of-concept applications for WONQ, a Japanese enterprise client, turning open-ended requirements into working demos in two to three days across computer vision, AR/VR, workforce scheduling, and delivery tracking.',
+      'Deliver proof-of-concept applications for a Japanese enterprise client, turning open-ended requirements into working demos in two to three days across computer vision, AR/VR, workforce scheduling, and delivery tracking.',
       'Built an architectural drawing enhancement platform in Python and FastAPI that restores faded scanned blueprints through an OpenCV, Tesseract OCR, and Claude Vision pipeline, removing the manual redrawing step for legacy plans.',
       'Developed AR/VR prototypes in Unity for enterprise visualization, and ran the supporting research into XR toolchains and open-source AI model selection that shaped client technology decisions.',
       'Deployed services to AWS and Firebase with Hugging Face model hosting, designed ERD diagrams and normalized schemas from client business rules, and prototyped in Figma to settle scope early.',
@@ -15,7 +15,7 @@ export const experiences: Experience[] = [
     tech: ['Python', 'FastAPI', 'OpenCV', 'Tesseract', 'Claude Vision', 'Unity', 'AWS', 'Firebase', 'Next.js'],
   },
   {
-    company: 'Mizuho Bank, Singapore',
+    company: 'Corporate Bank, Singapore',
     role: 'Full Stack Software Developer',
     startDate: 'Jul 2025',
     endDate: 'Dec 2025',
@@ -34,7 +34,7 @@ export const experiences: Experience[] = [
     startDate: 'Jan 2025',
     endDate: 'Jul 2025',
     description: [
-      'Built a real-time land bidding platform for JTC (Jurong Town Corporation) using React, TypeScript, and Node.js, with WebSocket infrastructure pushing live bid updates to concurrent participants.',
+      'Built a real-time land bidding platform for a government agency using React, TypeScript, and Node.js, with WebSocket infrastructure pushing live bid updates to concurrent participants.',
       'Improved application performance by over 30% through route-based code splitting, lazy loading, and render optimization on data-heavy bidding screens.',
       'Designed the client state management architecture with React Context API, replacing prop drilling with a predictable data flow across bidding, listing, and account views.',
       'Integrated secure payment workflows and backend services to keep bid and transaction state consistent under concurrent load, and cleared SonarQube reliability and maintainability gates ahead of each release.',

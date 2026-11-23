@@ -12,19 +12,30 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('portfolio-theme')
-    return stored === 'light' ? 'light' : 'dark'
-  })
+  // index.html already resolved the theme before first paint (stored choice,
+  // else the OS preference) and stamped it on <html>. Start from that so the
+  // two never disagree.
+  const [theme, setTheme] = useState<Theme>(() =>
+    document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
+  )
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('portfolio-theme', theme)
   }, [theme])
 
+  // Only an explicit toggle is remembered. Persisting the initial value would
+  // freeze a visitor to whatever their OS said on their first visit.
   const toggleTheme = useCallback(() => {
     startTransition(() => {
-      setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
+      setTheme((prev) => {
+        const next = prev === 'dark' ? 'light' : 'dark'
+        try {
+          localStorage.setItem('portfolio-theme', next)
+        } catch {
+          // Storage can be unavailable (private mode); the toggle still works.
+        }
+        return next
+      })
     })
   }, [])
 

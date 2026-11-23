@@ -48,7 +48,18 @@ export function useSmoothScroll(enabled: boolean) {
     gsap.ticker.add(tick)
     gsap.ticker.lagSmoothing(0)
     setLenis(lenis)
+    // Sections use content-visibility, so the page height settles only as
+    // they render. Re-measure triggers whenever it changes, otherwise
+    // reveals further down fire late or never.
+    let pending = 0
+    const ro = new ResizeObserver(() => {
+      clearTimeout(pending)
+      pending = window.setTimeout(() => ScrollTrigger.refresh(), 150)
+    })
+    ro.observe(document.body)
     return () => {
+      clearTimeout(pending)
+      ro.disconnect()
       setLenis(null)
       gsap.ticker.remove(tick)
       lenis.destroy()

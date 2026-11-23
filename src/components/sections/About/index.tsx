@@ -29,12 +29,15 @@ export default function About() {
             architecture. Before that I delivered a real-time land bidding platform on
             WebSocket infrastructure, cutting frontend load time by over 30%.
           </p>
-          <p> 
-            I'm now working independently on applied AI product engineering — computer vision and
-            OCR pipelines in <span className={styles.highlight}>Python</span> and{' '}
-            <span className={styles.highlight}>FastAPI</span>, AR/VR prototypes in Unity, and
-            full-stack applications deployed on AWS and Firebase. I like owning a feature end to
-            end, from ERD and REST API design through to a performant, accessible frontend.
+          <p>
+            Today I'm a full stack engineer at{' '}
+            <span className={styles.highlight}>GovTech Singapore</span>, building Ministry of
+            Manpower products: a nationwide survey platform, an AI test-generation agent on{' '}
+            <span className={styles.highlight}>AWS Bedrock</span>, and the serverless AWS
+            infrastructure behind them. Alongside that I take project-based applied AI work —
+            computer vision and OCR pipelines in <span className={styles.highlight}>Python</span>{' '}
+            and <span className={styles.highlight}>FastAPI</span>. I like owning a feature end to
+            end, from API and data design through to a performant, accessible frontend.
           </p>
           <ul className={styles.techList}>
             <li>React &amp; Next.js</li>
@@ -42,7 +45,7 @@ export default function About() {
             <li>Python &amp; FastAPI</li>
             <li>OpenCV &amp; OCR</li>
             <li>Node.js &amp; Express</li>
-            <li>AWS &amp; Azure DevOps</li>
+            <li>AWS &amp; Bedrock</li>
           </ul>
         </div>
         <div className={styles.imageBlock}>

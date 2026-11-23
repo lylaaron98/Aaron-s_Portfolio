@@ -12,22 +12,22 @@ export const skillCategories: SkillCategory[] = [
   {
     title: 'Backend & APIs',
     icon: '⚙️',
-    skills: ['Node.js', 'Express', 'Python', 'FastAPI', 'Django', 'REST APIs', 'WebSockets', 'Supabase', 'Prisma'],
+    skills: ['Node.js', 'Express', 'Python', 'FastAPI', 'Django', 'REST APIs', 'WebSockets', 'Fastify', 'Supabase', 'Prisma', 'Zod'],
   },
   {
     title: 'Data',
     icon: '🗄️',
-    skills: ['SQL Server', 'Oracle', 'MySQL', 'MongoDB'],
+    skills: ['PostgreSQL', 'DynamoDB', 'SQL Server', 'Oracle', 'MySQL', 'MongoDB'],
   },
   {
     title: 'Applied AI',
     icon: '🧠',
-    skills: ['OpenCV', 'Tesseract OCR', 'Claude Vision', 'OpenAI APIs', 'Hugging Face'],
+    skills: ['AWS Bedrock', 'RAG', 'Agents & function calling', 'MCP', 'OpenCV', 'Tesseract OCR', 'Claude Vision', 'OpenAI APIs'],
   },
   {
     title: 'Cloud & Delivery',
     icon: '☁️',
-    skills: ['AWS', 'Firebase', 'Vercel', 'Azure DevOps', 'Docker', 'CI/CD'],
+    skills: ['AWS', 'AWS CDK', 'Docker', 'GitLab CI', 'GitHub Actions', 'Azure DevOps', 'CloudWatch', 'Vercel', 'Firebase'],
   },
   {
     title: 'Quality & Tools',

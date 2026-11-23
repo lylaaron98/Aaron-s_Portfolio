@@ -136,11 +136,12 @@ export default function Hero() {
         </p>
 
         <p className={`${styles.lede} ${styles.reveal}`} style={delay(210)}>
-          Production experience across banking, government, sustainability and Japanese
-          enterprise clients. I modernised mission-critical treasury systems at a{' '}
+          Full stack software engineer at <strong>GovTech Singapore</strong>, building Ministry of
+          Manpower products in React, TypeScript, Python and AWS, including AI agents on Bedrock.
+          Before that I modernised mission-critical treasury systems at a{' '}
           <strong>corporate bank</strong> and built a <strong>government agency&rsquo;s</strong>{' '}
-          real-time land bidding platform. Now working independently on applied AI — computer
-          vision and OCR pipelines, AR/VR prototypes, and full-stack products shipped end to end.
+          real-time land bidding platform. On the side I take project-based applied AI work in
+          computer vision and OCR.
         </p>
 
         <div className={`${styles.actions} ${styles.reveal}`} style={delay(280)}>

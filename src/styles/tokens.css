@@ -44,7 +44,7 @@
   --au-indigo: #5b5bf0;
   --au-indigo-lt: #4a4ade;
   --au-teal: #19c3b2;
-  --au-teal-lt: #0b7d72; /* 5:1 on white, WCAG AA for small text */
+  --au-teal-lt: #08675e; /* WCAG AA for small text on white, sunk surfaces and the aurora blooms */
   --au-magenta: #e0489c;
   --au-magenta-lt: #c62f83;
 

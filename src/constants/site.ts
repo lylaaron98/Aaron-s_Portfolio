@@ -8,4 +8,4 @@ export const SITE_URL = 'https://aaron-s-portfolio.vercel.app'
  * Leave empty to hide the resume buttons. Drop the file into public/ and set
  * this to publish it.
  */
-export const RESUME_URL = ''
+export const RESUME_URL = '/aaron-lee-resume.pdf'

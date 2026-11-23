@@ -2,7 +2,20 @@ import type { Experience } from '../types/experience'
 
 export const experiences: Experience[] = [
   {
-    company: 'Freelance, Remote (Singapore)',
+    company: 'GovTech Singapore (Hybrid)',
+    role: 'Full Stack Software Engineer, Ministry of Manpower',
+    startDate: 'May 2026',
+    endDate: 'Present',
+    description: [
+      'Build internal and citizen-facing products for the Ministry of Manpower in React, TypeScript and Python, replacing legacy platforms, and provision their AWS infrastructure end to end with CDK (Lambda, DynamoDB), ECR images shipped through GitLab CI, and ECS and EC2 services.',
+      'Developing a nationwide survey platform: a no-code survey designer for staff, AWS Bedrock parsing that structures raw question sets, and a public portal taking submissions from respondents across Singapore.',
+      'Building a multi-step AI testing agent on AWS Bedrock that generates test cases from application flows, using function calling, RAG over Bedrock Knowledge Bases and OpenSearch, memory across runs and an automated evaluation set.',
+      'Own production reliability with CloudWatch metrics, logs and alarms, incident response and feature-flagged staged rollouts, and onboarded UAT and production accounts to AWS Managed Services.',
+    ],
+    tech: ['React', 'TypeScript', 'Python', 'AWS CDK', 'Lambda', 'DynamoDB', 'ECS', 'AWS Bedrock', 'OpenSearch', 'GitLab CI', 'CloudWatch'],
+  },
+  {
+    company: 'Freelance (project-based), Remote',
     role: 'Software Engineer — Full Stack & Applied AI',
     startDate: 'Jan 2026',
     endDate: 'Present',

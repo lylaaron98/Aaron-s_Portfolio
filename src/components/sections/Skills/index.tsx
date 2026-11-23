@@ -3,7 +3,7 @@ import {
   SiTypescript, SiJavascript, SiReact, SiNextdotjs, SiTailwindcss, SiAntdesign, SiReactquery,
   SiRedux, SiGreensock, SiHtml5, SiNodedotjs, SiExpress, SiPython, SiFastapi, SiDjango,
   SiSocketdotio, SiSupabase, SiPrisma, SiMysql, SiMongodb, SiOpencv, SiAnthropic, SiOpenai,
-  SiHuggingface, SiFirebase, SiVercel, SiDocker, SiGithubactions, SiVitest, SiCypress,
+  SiFirebase, SiPostgresql, SiGitlab, SiFastify, SiZod, SiModelcontextprotocol, SiVercel, SiDocker, SiGithubactions, SiVitest, SiCypress,
   SiSonarqubeserver, SiGit, SiFigma, SiUnity, SiCplusplus, SiOpenjdk, SiDotnet, SiExpo,
 } from 'react-icons/si'
 import styles from './Skills.module.css'
@@ -41,7 +41,12 @@ const skillIcons: Record<string, Icon> = {
   OpenCV: SiOpencv,
   'Claude Vision': SiAnthropic,
   'OpenAI APIs': SiOpenai,
-  'Hugging Face': SiHuggingface,
+  MCP: SiModelcontextprotocol,
+  PostgreSQL: SiPostgresql,
+  'GitLab CI': SiGitlab,
+  'GitHub Actions': SiGithubactions,
+  Fastify: SiFastify,
+  Zod: SiZod,
   Firebase: SiFirebase,
   Vercel: SiVercel,
   Docker: SiDocker,

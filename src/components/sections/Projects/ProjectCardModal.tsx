@@ -116,13 +116,6 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     setPhase('opening')
   }
 
-  // Timers live in refs, so cancelling them is a side effect, not render work.
-  useEffect(() => {
-    if (!state) return
-    clearPendingClose()
-    clearPendingFrame()
-  }, [clearPendingClose, clearPendingFrame, state])
-
   /**
    * The FLIP measure-and-invert, before the browser paints. The shell is
    * already at its final geometry in the DOM; we stamp on the inverse transform
@@ -132,6 +125,13 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   useLayoutEffect(() => {
     const shell = shellRef.current
     if (!shell || phase !== 'opening' || !displayState) return
+
+    // Reopening mid-close: cancel the pending close and any stale frame first.
+    // This must happen here, not in a passive effect: passive effects run after
+    // layout effects, so a cleanup there would cancel the frame scheduled below
+    // and leave the dialog stuck at the card's size, faded.
+    clearPendingClose()
+    clearPendingFrame()
 
     const target = shell.getBoundingClientRect()
     shell.style.transition = 'none'
@@ -150,7 +150,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     })
 
     return clearPendingFrame
-  }, [clearPendingFrame, displayState, phase])
+  }, [clearPendingClose, clearPendingFrame, displayState, phase])
 
   const requestClose = useCallback(() => {
     const shell = shellRef.current

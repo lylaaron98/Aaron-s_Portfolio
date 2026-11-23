@@ -59,6 +59,22 @@ test('project card opens its dialog and Escape closes it', async ({ page }) => {
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
   await expect(dialog.getByRole('img').first()).toBeVisible()
+  // The open animation must finish: focus moves to the close button and the
+  // panel ends at full size and full opacity, not stuck at the card's rect.
+  await expect(dialog.getByRole('button', { name: /close/i }).first()).toBeFocused()
+  await expect(dialog.getByRole('heading', { level: 2 }).first()).toBeInViewport()
+  await expect
+    .poll(() =>
+      dialog.evaluate((shell) => {
+        const content = shell.querySelector('[class*="modalContent"]')
+        return {
+          wide: shell.getBoundingClientRect().width > window.innerWidth * 0.6,
+          shellOpacity: getComputedStyle(shell).opacity,
+          contentOpacity: content ? getComputedStyle(content).opacity : 'missing',
+        }
+      }),
+    )
+    .toEqual({ wide: true, shellOpacity: '1', contentOpacity: '1' })
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
 })

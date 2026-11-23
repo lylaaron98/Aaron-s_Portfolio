@@ -15,6 +15,13 @@ import { projects } from '../data/projects'
 import { interceptLinkClicks, navigate, useLocation } from '../utils/router'
 
 const DemoPage = lazy(() => import('../components/sections/Projects/DemoPage'))
+const ConceptsRoute = lazy(() => import('../concepts/ConceptsRoute'))
+
+/** Draft redesigns live at /concepts[/name] until one is chosen. */
+function conceptSlugFromPath(pathname: string): string | null {
+  const match = pathname.replace(/\/+$/, '').match(/^\/concepts(?:\/([^/]+))?$/)
+  return match ? (match[1] ?? '') : null
+}
 
 // Old shared links used #/projects/demo/<slug>. Move them to the real path
 // before the first render so they land on the right page.
@@ -34,14 +41,17 @@ function App() {
   const { pathname, hash } = useLocation()
   const slug = demoSlugFromPath(pathname)
   const isDemoPage = slug !== null
+  const conceptSlug = conceptSlugFromPath(pathname)
+  const isConcept = conceptSlug !== null
 
   useEffect(() => {
-    document.title = titleFor(slug)
-  }, [slug])
+    if (!isConcept) document.title = titleFor(slug)
+  }, [slug, isConcept])
 
   useEffect(() => interceptLinkClicks(), [])
 
   useEffect(() => {
+    if (isConcept) return
     if (isDemoPage) {
       window.scrollTo({ top: 0, behavior: 'auto' })
       return
@@ -50,12 +60,20 @@ function App() {
     if (!hash) return
 
     requestAnimationFrame(() => smoothScrollTo(hash))
-  }, [pathname, hash, isDemoPage])
+  }, [pathname, hash, isDemoPage, isConcept])
 
   // An unknown path renders the home page; tidy the address bar to match.
   useEffect(() => {
-    if (!isDemoPage && pathname !== '/') navigate(`/${hash}`, { replace: true })
-  }, [isDemoPage, pathname, hash])
+    if (!isDemoPage && !isConcept && pathname !== '/') navigate(`/${hash}`, { replace: true })
+  }, [isDemoPage, isConcept, pathname, hash])
+
+  if (isConcept) {
+    return (
+      <Suspense fallback={null}>
+        <ConceptsRoute key={conceptSlug} slug={conceptSlug} />
+      </Suspense>
+    )
+  }
 
   return (
     <ThemeProvider>

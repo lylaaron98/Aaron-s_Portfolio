@@ -1,0 +1,608 @@
+.page {
+  --fg: #f1f2fb;
+  --mute: #a9aec8;
+  --teal: #19c3b2;
+  --indigo: #7b7bff;
+  --magenta: #e0489c;
+  --display: 'Syne', 'Inter', system-ui, sans-serif;
+  --pad: clamp(16px, 4vw, 56px);
+  position: relative;
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #05060d;
+  overflow-x: clip;
+}
+
+.canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.canvas[data-ready='true'] {
+  opacity: 1;
+}
+
+/* Painted under the canvas; it is the whole background when WebGL is off. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(50% 40% at 20% 20%, rgba(91, 91, 240, 0.25), transparent 70%),
+    radial-gradient(40% 40% at 85% 70%, rgba(224, 72, 156, 0.2), transparent 70%),
+    radial-gradient(40% 50% at 50% 100%, rgba(25, 195, 178, 0.2), transparent 70%),
+    #05060d;
+}
+
+.page > main,
+.nav,
+.altimeter {
+  position: relative;
+  z-index: 1;
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 200;
+  padding: 10px 14px;
+  background: #fff;
+  color: #000;
+  border-radius: 8px;
+}
+
+.skip:focus {
+  top: 16px;
+}
+
+.page a:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.glass {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ── Nav ─────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  background: linear-gradient(#05060d 10%, rgba(5, 6, 13, 0));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px var(--pad);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 18px/1 var(--display);
+  white-space: nowrap;
+}
+
+.logoMark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--teal);
+  box-shadow: 0 0 16px var(--teal), inset 0 0 8px var(--teal);
+}
+
+.nav nav {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.nav nav a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+.nav nav a:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Altimeter ───────────────────────────────────────────────────── */
+.altimeter {
+  position: fixed;
+  right: var(--pad);
+  top: 50%;
+  z-index: 40;
+  transform: translate(20px, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.altimeterOn {
+  opacity: 1;
+  transform: translate(0, -50%);
+  pointer-events: auto;
+}
+
+.altimeter ol {
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.altimeter a {
+  display: grid;
+  justify-items: end;
+  padding: 6px 16px 6px 8px;
+  color: var(--mute);
+  position: relative;
+  transition: color 0.3s;
+}
+
+.altimeter a::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: #2a2e44;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.altimeter a[aria-current='step'] {
+  color: var(--fg);
+}
+
+.altimeter a[aria-current='step']::after {
+  background: var(--teal);
+  box-shadow: 0 0 12px var(--teal);
+}
+
+.altYear {
+  font: 600 13px/1.2 'JetBrains Mono', monospace;
+}
+
+.altName {
+  font-size: 12px;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition: max-width 0.4s, opacity 0.4s;
+}
+
+.altimeter a[aria-current='step'] .altName,
+.altimeter a:hover .altName {
+  max-width: 200px;
+  opacity: 1;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 0 var(--pad);
+  position: relative;
+  perspective: 800px;
+}
+
+.heroInner {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+}
+
+.kicker {
+  font: 500 12px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.heroTitle {
+  font: 800 clamp(72px, 15vw, 240px) / 0.85 var(--display);
+  letter-spacing: -0.04em;
+  transform-style: preserve-3d;
+}
+
+.heroTitle span {
+  display: inline-block;
+  background: linear-gradient(100deg, #ffffff 10%, #b8bbff 40%, var(--teal) 65%, var(--magenta) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 40px rgba(91, 91, 240, 0.35));
+}
+
+.heroSub {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+}
+
+.heroSub > p:first-child {
+  max-width: 520px;
+  color: var(--mute);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.primary,
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  min-height: 50px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+}
+
+.primary {
+  background: linear-gradient(100deg, var(--indigo), var(--teal));
+  color: #04131a;
+  box-shadow: 0 10px 40px -10px rgba(25, 195, 178, 0.7);
+}
+
+.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 50px -10px rgba(25, 195, 178, 0.9);
+}
+
+.ghost {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+}
+
+.ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hint {
+  position: absolute;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 500 11px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+/* ── Intro ───────────────────────────────────────────────────────── */
+.intro {
+  padding: 20vh var(--pad);
+  display: grid;
+  place-items: center;
+}
+
+.intro p {
+  max-width: 860px;
+  padding: clamp(28px, 5vw, 56px);
+  font: 600 clamp(22px, 2.6vw, 34px) / 1.35 var(--display);
+  letter-spacing: -0.01em;
+}
+
+/* ── Work ────────────────────────────────────────────────────────── */
+.work {
+  padding: 10vh var(--pad) 0;
+}
+
+.h2 {
+  font: 800 clamp(44px, 7vw, 110px) / 0.95 var(--display);
+  letter-spacing: -0.04em;
+  text-align: center;
+}
+
+.h2 span {
+  background: linear-gradient(100deg, var(--teal), var(--magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.roles {
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  /* Leave the right edge to the year rail. */
+  .roles {
+    padding-right: 190px;
+  }
+}
+
+.role {
+  min-height: 130vh;
+  display: flex;
+  align-items: center;
+  perspective: 1200px;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.card {
+  position: relative;
+  width: min(560px, 100%);
+  padding: clamp(24px, 3vw, 40px);
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font: 500 12px/1.3 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.cardTop span:last-child {
+  color: var(--mute);
+}
+
+.card h3 {
+  font: 700 clamp(24px, 2.4vw, 32px) / 1.1 var(--display);
+  letter-spacing: -0.02em;
+}
+
+.cardOrg {
+  font-weight: 500;
+}
+
+.card ul {
+  display: grid;
+  gap: 8px;
+  padding-left: 18px;
+  color: var(--mute);
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chips span {
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 12.5px;
+  color: #d8dbee;
+}
+
+.cardYear {
+  position: absolute;
+  right: -6px;
+  bottom: -36px;
+  font: 800 140px/1 var(--display);
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+/* ── Projects carousel ───────────────────────────────────────────── */
+.projects {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: 40px;
+  padding: 100px 0 40px;
+  overflow: hidden;
+}
+
+.scene3d {
+  height: 440px;
+  perspective: 2000px;
+  display: grid;
+  place-items: center;
+}
+
+.carousel {
+  --radius: 520px;
+  position: relative;
+  width: 360px;
+  height: 400px;
+  list-style: none;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(-1 * var(--radius)));
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(var(--angle)) translateZ(var(--radius));
+  backface-visibility: hidden;
+}
+
+.slideCard {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(14, 16, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  transition: border-color 0.3s;
+}
+
+.slideCard:hover {
+  border-color: var(--teal);
+}
+
+.slideCard img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+}
+
+.slideText {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 18px 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.slideText strong {
+  font: 700 19px/1.2 var(--display);
+  color: var(--fg);
+}
+
+/* ── Skills ──────────────────────────────────────────────────────── */
+.skills {
+  padding: 16vh var(--pad) 0;
+  display: grid;
+  gap: 40px;
+}
+
+.skillGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.skillGrid > div {
+  padding: 26px;
+  display: grid;
+  gap: 16px;
+}
+
+.skillGrid h3 {
+  font: 700 20px/1 var(--display);
+}
+
+/* ── Contact ─────────────────────────────────────────────────────── */
+.contact {
+  min-height: 90svh;
+  display: grid;
+  place-content: center;
+  gap: 36px;
+  text-align: center;
+  padding: 0 var(--pad) 120px;
+}
+
+.contact h2 {
+  font: 800 clamp(52px, 9vw, 150px) / 0.92 var(--display);
+  letter-spacing: -0.04em;
+}
+
+.contact h2 span {
+  display: block;
+  background: linear-gradient(100deg, var(--indigo), var(--teal), var(--magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Phones and reduced motion ───────────────────────────────────── */
+@media (max-width: 899px), (prefers-reduced-motion: reduce) {
+  .scene3d {
+    height: auto;
+    perspective: none;
+    padding: 0 var(--pad);
+  }
+
+  .carousel {
+    width: 100%;
+    height: auto;
+    transform: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 16px;
+  }
+
+  .slide {
+    position: static;
+    transform: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .altimeter {
+    display: none;
+  }
+
+  .role {
+    min-height: 100vh;
+  }
+
+  .right {
+    justify-content: flex-start;
+  }
+
+  .nav nav a {
+    padding: 8px 10px;
+  }
+
+  .logo {
+    font-size: 0;
+    gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role {
+    min-height: 0;
+    padding: 24px 0;
+  }
+
+  .altimeter,
+  .altName,
+  .canvas {
+    transition: none;
+  }
+}

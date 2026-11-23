@@ -1,0 +1,137 @@
+.page {
+  min-height: 100vh;
+  background: #07080d;
+  color: #eef0f7;
+  padding: clamp(48px, 10vh, 120px) 16px 80px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.header,
+.list,
+.back {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.kicker {
+  font: 500 12px/1.4 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #19c3b2;
+}
+
+.title {
+  margin: 14px 0 18px;
+  font-size: clamp(40px, 7vw, 84px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+
+.lede {
+  max-width: 620px;
+  color: #a7acc4;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin-top: 56px;
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 28px;
+  align-items: center;
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.card:focus-visible {
+  outline: 2px solid #19c3b2;
+  outline-offset: 3px;
+}
+
+.orbit {
+  background: radial-gradient(120% 140% at 0% 0%, rgba(91, 91, 240, 0.35), transparent 55%), #0d0f18;
+}
+
+.blueprint {
+  background: linear-gradient(rgba(16, 42, 92, 0.06) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(16, 42, 92, 0.06) 1px, transparent 1px) 0 0 / 24px 24px, #f3f1ea;
+  color: #101a33;
+}
+
+.warp {
+  background: radial-gradient(80% 160% at 100% 50%, rgba(224, 72, 156, 0.32), transparent 60%),
+    radial-gradient(70% 120% at 0% 100%, rgba(25, 195, 178, 0.3), transparent 60%), #090a14;
+}
+
+.letter {
+  font: 600 64px/1 'JetBrains Mono', monospace;
+  opacity: 0.85;
+}
+
+.cardBody {
+  display: grid;
+  gap: 6px;
+}
+
+.tag {
+  font: 500 12px/1.4 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.name {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.summary {
+  max-width: 620px;
+  line-height: 1.55;
+  opacity: 0.82;
+}
+
+.go {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.back {
+  margin-top: 40px;
+}
+
+.back a {
+  color: #a7acc4;
+}
+
+@media (max-width: 640px) {
+  .card {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .letter {
+    font-size: 40px;
+  }
+}

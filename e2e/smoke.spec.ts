@@ -98,7 +98,9 @@ test('first visit follows the OS colour scheme', async ({ browser }) => {
 for (const colorScheme of ['light', 'dark'] as const) {
   test(`no serious accessibility violations (${colorScheme})`, async ({ page }) => {
     await trackFailures(page)
-    await page.emulateMedia({ colorScheme })
+    // Reduced motion so axe measures the settled page, not a header caught
+    // mid-fade by its scroll reveal.
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' })
     await page.goto('/')
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])

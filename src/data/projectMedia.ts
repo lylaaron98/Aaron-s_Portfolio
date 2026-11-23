@@ -2,9 +2,8 @@
  * Media catalogue for the project demo pages.
  *
  * Extracted from DemoPage.tsx, which was 569 lines of which ~340 were this.
- * Videos stream from GitHub LFS media; those URLs resolve against the
- * repository path, so the .mp4 files must stay under public/assets in git
- * even though vite.config.ts strips them from the build output.
+ * Demo videos are re-encoded 720p recordings in public/videos, served by the
+ * site itself (about 11 MB in total).
  */
 import type { ChromaItem } from '../components/ui/ChromaGrid/ChromaGrid'
 import type { Project } from '../types/project'
@@ -22,11 +21,6 @@ export type ProjectMedia = {
   isVideo?: boolean
 }
 
-const GITHUB_LFS_MEDIA_BASE = 'https://media.githubusercontent.com/media/lylaaron98/Aaron-s_Portfolio/main'
-
-function createHostedVideoSrc(assetPath: string) {
-  return encodeURI(`${GITHUB_LFS_MEDIA_BASE}/public${assetPath}`)
-}
 
 export const projectThemes: Record<string, ProjectTheme> = {
   'Property Website Builder & Agent CRM': {
@@ -150,13 +144,13 @@ const otodecksGallery: ProjectMedia[] = [
     subtitle: 'Two decks with EQ, cue points, loop controls, crossfader, and a searchable track library.',
   },
   {
-    src: createHostedVideoSrc('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
+    src: '/videos/otodecks-demo-1.mp4',
     title: 'Demo Recording 1',
     subtitle: 'First Otodecks app demo walkthrough.',
     isVideo: true,
   },
   {
-    src: createHostedVideoSrc('/assets/otodecks/Screen Recording 2026-03-05 180152.mp4'),
+    src: '/videos/otodecks-demo-2.mp4',
     title: 'Demo Recording 2',
     subtitle: 'Second Otodecks app demo walkthrough.',
     isVideo: true,
@@ -233,7 +227,7 @@ const restaurantPosGallery: ProjectMedia[] = [
     subtitle: 'Daily sales report and top-selling items for the manager role.',
   },
   {
-    src: createHostedVideoSrc('/assets/restaurant_pos/Screen Recording 2026-02-27 122053.mp4'),
+    src: '/videos/restaurant-pos-demo.mp4',
     title: 'Restaurant POS Demo',
     subtitle: 'Walkthrough of the waiter, kitchen, cashier, and manager flows in the POS app.',
     isVideo: true,
@@ -252,7 +246,7 @@ const djangoElearningGallery: ProjectMedia[] = [
     subtitle: 'Student and teacher chatting live over Django Channels and WebSockets.',
   },
   {
-    src: createHostedVideoSrc('/assets/django_elearning_app/Screen Recording 2024-09-09 143026.mp4'),
+    src: '/videos/django-elearning-demo.mp4',
     title: 'Django E-Learning Demo',
     subtitle:
       'Walkthrough of the student, teacher, course management, and chat experiences in the Django platform.',

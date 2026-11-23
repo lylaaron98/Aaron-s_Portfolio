@@ -6,11 +6,12 @@ import { buildProjectItems } from '../../../data/projectMedia'
 import type { Project } from '../../../types/project'
 import {
   PROJECTS_DEMO_ROUTE,
-  demoSlugFromHash,
+  demoSlugFromPath,
   projectDemoRoute,
   slugifyProject,
 } from '../../../constants/routes'
 import { cx } from '../../../utils/classNames'
+import { useLocation } from '../../../utils/router'
 import styles from './DemoPage.module.css'
 
 function categoryLabel(project: Project) {
@@ -185,13 +186,8 @@ function ProjectView({ project }: { project: Project }) {
 }
 
 export default function DemoPage() {
-  const [slug, setSlug] = useState(() => demoSlugFromHash(window.location.hash) ?? '')
-
-  useEffect(() => {
-    const onHashChange = () => setSlug(demoSlugFromHash(window.location.hash) ?? '')
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
-  }, [])
+  const { pathname } = useLocation()
+  const slug = demoSlugFromPath(pathname) ?? ''
 
   const project = useMemo(
     () => (slug ? projects.find((candidate) => slugifyProject(candidate.title) === slug) : undefined),
@@ -208,7 +204,7 @@ export default function DemoPage() {
 
       <div className={styles.inner}>
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-          <a href="#projects" className={styles.crumb}>
+          <a href="/#projects" className={styles.crumb}>
             <span aria-hidden="true">&larr;</span> Selected work
           </a>
           {slug && (

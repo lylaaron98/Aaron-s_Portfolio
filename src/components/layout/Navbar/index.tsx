@@ -55,7 +55,7 @@ export default function Navbar() {
   return (
     <header className={cx(styles.navbar, scrolled && styles.scrolled, hidden && styles.navbarHidden)}>
       <div className={styles.inner}>
-        <a href="#hero" className={styles.logo} aria-label="Aaron Lee — home">
+        <a href="/#hero" className={styles.logo} aria-label="Aaron Lee — home">
           <Logo variant="solid" />
         </a>
 
@@ -67,7 +67,7 @@ export default function Navbar() {
               </a>
             ))}
             <a href={PROJECTS_DEMO_ROUTE} className={cx(styles.navLink, styles.demoLink)}>
-              Demo
+              Demos
             </a>
           </div>
 

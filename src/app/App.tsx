@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { ThemeProvider } from '../context/ThemeContext'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
@@ -10,20 +10,36 @@ import Experience from '../components/sections/Experience'
 import Projects from '../components/sections/Projects'
 import Contact from '../components/sections/Contact'
 import { smoothScrollTo } from '../utils/smoothScroll'
-import { PROJECTS_DEMO_ROUTE } from '../constants/routes'
+import { demoSlugFromPath, pathFromLegacyHash, slugifyProject } from '../constants/routes'
+import { projects } from '../data/projects'
+import { interceptLinkClicks, navigate, useLocation } from '../utils/router'
 
 const DemoPage = lazy(() => import('../components/sections/Projects/DemoPage'))
 
+// Old shared links used #/projects/demo/<slug>. Move them to the real path
+// before the first render so they land on the right page.
+const HOME_TITLE = document.title
+
+function titleFor(slug: string | null) {
+  if (slug === null) return HOME_TITLE
+  if (!slug) return 'Project demos — Aaron Lee'
+  const project = projects.find((candidate) => slugifyProject(candidate.title) === slug)
+  return project ? `${project.title} — Aaron Lee` : 'Project not found — Aaron Lee'
+}
+
+const legacyPath = pathFromLegacyHash(window.location.hash)
+if (legacyPath) window.history.replaceState(null, '', legacyPath)
+
 function App() {
-  const [hash, setHash] = useState(() => window.location.hash)
-  const isDemoPage = hash.startsWith(PROJECTS_DEMO_ROUTE)
+  const { pathname, hash } = useLocation()
+  const slug = demoSlugFromPath(pathname)
+  const isDemoPage = slug !== null
 
   useEffect(() => {
-    const handleHashChange = () => setHash(window.location.hash)
+    document.title = titleFor(slug)
+  }, [slug])
 
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
+  useEffect(() => interceptLinkClicks(), [])
 
   useEffect(() => {
     if (isDemoPage) {
@@ -31,10 +47,15 @@ function App() {
       return
     }
 
-    if (!hash || hash.startsWith('#/')) return
+    if (!hash) return
 
     requestAnimationFrame(() => smoothScrollTo(hash))
-  }, [hash, isDemoPage])
+  }, [pathname, hash, isDemoPage])
+
+  // An unknown path renders the home page; tidy the address bar to match.
+  useEffect(() => {
+    if (!isDemoPage && pathname !== '/') navigate(`/${hash}`, { replace: true })
+  }, [isDemoPage, pathname, hash])
 
   return (
     <ThemeProvider>

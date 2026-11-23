@@ -29,3 +29,8 @@ dist-ssr
 # Scratch archives from file-sync sessions; never meant to be committed
 _preview-sync.tar.gz
 _to_delete/
+
+# Vite dependency pre-bundle cache
+.vite/
+test-results/
+playwright-report/

@@ -98,7 +98,57 @@ const aiGallery: ProjectMedia[] = [
   },
 ]
 
+const aiDrawingGallery: ProjectMedia[] = [
+  {
+    src: '/assets/ai_drawing_platform/restoration-pipeline.webp',
+    title: 'Restoration Pipeline',
+    subtitle:
+      'Illustration of the four-stage pipeline that turns a faded scan into a clean vector plan. Client work, so no screenshots are public.',
+  },
+]
+
+const defiGallery: ProjectMedia[] = [
+  {
+    src: '/assets/defi_dashboard/wallet-desk.webp',
+    title: 'Wallet Desk',
+    subtitle: 'Balances, allocation, a quick exchange panel, and live market snapshots for ETH, BTC, and USDC.',
+  },
+]
+
+const lifestyleGallery: ProjectMedia[] = [
+  {
+    src: '/assets/lifestyle_app/screens.webp',
+    title: 'App Overview',
+    subtitle: 'Financial overview, expense tracking, and mood journal screens from the Expo app.',
+  },
+  {
+    src: '/assets/lifestyle_app/overview.webp',
+    title: 'Financial Overview',
+    subtitle: 'Monthly spend, savings progress across pots, and top expenses at a glance.',
+  },
+  {
+    src: '/assets/lifestyle_app/finance.webp',
+    title: 'Finance',
+    subtitle: 'Subscriptions and one-off expenses with frequency-normalised monthly cost.',
+  },
+  {
+    src: '/assets/lifestyle_app/calendar.webp',
+    title: 'Calendar',
+    subtitle: 'Month view combining expenses, journal entries, and Singapore public holidays.',
+  },
+  {
+    src: '/assets/lifestyle_app/journal.webp',
+    title: 'Mood Journal',
+    subtitle: 'Daily entries with a five-point mood scale and running average.',
+  },
+]
+
 const otodecksGallery: ProjectMedia[] = [
+  {
+    src: '/assets/otodecks/dj-mixer.webp',
+    title: 'Dual-Deck Mixer',
+    subtitle: 'Two decks with EQ, cue points, loop controls, crossfader, and a searchable track library.',
+  },
   {
     src: createHostedVideoSrc('/assets/otodecks/Screen Recording 2026-03-02 144811.mp4'),
     title: 'Demo Recording 1',
@@ -168,6 +218,21 @@ const smarthomeGallery: ProjectMedia[] = [
 
 const restaurantPosGallery: ProjectMedia[] = [
   {
+    src: '/assets/restaurant_pos/create-order.webp',
+    title: 'Waiter: Create Order',
+    subtitle: 'Menu grid and running order ticket for a table, sent straight to the kitchen.',
+  },
+  {
+    src: '/assets/restaurant_pos/kitchen-orders.webp',
+    title: 'Kitchen Queue',
+    subtitle: 'Active and completed orders with status transitions from new to ready.',
+  },
+  {
+    src: '/assets/restaurant_pos/manager-reports.webp',
+    title: 'Manager Reports',
+    subtitle: 'Daily sales report and top-selling items for the manager role.',
+  },
+  {
     src: createHostedVideoSrc('/assets/restaurant_pos/Screen Recording 2026-02-27 122053.mp4'),
     title: 'Restaurant POS Demo',
     subtitle: 'Walkthrough of the waiter, kitchen, cashier, and manager flows in the POS app.',
@@ -176,6 +241,16 @@ const restaurantPosGallery: ProjectMedia[] = [
 ]
 
 const djangoElearningGallery: ProjectMedia[] = [
+  {
+    src: '/assets/django_elearning_app/teacher-dashboard.webp',
+    title: 'Teacher Dashboard',
+    subtitle: 'Course management, uploaded materials, and enrolled students for a teacher account.',
+  },
+  {
+    src: '/assets/django_elearning_app/realtime-chat.webp',
+    title: 'Real-time Chat',
+    subtitle: 'Student and teacher chatting live over Django Channels and WebSockets.',
+  },
   {
     src: createHostedVideoSrc('/assets/django_elearning_app/Screen Recording 2024-09-09 143026.mp4'),
     title: 'Django E-Learning Demo',
@@ -218,12 +293,26 @@ export const fallbackTheme: ProjectTheme = {
 
 export const mediaByProjectTitle: Record<string, ProjectMedia[]> = {
   'Property Website Builder & Agent CRM': propertyBuilderGallery,
+  'AI Architectural Drawing Platform': aiDrawingGallery,
+  'DeFi Portfolio Dashboard': defiGallery,
+  'Lifestyle App': lifestyleGallery,
   'Workforce Scheduling Platform': workforceSchedulingGallery,
   'AI Chatbot Assistant': aiGallery,
   Otodecks: otodecksGallery,
   MySmartHome: smarthomeGallery,
   'Django E-Learning App': djangoElearningGallery,
   'Restaurant POS System': restaurantPosGallery,
+}
+
+/**
+ * Still images for the project dialog: the project's own screenshot list when it
+ * has one, otherwise the non-video entries of its demo-page gallery. Keeps the
+ * dialog's media panel from rendering empty for projects whose visuals only
+ * live in the demo catalogue.
+ */
+export function getProjectStills(project: Project): string[] {
+  if (project.images?.length) return project.images
+  return (mediaByProjectTitle[project.title] ?? []).filter((item) => !item.isVideo).map((item) => item.src)
 }
 
 export function createProjectArt(projectTitle: string, label: string, accent: string) {

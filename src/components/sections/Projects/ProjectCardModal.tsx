@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom'
 import type { Project } from '../../../types/project'
 import Badge from '../../ui/Badge'
 import { projectDemoRoute } from '../../../constants/routes'
+import { getProjectStills } from '../../../data/projectMedia'
 import { cx } from '../../../utils/classNames'
 import styles from './Projects.module.css'
 
@@ -79,7 +80,10 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [phase, setPhase] = useState<ModalPhase>('closed')
 
-  const galleryImages = useMemo(() => displayState?.project.images ?? [], [displayState])
+  const galleryImages = useMemo(
+    () => (displayState ? getProjectStills(displayState.project) : []),
+    [displayState],
+  )
 
   const clearPendingClose = useCallback(() => {
     if (closeTimeoutRef.current !== null) {
@@ -109,7 +113,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     clearPendingFrame()
 
     setDisplayState(state)
-    setActiveImage(state.project.images?.[0] ?? null)
+    setActiveImage(getProjectStills(state.project)[0] ?? null)
     setPhase('opening')
   }, [clearPendingClose, clearPendingFrame, state])
 

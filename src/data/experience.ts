@@ -2,12 +2,12 @@ import type { Experience } from '../types/experience'
 
 export const experiences: Experience[] = [
   {
-    company: 'GovTech Singapore (Hybrid)',
-    role: 'Full Stack Software Engineer, Ministry of Manpower',
+    company: 'Government Agency, Singapore',
+    role: 'Full Stack Software Engineer',
     startDate: 'May 2026',
     endDate: 'Present',
     description: [
-      'Build Ministry of Manpower products in React, TypeScript and Python, on AWS infrastructure I provision with CDK.',
+      'Build citizen-facing and internal products in React, TypeScript and Python, on AWS infrastructure I provision with CDK.',
       'Developing a nationwide survey platform, using AWS Bedrock to turn raw question sets into structured surveys.',
       'Building an AI agent on Bedrock that writes test cases from application flows.',
       'Own production reliability: CloudWatch alarms, incident response and staged rollouts.',

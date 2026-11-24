@@ -20,9 +20,9 @@ export default function About() {
             Singapore with a BSc (Hons) in Computer Science from Goldsmiths, University of London.
           </p>
           <p>
-            I've shipped for a <span className={styles.highlight}>corporate bank</span>, a government
-            agency and Japanese enterprise clients. Today I build Ministry of Manpower products at{' '}
-            <span className={styles.highlight}>GovTech Singapore</span>, from{' '}
+            I've shipped for a <span className={styles.highlight}>corporate bank</span>, government
+            agencies and Japanese enterprise clients. Today I build citizen-facing products for a{' '}
+            <span className={styles.highlight}>government agency</span>, from{' '}
             <span className={styles.highlight}>React</span> frontends to AI agents on{' '}
             <span className={styles.highlight}>AWS Bedrock</span>.
           </p>

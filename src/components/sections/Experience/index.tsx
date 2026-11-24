@@ -6,7 +6,7 @@ import { gsap, ScrollTrigger, MOTION_OK } from "../../../orbit/motion";
 import styles from "./Experience.module.css";
 
 const SECTOR: Record<string, string> = {
-  "GovTech Singapore (Hybrid)": "Public sector",
+  "Government Agency, Singapore": "Public sector",
   "Freelance (project-based), Remote": "Applied AI",
   "Corporate Bank, Singapore": "Banking",
   "Capgemini, Singapore": "Consulting",

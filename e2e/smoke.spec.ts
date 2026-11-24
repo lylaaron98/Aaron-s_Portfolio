@@ -79,6 +79,15 @@ test('project card opens its dialog and Escape closes it', async ({ page }) => {
   await expect(dialog).toBeHidden()
 })
 
+test('intro loader counts to 100 and gets out of the way', async ({ page }) => {
+  await trackFailures(page)
+  await page.goto('/')
+  const loader = page.getByRole('progressbar', { name: 'Loading portfolio' })
+  await expect(loader).toBeAttached()
+  await expect(loader).toBeHidden({ timeout: 12_000 })
+  await expect(page.getByRole('heading', { level: 1, name: 'Aaron Lee' })).toBeVisible()
+})
+
 test('legacy hash links redirect to real project URLs', async ({ page }) => {
   await trackFailures(page)
   await page.goto('/#/projects/demo/otodecks')

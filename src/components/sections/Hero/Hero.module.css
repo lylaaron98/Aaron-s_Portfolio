@@ -393,3 +393,26 @@
     max-width: none;
   }
 }
+
+/* ── Orbit particle core ─────────────────────────────────────────────────
+   Sits over the aurora backdrop and under the vignette, so the name always
+   reads against a calm centre. Fades in once its first frame is drawn. */
+.core {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.core[data-ready='true'] {
+  opacity: 1;
+}
+
+/* While the intro loader is up, hold the entrance at its first frame. */
+.hero[data-intro='pending'] .reveal {
+  animation-play-state: paused;
+}

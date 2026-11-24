@@ -1,16 +1,12 @@
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import styles from './Hero.module.css'
 import Button from '../../ui/Button'
 import { scrollToSection } from '../../../utils/smoothScroll'
 import { useTheme } from '../../../context/ThemeContext'
 import { RESUME_URL } from '../../../constants/site'
-import {
-  useLowPerformanceMode,
-  useMediaQuery,
-  usePrefersReducedMotion,
-} from '../../../hooks/useMediaQuery'
-
-const Silk = lazy(() => import('../../ui/Silk/Silk'))
+import { useLowPerformanceMode, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+import { ScrollTrigger, useMotionBudget, useScene } from '../../../orbit/motion'
+import { completeTask } from '../../../orbit/loadProgress'
 
 const ROLES = ['Full Stack Developer', 'AI Engineer', 'Frontend Engineer'] as const
 
@@ -70,53 +66,43 @@ function RoleTypewriter({ disableMotion }: { disableMotion: boolean }) {
   )
 }
 
-/**
- * Reads a colour token off the document so the shader participates in theming
- * instead of being a hardcoded dark rectangle. One getComputedStyle per theme
- * flip is free; the alternative is duplicating the palette in JS.
- */
-function readToken(name: string, fallback: string) {
-  if (typeof document === 'undefined') return fallback
-  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-  return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback
-}
-
-export default function Hero() {
+export default function Hero({ introPending = false }: { introPending?: boolean }) {
   const { theme } = useTheme()
   const prefersReducedMotion = usePrefersReducedMotion()
   const lowPerformanceMode = useLowPerformanceMode()
-  const isCompactViewport = useMediaQuery('(max-width: 900px)')
   const disableMotion = prefersReducedMotion || lowPerformanceMode
-  const showSilk = !disableMotion && !isCompactViewport
+  const { allow3d } = useMotionBudget()
+  const canvas = useRef<HTMLCanvasElement>(null)
 
-  // Re-read on theme change. This is what finally makes light mode reach the
-  // hero — previously the shader stayed dark and the hero read dark-on-light.
-  const shader = useMemo(() => {
-    void theme
-    return {
-      base: readToken('--shader-base', '#3a2fd6'),
-      tint: readToken('--shader-tint', '#12b3a3'),
-    }
-  }, [theme])
+  // The Orbit particle core, coloured for the current theme. The CSS aurora
+  // behind it is the fallback when WebGL is off.
+  useScene(
+    canvas,
+    allow3d,
+    () => import('../../../orbit/orbitScene').then((m) => (c: HTMLCanvasElement) => m.createOrbitScene(c, theme === 'light')),
+    (scene) => {
+      completeTask('scene')
+      const onMove = (e: PointerEvent) =>
+        scene.setPointer((e.clientX / innerWidth) * 2 - 1, (e.clientY / innerHeight) * 2 - 1)
+      window.addEventListener('pointermove', onMove)
+      const trigger = ScrollTrigger.create({
+        trigger: canvas.current,
+        start: 'top top',
+        end: 'bottom top',
+        onUpdate: (self) => scene.setProgress(self.progress),
+      })
+      return () => {
+        window.removeEventListener('pointermove', onMove)
+        trigger.kill()
+      }
+    },
+    theme,
+  )
 
   return (
-    <section id="hero" className={styles.hero}>
-      {showSilk ? (
-        <div className={styles.shaderLayer} aria-hidden="true">
-          <Suspense fallback={<div className={styles.staticBackdrop} />}>
-            <Silk
-              speed={3.2}
-              scale={0.9}
-              color={shader.base}
-              colorB={shader.tint}
-              noiseIntensity={0.08}
-              rotation={1.25}
-            />
-          </Suspense>
-        </div>
-      ) : (
-        <div className={styles.staticBackdrop} aria-hidden="true" />
-      )}
+    <section id="hero" className={styles.hero} data-intro={introPending ? 'pending' : undefined}>
+      <div className={styles.staticBackdrop} aria-hidden="true" />
+      <canvas ref={canvas} className={styles.core} aria-hidden="true" />
       <div className={styles.blooms} aria-hidden="true" />
       <div className={styles.dots} aria-hidden="true" />
       <div className={styles.vignette} aria-hidden="true" />

@@ -10,7 +10,7 @@ A client-rendered Vite + React 19 + TypeScript app. Three views share one shell:
 ThemeProvider
   Navbar
   main
-    /                 Hero, About, Skills, Experience, Projects, Contact
+    /                 Hero, Statement, About, Skills, Experience, Projects, Contact
     /projects         DemoPage (index)
     /projects/<slug>  DemoPage (one project)
   Footer
@@ -27,13 +27,14 @@ src/
   app/App.tsx             Shell and view selection
   components/
     layout/               Navbar, Footer
-    sections/             Hero, About, Skills, Experience, Projects (+ DemoPage), Contact
-    ui/                   Button, Card, Badge, SectionContainer, ChromaGrid, Silk (WebGL), ...
+    sections/             Hero, Statement, About, Skills, Experience, Projects (+ DemoPage), Contact
+    ui/                   Button, Card, Badge, SectionContainer, ChromaGrid, ...
   constants/
     routes.ts             Path helpers: slugifyProject, projectDemoRoute, demoSlugFromPath, pathFromLegacyHash
     site.ts               SITE_URL, RESUME_URL
   context/ThemeContext    Theme state, mirrored on <html data-theme>
   data/                   projects, projectMedia, experience, skills, navigation
+  orbit/                  three.js hero scene, intro loader + load progress, motion hooks (Lenis, budget)
   hooks/                  useGsapReveal, useMediaQuery, useTilt
   styles/                 tokens.css (primitives → semantic tokens), globals.css
   types/project.ts

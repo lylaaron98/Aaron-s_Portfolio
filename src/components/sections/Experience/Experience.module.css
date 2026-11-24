@@ -1,127 +1,269 @@
-.timeline {
+/* Vertical scroll-drawn timeline, on the site's theme tokens. Columns on wide
+   screens: date | rail | card. On phones the rail moves to the left edge and
+   the date sits above the card. */
+.wrap {
+  --rail-x: 236px;
+  --node: 14px;
   position: relative;
-  display: grid;
-  gap: var(--space-6, 1.5rem);
-  max-width: 980px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 0;
-  list-style: none;
 }
 
-/* The rail runs behind the dots, down the date column. */
-.timeline::before {
-  content: '';
+.timeline {
+  display: grid;
+  gap: var(--space-8);
+  list-style: none;
+  padding: var(--space-3) 0;
+}
+
+.rail {
   position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: 7px;
+  top: 0;
+  bottom: 0;
+  left: var(--rail-x);
   width: 2px;
-  background: linear-gradient(to bottom, var(--brand), color-mix(in srgb, var(--brand) 15%, transparent));
+  transform: translateX(-50%);
+  background: var(--line);
   border-radius: 2px;
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  background: linear-gradient(
+    to bottom,
+    var(--brand),
+    var(--brand-2),
+    var(--brand-3)
+  );
+  box-shadow: 0 0 12px var(--brand-glow, var(--brand));
 }
 
 .item {
+  position: relative;
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: var(--space-5, 1.25rem);
+  grid-template-columns: calc(var(--rail-x) - var(--space-7)) var(
+      --space-7
+    ) minmax(0, 1fr);
   align-items: start;
 }
 
 .when {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-top: 22px;
+  display: grid;
+  justify-items: end;
+  text-align: right;
+  gap: 4px;
+  padding: var(--space-4) var(--space-5) 0 0;
 }
 
-.dot {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--bg, #070912);
-  border: 3px solid var(--brand);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 18%, transparent);
-  position: relative;
-  z-index: 1;
+.year {
+  font: var(--weight-semi, 600) clamp(2rem, 3.4vw, 2.75rem) / 1 var(--font-sans);
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--line-strong);
+  transition:
+    color 0.5s,
+    -webkit-text-stroke-color 0.5s;
 }
 
 .date {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: var(--text-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font: var(--weight-medium) var(--text-xs) / 1.4 var(--font-mono);
   color: var(--fg-mute);
+  white-space: nowrap;
+}
+
+.sector {
+  font: var(--weight-medium) var(--text-2xs) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.node {
+  position: absolute;
+  left: var(--rail-x);
+  top: calc(var(--space-4) + 12px);
+  width: var(--node);
+  height: var(--node);
+  transform: translate(-50%, -50%) scale(0.8);
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--line-strong);
+  transition:
+    transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1),
+    border-color 0.4s,
+    background 0.4s,
+    box-shadow 0.4s;
+  z-index: 1;
+}
+
+.pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--brand);
+  animation: pulse 2.2s ease-out infinite;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Lit state: node filled, year coloured. Applied on scroll, or always when
+   motion is reduced. */
+.reached .node {
+  transform: translate(-50%, -50%) scale(1);
+  border-color: var(--brand);
+  background: var(--brand);
+  box-shadow:
+    0 0 0 5px var(--brand-dim),
+    0 0 18px var(--brand-glow, var(--brand));
+}
+
+.reached .year {
+  color: var(--fg);
+  -webkit-text-stroke-color: transparent;
 }
 
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3, 0.75rem);
-  padding: var(--space-6, 1.5rem);
+  grid-column: 3;
+  position: relative;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg, 16px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  transition:
+    border-color 0.3s,
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+
+/* Little connector from the node to the card. */
+.card::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--space-4) + 12px);
+  right: 100%;
+  width: calc(var(--space-7) - var(--node) / 2);
+  height: 1px;
+  background: linear-gradient(to left, var(--line-strong), transparent);
+}
+
+.card:hover {
+  border-color: var(--brand-line);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -24px var(--brand-glow, var(--brand));
 }
 
 .role {
-  font-size: var(--text-lg);
-  font-weight: 700;
+  font-size: var(--text-lg, 1.2rem);
   line-height: 1.3;
   color: var(--fg);
 }
 
 .company {
-  margin-top: -4px;
-  font-size: var(--text-base);
+  margin-top: 4px;
   color: var(--brand);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
 }
 
 .bullets {
   display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.bullet {
-  position: relative;
-  padding-left: 1.1rem;
-  font-size: var(--text-base);
-  line-height: 1.65;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
   color: var(--fg-soft);
+  font-size: var(--text-sm);
+  line-height: 1.6;
 }
 
-.bullet::before {
-  content: '';
+.bullets li {
+  position: relative;
+  padding-left: var(--space-4);
+}
+
+.bullets li::before {
+  content: "";
   position: absolute;
   left: 0;
   top: 0.7em;
   width: 6px;
-  height: 2px;
+  height: 1px;
   background: var(--brand);
 }
 
 .tech {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2, 0.5rem);
-  padding-top: var(--space-3, 0.75rem);
-  border-top: 1px solid var(--line);
+  gap: 6px;
+  margin-top: var(--space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reachedStatic .node {
+    border-color: var(--brand);
+    background: var(--brand);
+  }
+
+  .reachedStatic .year {
+    color: var(--fg);
+    -webkit-text-stroke-color: transparent;
+  }
+
+  .pulse {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
+  .wrap {
+    --rail-x: 7px;
+  }
+
+  .timeline {
+    gap: var(--space-7);
+  }
+
   .item {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2, 0.5rem);
-    padding-left: 30px;
+    grid-template-columns: var(--space-6) minmax(0, 1fr);
   }
 
   .when {
-    padding-top: 0;
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
+    padding: 0 0 var(--space-3);
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    column-gap: var(--space-3);
   }
 
-  .dot {
-    position: absolute;
-    left: -30px;
+  .year {
+    grid-row: span 2;
+    font-size: 2rem;
+  }
+
+  .node {
+    top: 16px;
+  }
+
+  .card {
+    grid-column: 2;
+    padding: var(--space-5);
+  }
+
+  .card::before {
+    display: none;
   }
 }

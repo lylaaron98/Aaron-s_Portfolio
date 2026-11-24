@@ -1,0 +1,20 @@
+.statement {
+  position: relative;
+  background: var(--bg);
+}
+
+.text {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  font-size: clamp(1.75rem, 4.2vw, 3.6rem);
+  font-weight: var(--weight-semi);
+  line-height: 1.14;
+  letter-spacing: var(--tracking-display);
+  color: var(--fg);
+}
+
+/* Gradient ink on the key words would fight the reveal; keep it to colour. */
+.word {
+  will-change: opacity;
+}

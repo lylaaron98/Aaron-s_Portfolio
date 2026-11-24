@@ -18,6 +18,22 @@ export const projects: Project[] = [
     category: 'personal',
   },
   {
+    title: 'Salon Group Websites',
+    summary: 'Three salon brand sites on one shared design system, built as a portfolio demo.',
+    highlights: [
+      'Hair, skin and scalp brands from one codebase',
+      'Shared token package themes each brand',
+      'Services, pricing, team and outlet booking pages',
+    ],
+    description:
+      'A Next.js monorepo for a fictional Singapore salon group with three specialist studios: a hair atelier, a skin studio and a scalp clinic. Every brand draws from one design token package through CSS custom properties scoped by a data-brand attribute, so each site gets its own fonts, colours and button styles from the same components. Each studio has services, fixed pricing, team profiles, outlet pages with book, call and WhatsApp actions, and offers, plus a public token reference and component library.',
+    tech: ['Next.js', 'TypeScript', 'Monorepo', 'Design Tokens', 'CSS Custom Properties', 'Vercel'],
+    github: '',
+    live: 'https://salon-demos-jade.vercel.app',
+    featured: true,
+    category: 'personal',
+  },
+  {
     title: 'AI Architectural Drawing Platform',
     summary: 'Turns faded scanned blueprints into clean vector plans, with no manual redrawing.',
     highlights: [

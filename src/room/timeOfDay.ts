@@ -177,3 +177,47 @@ export function skyBodyAt(hour: number) {
   const span = isDay ? (h - 6) / 13 : ((h + 24 - 19) % 24) / 11
   return { isDay, across: span, elevation: Math.sin(Math.PI * Math.min(Math.max(span, 0), 1)) }
 }
+
+/**
+ * Photographic skies (CC0 HDRIs from Poly Haven, toned to LDR). `sun` is the
+ * sun's position in the full panorama (u across, v down); `center` is the u
+ * that faces out of the window, chosen so dawn and dusk suns sit in view.
+ */
+export const SKIES: Record<Phase, { src: string | null; sun: [number, number] | null; center: number; gain: number }> = {
+  dawn: { src: '/assets/room/sky/dawn.webp', sun: [0.613, 0.474], center: 0.55, gain: 1.1 },
+  day: { src: '/assets/room/sky/day.webp', sun: [0.595, 0.234], center: 0.5, gain: 1.35 },
+  dusk: { src: '/assets/room/sky/dusk.webp', sun: [0.605, 0.489], center: 0.625, gain: 1.05 },
+  // Night keeps the procedural starfield: photos of night skies show street-level lights.
+  night: { src: null, sun: null, center: 0.5, gain: 1 },
+}
+
+const SKY_KEYS: [number, Phase][] = [
+  [5.25, 'night'],
+  [6.6, 'dawn'],
+  [8.5, 'day'],
+  [17, 'day'],
+  [18.8, 'dusk'],
+  [20.2, 'night'],
+]
+
+/** Which two skies to show for an hour, and how far between them. */
+export function skyBlendAt(hour: number): { a: Phase; b: Phase; t: number } {
+  const h = ((hour % 24) + 24) % 24
+  if (h < SKY_KEYS[0][0] || h >= SKY_KEYS[SKY_KEYS.length - 1][0]) return { a: 'night', b: 'night', t: 0 }
+  for (let i = 0; i < SKY_KEYS.length - 1; i++) {
+    const [h0, a] = SKY_KEYS[i]
+    const [h1, b] = SKY_KEYS[i + 1]
+    if (h >= h0 && h < h1) {
+      const raw = (h - h0) / (h1 - h0)
+      return { a, b, t: raw * raw * (3 - 2 * raw) }
+    }
+  }
+  return { a: 'night', b: 'night', t: 0 }
+}
+
+/** World direction of a panorama point, given the u that faces the window. */
+export function panoramaDirection(u: number, v: number, center: number) {
+  const lon = (u - center) * Math.PI * 2
+  const lat = (0.5 - v) * Math.PI
+  return { x: Math.sin(lon) * Math.cos(lat), y: Math.sin(lat), z: -Math.cos(lon) * Math.cos(lat) }
+}

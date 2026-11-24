@@ -65,6 +65,12 @@ function softwareRenderer() {
 
 /** Phones, touch-first devices, small CPUs and software GL get the lighter scene. */
 export function wantsLiteRoom() {
+  try {
+    // Manual override for testing the full scene on any machine.
+    if (localStorage.getItem('portfolio-room-quality') === 'high') return false
+  } catch {
+    // ignore
+  }
   const coarse = window.matchMedia('(max-width: 760px), (pointer: coarse)').matches
   const cores = navigator.hardwareConcurrency
   return coarse || (typeof cores === 'number' && cores > 0 && cores <= 4) || softwareRenderer()

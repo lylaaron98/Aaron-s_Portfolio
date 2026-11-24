@@ -1,17 +1,15 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+import type { Post } from './post'
 import { gsap } from '../orbit/motion'
-import { lightingAt, skyBodyAt } from './timeOfDay'
+import { lightingAt, panoramaDirection, skyBlendAt, SKIES, type Phase } from './timeOfDay'
 import { createSkyline } from './skyline'
 import { createAvatar } from './avatar'
 import {
   auroraPrint,
   codeTexture,
-  concreteTextures,
   contactShadowTexture,
   fabricTexture,
   plasterTexture,
@@ -78,6 +76,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   const camera = new THREE.PerspectiveCamera(42, 1, 0.03, 900)
 
   const disposables: { dispose(): void }[] = []
+  let disposed = false
   const track = <T extends { dispose(): void }>(item: T) => (disposables.push(item), item)
 
   const add = <T extends THREE.Object3D>(object: T, parent: THREE.Object3D = scene, shadows = true) => {
@@ -98,14 +97,44 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
 
   // ── Materials ──────────────────────────────────────────────────────────
   const wood = woodTextures()
-  const concrete = concreteTextures()
   const plaster = track(plasterTexture())
-  ;[wood.map, wood.roughness, concrete.map, concrete.roughness].forEach(track)
+  ;[wood.map, wood.roughness].forEach(track)
 
-  const floorMat = track(new THREE.MeshStandardMaterial({ map: concrete.map, roughnessMap: concrete.roughness, roughness: 1, metalness: 0 }))
+  // Scanned materials (CC0, Poly Haven): oak laminate floor and an oak desk.
+  const textureLoader = new THREE.TextureLoader()
+  const scanned = (src: string, color: boolean, repeat: [number, number], rotate = 0) => {
+    const t = track(textureLoader.load(src))
+    t.colorSpace = color ? THREE.SRGBColorSpace : THREE.NoColorSpace
+    t.wrapS = t.wrapT = THREE.RepeatWrapping
+    t.repeat.set(...repeat)
+    t.center.set(0.5, 0.5)
+    t.rotation = rotate
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy())
+    return t
+  }
+  const plank: [number, number] = [5.5, 6]
+  const floorMat = track(
+    new THREE.MeshStandardMaterial({
+      map: scanned('/assets/room/tex/floor-color.webp', true, plank, Math.PI / 2),
+      normalMap: scanned('/assets/room/tex/floor-normal.webp', false, plank, Math.PI / 2),
+      normalScale: new THREE.Vector2(0.6, 0.6),
+      roughnessMap: scanned('/assets/room/tex/floor-rough.webp', false, plank, Math.PI / 2),
+      roughness: 1,
+      metalness: 0,
+    }),
+  )
   const wallMat = track(new THREE.MeshStandardMaterial({ map: plaster, roughness: 0.95 }))
   const oak = track(
     new THREE.MeshPhysicalMaterial({ map: wood.map, roughnessMap: wood.roughness, roughness: 1, clearcoat: 0.35, clearcoatRoughness: 0.35 }),
+  )
+  const deskMat = track(
+    new THREE.MeshPhysicalMaterial({
+      map: scanned('/assets/room/tex/desk-color.webp', true, [1, 1]),
+      roughnessMap: wood.roughness,
+      roughness: 0.9,
+      clearcoat: 0.3,
+      clearcoatRoughness: 0.3,
+    }),
   )
   const blackMetal = track(new THREE.MeshStandardMaterial({ color: '#1a1b1f', roughness: 0.38, metalness: 0.75 }))
   const alu = track(new THREE.MeshStandardMaterial({ color: '#b9bcc2', roughness: 0.3, metalness: 0.9 }))
@@ -193,7 +222,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   add(rug, scene, false)
 
   // ── Desk ───────────────────────────────────────────────────────────────
-  add(rounded(1.7, 0.035, 0.75, 0.008, oak, 0, DESK_TOP - 0.0175, -1.45))
+  add(rounded(1.7, 0.035, 0.75, 0.008, deskMat, 0, DESK_TOP - 0.0175, -1.45))
   for (const x of [-0.78, 0.78]) {
     const frame = new THREE.Group()
     frame.add(rounded(0.035, DESK_TOP - 0.04, 0.035, 0.006, blackMetal, x, (DESK_TOP - 0.04) / 2, -1.14))
@@ -433,6 +462,61 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   add(plant)
   contactShadow(1.5, 0, -1.85, 0.6, 0.6)
 
+  // ── Real furniture (desktop) ───────────────────────────────────────────
+  // Potted plant: CC-BY 4.0 Eric Chadwick / Darmstadt Graphics Group, from a
+  // CC0 scan by Rico Cilliers. Velvet sofa: CC-BY 4.0 Eric Chadwick / Wayfair.
+  // Both from the Khronos glTF sample assets; see /assets/room/CREDITS.txt.
+  const gltfLoader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
+  const loadedTextures: THREE.Texture[] = []
+  const place = (
+    url: string,
+    fit: { height?: number; length?: number },
+    at: THREE.Vector3,
+    rotationY: number,
+    onPlaced?: (root: THREE.Object3D) => void,
+  ) =>
+    gltfLoader.load(url, (gltf) => {
+      if (disposed) return
+      const root = gltf.scene
+      const lights: THREE.Object3D[] = []
+      root.traverse((child) => {
+        if ((child as THREE.Light).isLight) lights.push(child)
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true
+          child.receiveShadow = true
+          const mat = child.material as THREE.MeshStandardMaterial
+          for (const key of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'] as const) {
+            const t = mat[key]
+            if (t) {
+              t.anisotropy = 8
+              loadedTextures.push(t)
+            }
+          }
+        }
+      })
+      lights.forEach((light) => light.removeFromParent())
+      root.rotation.y = rotationY
+      root.updateMatrixWorld(true)
+      let box = new THREE.Box3().setFromObject(root)
+      const size = box.getSize(new THREE.Vector3())
+      const scale = fit.height ? fit.height / size.y : fit.length! / Math.max(size.x, size.z)
+      root.scale.setScalar(scale)
+      root.updateMatrixWorld(true)
+      box = new THREE.Box3().setFromObject(root)
+      const center = box.getCenter(new THREE.Vector3())
+      root.position.set(at.x - center.x, at.y - box.min.y, at.z - center.z)
+      scene.add(root)
+      onPlaced?.(root)
+    })
+  if (!lite) {
+    place('/assets/room/models/plant.glb', { height: 1.35 }, new THREE.Vector3(1.5, 0, -1.85), 0.6, () => {
+      plant.visible = false
+    })
+    place('/assets/room/models/sofa.glb', { length: 2.1 }, new THREE.Vector3(-2.72, 0, -0.75), Math.PI / 2, () => {
+      contactShadow(-2.72, 0, -0.75, 1.2, 2.4, 0.8)
+    })
+  }
+
   // ── Left wall: shelf, books, print ──────────────────────────────────────
   const shelf = new THREE.Group()
   shelf.position.set(-3.18, 0, -0.4)
@@ -584,28 +668,73 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   envScene.add(envWarm)
   let envTarget: THREE.WebGLRenderTarget | null = null
 
-  // ── Post-processing (desktop) ──────────────────────────────────────────
-  let composer: EffectComposer | null = null
-  let bloom: UnrealBloomPass | null = null
+  // ── Post-processing (desktop, loaded on demand) ────────────────────────
+  let post: Post | null = null
   if (!lite) {
-    const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 })
-    composer = new EffectComposer(renderer, target)
-    composer.addPass(new RenderPass(scene, camera))
-    bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.3, 0.55, 0.88)
-    composer.addPass(bloom)
-    composer.addPass(new OutputPass())
+    void import('./post').then(({ createPost }) => {
+      if (disposed) return
+      post = createPost(renderer, scene, camera)
+      post.setSize(Math.max(1, canvas.clientWidth), Math.max(1, canvas.clientHeight))
+      renderer.toneMapping = THREE.NoToneMapping
+    })
   }
   let bloomBase = 0.3
 
   // ── Time of day ────────────────────────────────────────────────────────
   const sunDir = new THREE.Vector3()
+  // Photographic skies load on demand and stay cached for the session.
+  const skyCache = new Map<Phase, THREE.Texture>()
+  const skyTexture = (phase: Phase, onReady: () => void) => {
+    const src = SKIES[phase].src
+    if (!src) return null
+    const cached = skyCache.get(phase)
+    if (cached) return cached
+    const tex = textureLoader.load(src, () => {
+      if (!disposed) onReady()
+    })
+    tex.colorSpace = THREE.NoColorSpace
+    tex.wrapS = THREE.RepeatWrapping
+    tex.minFilter = THREE.LinearFilter
+    tex.generateMipmaps = false
+    skyCache.set(phase, tex)
+    loadedTextures.push(tex)
+    return tex
+  }
+  const MOON = new THREE.Vector3(-0.3, 0.5, -0.8).normalize()
+  const bodyDir = (phase: Phase) => {
+    const sky = SKIES[phase]
+    if (!sky.sun) return MOON.clone()
+    const d = panoramaDirection(sky.sun[0], sky.sun[1], sky.center)
+    return new THREE.Vector3(d.x, Math.max(d.y, 0.06), d.z).normalize()
+  }
+  let currentHour = options.hour
   const setHour = (hour: number) => {
+    currentHour = hour
     const L = lightingAt(hour)
-    const body = skyBodyAt(hour)
-    // Across the window from left to right, rising to the given elevation.
-    const azimuth = THREE.MathUtils.lerp(-0.9, 0.9, body.across)
-    const elevation = 0.04 + body.elevation * 0.55
-    sunDir.set(Math.sin(azimuth) * Math.cos(elevation), Math.sin(elevation), -Math.cos(azimuth) * Math.cos(elevation))
+    const blend = skyBlendAt(hour)
+    const nightness = (blend.a === 'night' ? 1 - blend.t : 0) + (blend.b === 'night' ? blend.t : 0)
+    const body = { isDay: nightness < 0.5 }
+    sunDir.copy(bodyDir(blend.a)).lerp(bodyDir(blend.b), blend.t).normalize()
+    const refresh = () => {
+      if (currentHour === hour) setHour(hour)
+    }
+    const ready = (t: THREE.Texture | null) => (t?.image ? t : null)
+    const texA = ready(skyTexture(blend.a, refresh))
+    const texB = ready(skyTexture(blend.b, refresh))
+    // A phase without a photo (night) fades to the procedural sky.
+    const strength = (texA ? 1 - blend.t : 0) + (texB ? blend.t : 0)
+    const first = texA ?? texB
+    const second = texA && texB ? texB : null
+    const skyA = texA ? SKIES[blend.a] : SKIES[blend.b]
+    skyline.setPhotos(
+      first,
+      second,
+      blend.t,
+      skyA.center,
+      SKIES[blend.b].center,
+      second ? THREE.MathUtils.lerp(SKIES[blend.a].gain, SKIES[blend.b].gain, blend.t) : skyA.gain,
+      first && !second && SKIES[blend.a].src && SKIES[blend.b].src ? 1 : strength,
+    )
     skyline.update(L, sunDir, body.isDay)
     ;(scene.fog as THREE.Fog).color.set(L.skyHorizon)
 
@@ -666,8 +795,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       const { clientWidth: w, clientHeight: h } = canvas
       if (!w || !h) return
       renderer.setSize(w, h, false)
-      composer?.setSize(w, h)
-      bloom?.resolution.set(w, h)
+      post?.setSize(w, h)
       aspect = w / h
       camera.aspect = aspect
       if (!entering) Object.assign(rig, home())
@@ -701,10 +829,9 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       const haloMat = halo.material as THREE.MeshBasicMaterial
       haloMat.opacity += ((hover ? 0.85 : 0) - haloMat.opacity) * Math.min(1, dt * 8)
 
-      if (composer && bloom) {
+      if (post) {
         // Bloom fades out on the way in, so the last frame matches the page.
-        bloom.strength = bloomBase * (1 - rig.zoom)
-        composer.render(dt)
+        post.render(dt, bloomBase * 2.2 * (1 - rig.zoom))
       } else {
         renderer.render(scene, camera)
       }
@@ -774,7 +901,9 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       })
       envTarget?.dispose()
       pmrem.dispose()
-      composer?.dispose()
+      disposed = true
+      loadedTextures.forEach((t) => t.dispose())
+      post?.dispose()
       skyline.dispose()
       avatar.dispose()
       disposables.forEach((item) => item.dispose())

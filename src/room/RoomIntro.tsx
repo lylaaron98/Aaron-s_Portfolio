@@ -168,6 +168,9 @@ export default function RoomIntro({ reduced, onExit }: { reduced: boolean; onExi
         <div className={styles.brand}>
           <strong>Aaron Lee</strong>
           <span>Software engineer · Singapore</span>
+          <a className={styles.credits} href="/assets/room/CREDITS.txt" target="_blank" rel="noreferrer">
+            Credits
+          </a>
         </div>
         <button type="button" className={styles.skip} onClick={leave}>
           Skip to site

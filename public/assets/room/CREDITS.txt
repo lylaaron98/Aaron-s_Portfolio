@@ -1,0 +1,18 @@
+3D room: third-party assets
+
+Skies (Poly Haven, CC0): Kloofendal 48d Partly Cloudy (Pure Sky),
+Kloppenheim 06 (Pure Sky), Belfast Sunset (Pure Sky).
+https://polyhaven.com
+
+Floor (Poly Haven, CC0): Laminate Floor 02.
+Desk top (Poly Haven, CC0): Kitchen Wood.
+
+Potted plant: "Diffuse Transmission Plant" by Eric Chadwick and
+Darmstadt Graphics Group GmbH, from a CC0 scan by Rico Cilliers.
+Licensed CC BY 4.0. https://github.com/KhronosGroup/glTF-Sample-Assets
+
+Sofa: "Glam Velvet Sofa" by Eric Chadwick and Wayfair LLC.
+Licensed CC BY 4.0. https://github.com/KhronosGroup/glTF-Sample-Assets
+
+Models were compressed (WebP textures, meshopt geometry); otherwise unchanged.
+License: https://creativecommons.org/licenses/by/4.0/

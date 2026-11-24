@@ -22,6 +22,23 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
   const disposables: { dispose(): void }[] = []
   const track = <T extends { dispose(): void }>(item: T) => (disposables.push(item), item)
 
+  // The photos hold the top 57% of an equirectangular panorama. Shared by the
+  // sky dome and the glass of the towers, which reflect it.
+  const PHOTO_GLSL = /* glsl */ `
+    uniform sampler2D uPhotoA, uPhotoB;
+    uniform float uCenterA, uCenterB, uPhotoMix, uPhoto, uPhotoGain;
+    vec3 photo(sampler2D map, float center, vec3 d) {
+      float lon = atan(d.x, -d.z) / 6.2831853;
+      float lat = asin(clamp(d.y, -1.0, 1.0)) / 3.1415927;
+      vec2 uv = vec2(fract(center + lon), 1.0 - (0.5 - lat) / 0.57);
+      return texture2D(map, uv).rgb;
+    }
+    vec3 photoSky(vec3 d) {
+      vec3 shot = mix(photo(uPhotoA, uCenterA, d), photo(uPhotoB, uCenterB, d), uPhotoMix);
+      return pow(shot, vec3(2.2)) * uPhotoGain; // back to linear
+    }
+  `
+
   // ── Sky dome ───────────────────────────────────────────────────────────
   const skyUniforms = {
     uTop: { value: new THREE.Color() },
@@ -33,6 +50,14 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
     uCloud: { value: new THREE.Color() },
     uClouds: { value: 0.5 },
     uTime: { value: 0 },
+    // Photographic skies (CC0 HDRIs, pre-toned to LDR), blended by time.
+    uPhotoA: { value: null as THREE.Texture | null },
+    uPhotoB: { value: null as THREE.Texture | null },
+    uCenterA: { value: 0.5 },
+    uCenterB: { value: 0.5 },
+    uPhotoMix: { value: 0 },
+    uPhoto: { value: 0 },
+    uPhotoGain: { value: 1 },
   }
   const sky = new THREE.Mesh(
     track(new THREE.SphereGeometry(400, 48, 24)),
@@ -50,6 +75,7 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
           uniform float uIsDay, uStars, uClouds, uTime;
           varying vec3 vDir;
           ${NOISE}
+          ${PHOTO_GLSL}
           void main() {
             vec3 d = normalize(vDir);
             float h = clamp(d.y, -0.2, 1.0);
@@ -76,6 +102,13 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
             col += vec3(star * twinkle * uStars * smoothstep(0.08, 0.3, h) * (1.0 - cover));
 
             col += disc * uSunColor * (uIsDay > 0.5 ? 6.0 : 2.0);
+            if (uPhoto > 0.001) {
+              vec3 shot = photoSky(d);
+              // Below the horizon the city haze takes over (the photos were
+              // shot at street level; this room is on a high floor).
+              float above = smoothstep(-0.015, 0.02, d.y);
+              col = mix(col, mix(uHorizon * 0.9, shot, above), uPhoto);
+            }
             gl_FragColor = vec4(col, 1.0);
             #include <tonemapping_fragment>
             #include <colorspace_fragment>
@@ -88,7 +121,20 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
   scene.add(sky)
 
   // ── Buildings ──────────────────────────────────────────────────────────
-  const cityUniforms = { uCity: { value: 0 }, uDay: { value: 1 }, uTime: { value: 0 } }
+  const cityUniforms = {
+    uCity: { value: 0 },
+    uDay: { value: 1 },
+    uTime: { value: 0 },
+    uSkyTop: skyUniforms.uTop,
+    uSkyHorizon: skyUniforms.uHorizon,
+    uPhotoA: skyUniforms.uPhotoA,
+    uPhotoB: skyUniforms.uPhotoB,
+    uCenterA: skyUniforms.uCenterA,
+    uCenterB: skyUniforms.uCenterB,
+    uPhotoMix: skyUniforms.uPhotoMix,
+    uPhoto: skyUniforms.uPhoto,
+    uPhotoGain: skyUniforms.uPhotoGain,
+  }
   const cityMaterial = track(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.75, metalness: 0.15, envMapIntensity: 0.15 }))
   cityMaterial.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, cityUniforms)
@@ -107,13 +153,16 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
         '#include <common>',
         `#include <common>
          uniform float uCity, uDay, uTime;
+         uniform vec3 uSkyTop, uSkyHorizon;
+         ${PHOTO_GLSL}
          varying vec3 vCityPos;
          varying vec3 vCityNormal;
          varying float vCityId;
          ${NOISE}
          float cityWindow;
          float cityLit;
-         vec3 cityLitColor;`,
+         vec3 cityLitColor;
+         float cityCurtain;`,
       )
       .replace(
         '#include <color_fragment>',
@@ -129,7 +178,11 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
          vec2 f = fract(g);
          vec2 cell = floor(g);
          float frame = style > 0.6 ? 0.1 : 0.2;
-         cityWindow = side * step(frame, f.x) * step(f.x, 1.0 - frame) * step(0.22, f.y) * step(f.y, 0.86);
+         // About a third of the towers are full glass curtain walls.
+         cityCurtain = step(0.66, hash12(vec2(cityId, 11.0)));
+         float mullion = step(0.04, f.x) * step(f.x, 0.96) * step(0.06, f.y);
+         float punched = step(frame, f.x) * step(f.x, 1.0 - frame) * step(0.22, f.y) * step(f.y, 0.86);
+         cityWindow = side * mix(punched, mullion, cityCurtain);
          float r = hash12(cell + cityId * 13.1);
          float flicker = step(0.997, hash12(cell + floor(uTime * 0.25)));
          cityLit = cityWindow * step(1.0 - uCity * (0.12 + style * 0.22), r) * (1.0 - flicker) * (0.45 + 0.55 * hash12(cell + 9.3));
@@ -138,7 +191,7 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
          float blinds = step(0.65, hash12(cell + 5.1)) * step(0.6, f.y) * (0.6 + 0.4 * step(0.5, fract(f.y * 14.0)));
          cityLitColor *= mix(1.0, 0.55, smoothstep(0.3, 0.86, f.y)) * (1.0 - blinds * 0.7);
          vec3 facade = diffuseColor.rgb * (0.85 + 0.3 * hash12(vec2(cityId, 3.0))) * mix(0.22, 1.0, uDay);
-         vec3 glass = mix(vec3(0.16, 0.2, 0.27), vec3(0.42, 0.55, 0.68), uDay) * (0.8 + 0.4 * r);
+         vec3 glass = mix(vec3(0.08, 0.1, 0.13), vec3(0.2, 0.26, 0.32), uDay) * (0.8 + 0.4 * r);
          diffuseColor.rgb = mix(facade, glass, cityWindow * 0.85);
          // Roofs read darker.
          diffuseColor.rgb *= mix(1.0, 0.7, step(0.5, n.y));`,
@@ -151,14 +204,26 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
       .replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
-         totalEmissiveRadiance += cityLitColor * cityLit * 1.25;`,
+         totalEmissiveRadiance += cityLitColor * cityLit * 1.25;
+         // Glass mirrors the real sky, strongest at grazing angles. Panes are
+         // never perfectly flat, so each one tilts the reflection a touch.
+         vec3 viewDir = normalize(vCityPos - cameraPosition);
+         vec3 wobble = vec3(hash12(cell + 4.4) - 0.5, hash12(cell + 8.8) - 0.5, 0.0) * 0.03;
+         vec3 rdir = reflect(viewDir, normalize(n + wobble * side));
+         rdir.y = abs(rdir.y) * 0.85 + 0.03;
+         rdir = normalize(rdir);
+         vec3 gradient = mix(uSkyHorizon, uSkyTop, smoothstep(0.0, 0.5, rdir.y));
+         vec3 skyRefl = uPhoto > 0.001 ? mix(gradient, photoSky(rdir), uPhoto) : gradient;
+         float fres = 0.06 + 0.94 * pow(1.0 - clamp(dot(-viewDir, n), 0.0, 1.0), 5.0);
+         float reflAmt = cityWindow * (1.0 - cityLit) * mix(0.35, 0.9, cityCurtain) * (0.25 + 0.75 * fres);
+         totalEmissiveRadiance += skyRefl * reflAmt * mix(0.25, 0.6, uDay);`,
       )
   }
 
   const count = lite ? 120 : 240
   const box = track(new THREE.BoxGeometry(1, 1, 1))
   const city = new THREE.InstancedMesh(box, cityMaterial, count)
-  const tints = ['#8a93a6', '#a49c90', '#7e8796', '#b0b4bb', '#6f7686', '#9aa4b2']
+  const tints = ['#7b8394', '#958d82', '#6f7886', '#a3a6ac', '#626a7a', '#8a94a2', '#b3aa9c']
   const dummy = new THREE.Object3D()
   const roofs: THREE.Vector3[] = []
   for (let i = 0; i < count; i++) {
@@ -167,7 +232,8 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
     const x = (Math.random() * 2 - 1) * spread
     const w = 7 + Math.random() * 14
     const d = 7 + Math.random() * 14
-    const top = -30 + Math.random() * 30 + (Math.abs(x) < 45 && Math.random() < 0.35 ? 14 : 0)
+    const cbd = Math.abs(x) < 90 && z < -175 && Math.random() < 0.35
+    const top = -30 + Math.random() * 30 + (Math.abs(x) < 45 && Math.random() < 0.35 ? 14 : 0) + (cbd ? 12 + Math.random() * 22 : 0)
     const height = 200
     dummy.position.set(x, top - height / 2, z)
     dummy.rotation.y = Math.random() < 0.15 ? Math.PI / 4 : 0
@@ -235,20 +301,6 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
   )
   scene.add(beacons)
 
-  // A faint far ridge of towers, mostly lost in haze, for depth.
-  const farCount = lite ? 40 : 80
-  const farMat = track(new THREE.MeshBasicMaterial({ color: '#7d8799', fog: true }))
-  const far = new THREE.InstancedMesh(box, farMat, farCount)
-  for (let i = 0; i < farCount; i++) {
-    const z = -260 - Math.random() * 60
-    dummy.rotation.set(0, 0, 0)
-    dummy.position.set((Math.random() * 2 - 1) * 380, -40 + Math.random() * 40, z)
-    dummy.scale.set(10 + Math.random() * 20, 80, 10)
-    dummy.updateMatrix()
-    far.setMatrixAt(i, dummy.matrix)
-  }
-  scene.add(far)
-
   return {
     update(L: Lighting, sunDir: THREE.Vector3, isDay: boolean) {
       skyUniforms.uTop.value.set(L.skyTop)
@@ -262,7 +314,16 @@ export function createSkyline(scene: THREE.Scene, lite: boolean) {
       cityUniforms.uCity.value = L.city
       cityUniforms.uDay.value = 1 - L.city
       beaconUniforms.uNight.value = Math.min(1, L.city * 1.2)
-      farMat.color.set(L.skyHorizon).multiplyScalar(0.82)
+    },
+    /** `strength` fades the photos over the procedural sky (night has none). */
+    setPhotos(a: THREE.Texture | null, b: THREE.Texture | null, mix: number, centerA: number, centerB: number, gain: number, strength = 1) {
+      skyUniforms.uPhotoA.value = a
+      skyUniforms.uPhotoB.value = b ?? a
+      skyUniforms.uPhotoMix.value = b ? mix : 0
+      skyUniforms.uCenterA.value = centerA
+      skyUniforms.uCenterB.value = centerB
+      skyUniforms.uPhoto.value = a ? strength : 0
+      skyUniforms.uPhotoGain.value = gain
     },
     tick(time: number) {
       skyUniforms.uTime.value = time

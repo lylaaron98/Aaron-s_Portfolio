@@ -17,8 +17,10 @@ import { smoothScrollTo } from '../utils/smoothScroll'
 import { demoSlugFromPath, pathFromLegacyHash, slugifyProject } from '../constants/routes'
 import { projects } from '../data/projects'
 import { interceptLinkClicks, navigate, useLocation } from '../utils/router'
+import { canRenderRoom, OPEN_ROOM_EVENT, shouldShowRoom } from '../room/gate'
 
 const DemoPage = lazy(() => import('../components/sections/Projects/DemoPage'))
+const RoomIntro = lazy(() => import('../room/RoomIntro'))
 
 // Old shared links used #/projects/demo/<slug>. Move them to the real path
 // before the first render so they land on the right page.
@@ -36,19 +38,22 @@ if (legacyPath) window.history.replaceState(null, '', legacyPath)
 
 // The intro plays once per full page load, and only when it lands on home.
 const landedOnHome = demoSlugFromPath(window.location.pathname) === null
+// First-time visitors on the home page enter through the 3D room instead.
+const roomFirst = shouldShowRoom(landedOnHome)
 
 function App() {
   const { pathname, hash } = useLocation()
   const slug = demoSlugFromPath(pathname)
   const isDemoPage = slug !== null
   const { reduced, allow3d } = useMotionBudget()
-  const [showLoader, setShowLoader] = useState(landedOnHome)
+  const [showRoom, setShowRoom] = useState(roomFirst)
+  const [showLoader, setShowLoader] = useState(landedOnHome && !roomFirst)
   const [introPending, setIntroPending] = useState(landedOnHome)
 
   // Register the load work before the loader subscribes, so it cannot read
   // 100% before the 3D scene has started.
   useState(() => {
-    if (!landedOnHome) return
+    if (!landedOnHome || roomFirst) return
     if (allow3d) addTask('scene', 3)
     trackPageAssets(['/assets/profile.webp'])
   })
@@ -60,6 +65,18 @@ function App() {
   }, [slug])
 
   useEffect(() => interceptLinkClicks(), [])
+
+  // The footer's "Visit the 3D room" link reopens the room from the top.
+  useEffect(() => {
+    const open = () => {
+      if (!canRenderRoom()) return
+      if (demoSlugFromPath(window.location.pathname) !== null) navigate('/')
+      window.scrollTo({ top: 0, behavior: 'auto' })
+      setShowRoom(true)
+    }
+    window.addEventListener(OPEN_ROOM_EVENT, open)
+    return () => window.removeEventListener(OPEN_ROOM_EVENT, open)
+  }, [])
 
   useEffect(() => {
     if (isDemoPage) {
@@ -79,29 +96,42 @@ function App() {
 
   return (
     <ThemeProvider>
+      {showRoom && (
+        <Suspense fallback={<div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: '#0b0f1e' }} />}>
+          <RoomIntro
+            reduced={reduced}
+            onExit={() => {
+              setShowRoom(false)
+              setIntroPending(false)
+            }}
+          />
+        </Suspense>
+      )}
       {showLoader && (
         <Loader reduced={reduced} onReveal={() => setIntroPending(false)} onDone={() => setShowLoader(false)} />
       )}
-      <Navbar />
-      <main>
-        {isDemoPage ? (
-          <Suspense fallback={null}>
-            <DemoPage />
-          </Suspense>
-        ) : (
-          <>
-            <Hero introPending={introPending} />
-            <Statement />
-            <About />
-            <Skills />
-            <Experience />
-            <Projects />
-            <Contact />
-          </>
-        )}
-      </main>
-      {!isDemoPage && <Footer />}
-      <ScrollToTop />
+      <div inert={showRoom} className="contents">
+        <Navbar />
+        <main>
+          {isDemoPage ? (
+            <Suspense fallback={null}>
+              <DemoPage />
+            </Suspense>
+          ) : (
+            <>
+              <Hero introPending={introPending} paused={showRoom} />
+              <Statement />
+              <About />
+              <Skills />
+              <Experience />
+              <Projects />
+              <Contact />
+            </>
+          )}
+        </main>
+        {!isDemoPage && <Footer />}
+        <ScrollToTop />
+      </div>
     </ThemeProvider>
   )
 }

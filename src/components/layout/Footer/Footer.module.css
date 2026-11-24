@@ -59,3 +59,21 @@
     text-align: center;
   }
 }
+
+.room {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--slate);
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: var(--transition);
+}
+
+.room:hover {
+  color: var(--cyan);
+}

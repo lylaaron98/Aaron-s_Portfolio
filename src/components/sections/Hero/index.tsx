@@ -70,7 +70,7 @@ function RoleTypewriter({ reducedMotion }: { reducedMotion: boolean }) {
   )
 }
 
-export default function Hero({ introPending = false }: { introPending?: boolean }) {
+export default function Hero({ introPending = false, paused = false }: { introPending?: boolean; paused?: boolean }) {
   const { theme } = useTheme()
   const prefersReducedMotion = usePrefersReducedMotion()
   const { allow3d } = useMotionBudget()
@@ -80,7 +80,8 @@ export default function Hero({ introPending = false }: { introPending?: boolean 
   // behind it is the fallback when WebGL is off.
   useScene(
     canvas,
-    allow3d,
+    // Held back while the 3D room is up, so only one WebGL scene runs at once.
+    allow3d && !paused,
     () => import('../../../orbit/orbitScene').then((m) => (c: HTMLCanvasElement) => m.createOrbitScene(c, theme === 'light')),
     (scene) => {
       completeTask('scene')

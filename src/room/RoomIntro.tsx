@@ -55,7 +55,7 @@ export default function RoomIntro({ reduced, onExit }: { reduced: boolean; onExi
     true,
     () =>
       import('./roomScene').then(
-        (m) => (canvas: HTMLCanvasElement) => m.createRoomScene(canvas, { lite, reduced, screenSrc, hour: localHour() }),
+        (m) => (canvas: HTMLCanvasElement) => m.createRoomScene(canvas, { lite, reduced, screenSrc, lightScreen: screenSrc.includes('light'), hour: localHour() }),
       ),
     (scene) => {
       sceneRef.current = scene

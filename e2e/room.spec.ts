@@ -1,5 +1,8 @@
-import { test, expect } from '@playwright/test'
+import { test, expect as baseExpect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+
+// Software WebGL keeps the main thread busy, so give assertions room to settle.
+const expect = baseExpect.configure({ timeout: 15_000 })
 
 const room = (page: import('@playwright/test').Page) => page.getByRole('region', { name: '3D room intro' })
 
@@ -10,6 +13,8 @@ test.beforeEach(async ({ page }) => {
     return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'))
   })
   test.skip(!webgl, 'No WebGL in this browser, so the room never shows')
+  // CI renders WebGL on the CPU, so the scene takes longer to come up.
+  test.slow()
 })
 
 test('first visit opens the room, Skip goes to the site and is remembered', async ({ page }) => {

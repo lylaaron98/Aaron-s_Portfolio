@@ -50,9 +50,22 @@ export function shouldShowRoom(onHome: boolean) {
   }
 }
 
-/** Phones, touch-first devices and small CPUs get the lighter scene. */
+/** True when WebGL is running on the CPU (blocklisted or missing GPU). */
+function softwareRenderer() {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl')
+    const info = gl?.getExtension('WEBGL_debug_renderer_info')
+    const name = info ? String(gl!.getParameter(info.UNMASKED_RENDERER_WEBGL)) : ''
+    gl?.getExtension('WEBGL_lose_context')?.loseContext()
+    return /swiftshader|llvmpipe|software|basic render/i.test(name)
+  } catch {
+    return false
+  }
+}
+
+/** Phones, touch-first devices, small CPUs and software GL get the lighter scene. */
 export function wantsLiteRoom() {
   const coarse = window.matchMedia('(max-width: 760px), (pointer: coarse)').matches
   const cores = navigator.hardwareConcurrency
-  return coarse || (typeof cores === 'number' && cores > 0 && cores <= 4)
+  return coarse || (typeof cores === 'number' && cores > 0 && cores <= 4) || softwareRenderer()
 }

@@ -21,6 +21,13 @@ export interface Lighting {
   /** Desk lamp and ceiling strip, 0–1. */
   interior: number
   exposure: number
+  /** Cloud tint and cover, 0–1. */
+  cloud: string
+  clouds: number
+  /** Soft daylight through the glass (rect light), arbitrary units. */
+  window: number
+  /** Bloom strength. */
+  bloom: number
 }
 
 interface Key extends Lighting {
@@ -39,6 +46,10 @@ const NIGHT: Omit<Key, 'hour'> = {
   stars: 1,
   interior: 1,
   exposure: 1.05,
+  cloud: '#2a3052',
+  clouds: 0.35,
+  window: 0.5,
+  bloom: 0.55,
 }
 
 const DAWN: Omit<Key, 'hour'> = {
@@ -53,6 +64,10 @@ const DAWN: Omit<Key, 'hour'> = {
   stars: 0.15,
   interior: 0.35,
   exposure: 1,
+  cloud: '#ffc2a8',
+  clouds: 0.6,
+  window: 2.2,
+  bloom: 0.35,
 }
 
 const DAY: Omit<Key, 'hour'> = {
@@ -67,13 +82,17 @@ const DAY: Omit<Key, 'hour'> = {
   stars: 0,
   interior: 0,
   exposure: 1.05,
+  cloud: '#ffffff',
+  clouds: 0.55,
+  window: 4,
+  bloom: 0.18,
 }
 
 const DUSK: Omit<Key, 'hour'> = {
   skyTop: '#2a2a6b',
   skyHorizon: '#ff7a59',
   sun: '#ff8a4c',
-  sunIntensity: 1.8,
+  sunIntensity: 1.3,
   hemiSky: '#8d7fc9',
   hemiGround: '#4a3338',
   hemiIntensity: 0.65,
@@ -81,6 +100,10 @@ const DUSK: Omit<Key, 'hour'> = {
   stars: 0.2,
   interior: 0.6,
   exposure: 1,
+  cloud: '#ff9e7a',
+  clouds: 0.65,
+  window: 2,
+  bloom: 0.4,
 }
 
 const KEYS: Key[] = [
@@ -137,6 +160,10 @@ export function lightingAt(hour: number): Lighting {
     stars: lerp(a.stars, b.stars, t),
     interior: lerp(a.interior, b.interior, t),
     exposure: lerp(a.exposure, b.exposure, t),
+    cloud: mixHex(a.cloud, b.cloud, t),
+    clouds: lerp(a.clouds, b.clouds, t),
+    window: lerp(a.window, b.window, t),
+    bloom: lerp(a.bloom, b.bloom, t),
   }
 }
 

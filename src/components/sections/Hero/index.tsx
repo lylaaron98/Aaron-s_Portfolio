@@ -74,8 +74,8 @@ export default function Hero({ introPending = false }: { introPending?: boolean 
   const { allow3d } = useMotionBudget()
   const canvas = useRef<HTMLCanvasElement>(null)
 
-  // The Orbit particle core, coloured for the current theme. It replaces the
-  // silk shader; the CSS aurora behind it is the fallback when WebGL is off.
+  // The Orbit particle core, coloured for the current theme. The CSS aurora
+  // behind it is the fallback when WebGL is off.
   useScene(
     canvas,
     allow3d,

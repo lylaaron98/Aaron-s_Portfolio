@@ -6,7 +6,8 @@ Personal portfolio for Aaron Lee, full-stack developer in Singapore. A Vite + Re
 
 - React 19, TypeScript (strict), Vite 7
 - CSS Modules on a shared token file (`src/styles/tokens.css`), light and dark themes
-- GSAP for scroll reveals; a small raw-WebGL shader (`Silk`) behind the hero
+- GSAP ScrollTrigger for scroll animation, Lenis for smooth scrolling
+- three.js particle core behind the hero (lazy-loaded, skipped for reduced motion and low-power devices)
 - react-icons
 - Web3Forms + hCaptcha for the contact form
 - Playwright + axe-core for end-to-end and accessibility checks

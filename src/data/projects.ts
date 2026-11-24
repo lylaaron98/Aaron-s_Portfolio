@@ -3,12 +3,11 @@ import type { Project } from '../types/project'
 export const projects: Project[] = [
   {
     title: 'Property Website Builder & Agent CRM',
-    summary:
-      'Multi-tenant SaaS that gives Singapore property agents a branded site and a lead CRM, with listings kept current automatically.',
+    summary: 'Branded websites and a lead CRM for Singapore property agents, with listings that update themselves.',
     highlights: [
-      'Per-agent sites at their own slug with a live-preview customiser, secured by Supabase row-level security',
-      'A Playwright scraper on daily cron keeps 90+ new condo launches synced with no manual entry',
-      'Visitor tracking feeds a lead-scoring engine and an eight-stage Kanban pipeline',
+      'Each agent gets their own site with a live-preview editor',
+      'Daily scraper keeps 90+ condo launches in sync',
+      'Lead scoring and an eight-stage Kanban pipeline',
     ],
     description:
       'A multi-tenant SaaS on Next.js and Supabase that provisions Singapore property agents a branded site at their own slug, with a live-preview customizer for section toggles, theming, and copy editing, secured by row-level security policies. A Playwright scraper on daily cron jobs keeps 90+ new condo launches synced through new-listing detection and scrape logging, so agent sites stay current without manual entry. The visitor tracking and CRM layer feeds page-view, scroll-depth, form, and WhatsApp events into a lead scoring engine and an eight-stage pipeline with Kanban and list views, alongside a blog CMS and a mobile-first redesign at a 390px primary viewport.',
@@ -20,12 +19,11 @@ export const projects: Project[] = [
   },
   {
     title: 'AI Architectural Drawing Platform',
-    summary:
-      'Restores faded scanned blueprints into clean vector plans, removing the manual redrawing step for legacy drawings.',
+    summary: 'Turns faded scanned blueprints into clean vector plans, with no manual redrawing.',
     highlights: [
-      'Four-stage pipeline: OpenCV cleanup, Hough line extraction, Tesseract 5 OCR and Claude Vision quality checks',
-      'Swappable model stages, so OCR and vision models can be benchmarked and replaced without a rewrite',
-      'Shipped on Firebase with camera capture, Japanese localisation and SVG export',
+      'OpenCV, OCR and Claude Vision pipeline',
+      'Swappable model stages for easy benchmarking',
+      'Camera capture, Japanese UI and SVG export',
     ],
     description:
       'A computer vision and OCR platform in Python and FastAPI that restores faded scanned blueprints, removing the manual redrawing step for legacy plans. The four-stage restoration pipeline runs OpenCV enhancement to strip noise and yellowing, Hough Transform line extraction for walls, centerlines, and dimension lines, Tesseract 5 LSTM OCR for dimensions and room labels, and Claude Vision analysis to classify drawing type and grade output quality. Structured as modular, swappable model stages so open-source OCR and vision models can be benchmarked and replaced without rewriting the pipeline; shipped on Firebase with upload and on-site camera capture, Japanese localization, and vector SVG export.',
@@ -37,12 +35,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Workforce Scheduling Platform',
-    summary:
-      "Scheduling app for a Japanese contractor, delivered as a deployed proof of concept inside the client's short evaluation window.",
+    summary: "Crew scheduling app for a Japanese contractor, deployed within the client's evaluation window.",
     highlights: [
-      'Managers allocate workers across job dates and maintain the employee master from one screen',
-      'Fully localised in Japanese, with a language selector',
-      'Mobile-first, so on-site supervisors can use it from the field',
+      'Assign workers to jobs from one screen',
+      'Fully localised in Japanese',
+      'Mobile-first for supervisors on site',
     ],
     description:
       'A client-facing scheduling app for a Japanese contractor. Managers allocate workers across job dates and maintain an employee master record from one responsive interface, shipped fully localized in Japanese with a language selector. Delivered as a working, deployed proof-of-concept inside the client’s short evaluation window, and built mobile-first so on-site supervisors could use it from the field.',
@@ -54,12 +51,11 @@ export const projects: Project[] = [
   },
   {
     title: 'DeFi Portfolio Dashboard',
-    summary:
-      'Web3 portfolio dashboard on a layered Next.js architecture built to absorb new features without rewrites. In progress: the wallet desk is live, other views are next.',
+    summary: 'Web3 portfolio tracker on a layered Next.js architecture. In progress.',
     highlights: [
-      'Feature-first App Router structure with repository, service and use-case layers on Prisma',
-      'Wallet connection through wagmi, RainbowKit and WalletConnect',
-      'Wallet desk with balances, allocation, quick exchange and market snapshots',
+      'Wallet connect via wagmi and RainbowKit',
+      'Balances, allocation and market snapshots',
+      'Clean service and repository layers on Prisma',
     ],
     description:
       'A Web3 portfolio tracking platform built with Next.js and wagmi. Feature-first Next.js App Router architecture with repository, service, and use-case layers backed by Prisma, structured to absorb feature expansion without cross-cutting rewrites, with wallet connectivity through wagmi, RainbowKit, and WalletConnect on Tailwind CSS and Mantine UI.',
@@ -71,12 +67,11 @@ export const projects: Project[] = [
   },
   {
     title: 'AI Chatbot Assistant',
-    summary:
-      'FAQ support chatbot on Groq LLM APIs, prototyped for internal support queries at Capgemini.',
+    summary: 'FAQ chatbot on Groq LLMs, prototyped for internal support at Capgemini.',
     highlights: [
-      'Streamlit interface with real-time responses and session memory',
-      'Context handling across a conversation',
-      'Tunable parameters and tone settings for FAQ automation',
+      'Real-time answers with session memory',
+      'Keeps context across a conversation',
+      'Adjustable tone and parameters',
     ],
     description:
       'Intelligent support interface using Streamlit and GroqAI APIs for real-time conversational responses. Features dynamic context handling, custom parameter tuning for FAQ automation, session memory, and adjustable tone settings. Deployed as an internal prototype at Capgemini.',
@@ -88,12 +83,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Lifestyle App',
-    summary:
-      'Local-first, cross-platform life organiser that brings spending, savings, calendar and journaling into one app.',
+    summary: 'One app for spending, savings, calendar and journaling. Local-first and cross-platform.',
     highlights: [
-      'Expo and React Native in a pnpm monorepo, with Expo Router and AsyncStorage persistence',
-      'Expense tracking, savings pots, calendar feeds and a daily mood journal',
-      'Context-aware AI assistant on Gemini or Groq, with an Express and OpenAPI backend scaffolded',
+      'Expo and React Native monorepo',
+      'Expenses, savings pots and mood journal',
+      'Built-in AI assistant on Gemini or Groq',
     ],
     description:
       'A local-first lifestyle management app built with Expo and React Native in a pnpm monorepo. It brings together finance tracking, savings pots, calendar integrations, daily mood journaling, profile preferences, light/dark theming, and a context-aware AI assistant powered by Gemini or Groq directly from the client, with AsyncStorage persistence and scaffolded Express, OpenAPI, and Drizzle packages ready for backend expansion.',
@@ -105,12 +99,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Otodecks',
-    summary:
-      'Two-deck DJ mixer in C++ and JUCE with real-time playback, EQ, cue points and a track library.',
+    summary: 'Two-deck DJ mixer in C++ and JUCE.',
     highlights: [
-      'Real-time audio playback, mixing and waveform display',
-      'Custom event-driven UI: knobs, sliders, cue and loop controls',
-      'Latency tuning for smooth track blending',
+      'Real-time playback, mixing and waveforms',
+      'Custom knobs, sliders, cues and loops',
+      'Tuned for low-latency blending',
     ],
     description:
       'A fully interactive DJ deck simulator built with C++ and the JUCE framework, featuring real-time audio playback, mixing, and waveform visualization. Includes modular audio components, custom event-driven UI with responsive knobs, sliders, and cue buttons, with latency optimization for seamless track blending.',
@@ -122,12 +115,11 @@ export const projects: Project[] = [
   },
   {
     title: 'MySmartHome',
-    summary:
-      'Web dashboard for monitoring and controlling household devices over a network.',
+    summary: 'Web dashboard to monitor and control home devices.',
     highlights: [
-      'Node.js and Express REST API with SQL storage for device data',
-      'Complete add, update and delete flows for devices, with confirmations',
-      'Server-rendered EJS interface with vanilla JavaScript controls',
+      'Node.js and Express REST API on SQL',
+      'Add, edit and remove devices',
+      'Server-rendered EJS interface',
     ],
     description:
       'A responsive Smart Home Web Dashboard enabling remote control and monitoring of household appliances over a network. Built with Node.js, Express.js, and SQL for device data storage, with a templated UI using EJS, CSS3, and vanilla JavaScript for dynamic appliance controls.',
@@ -139,12 +131,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Django E-Learning App',
-    summary:
-      'E-learning platform with separate student and teacher roles, course enrolment and real-time chat.',
+    summary: 'E-learning platform with student and teacher roles and live chat.',
     highlights: [
-      'Custom student and teacher authentication, course creation and enrolment',
-      'Course materials, feedback and REST endpoints with Django REST Framework',
-      'Live chat over Django Channels and WebSockets',
+      'Course creation and enrolment',
+      'REST API with Django REST Framework',
+      'Live chat over WebSockets',
     ],
     description:
       'A Django 5.1 eLearning platform with custom student and teacher authentication, course creation and enrollment workflows, downloadable course materials, enrollment-based feedback, REST API endpoints, and real-time chat powered by Django Channels and WebSockets.',
@@ -156,12 +147,11 @@ export const projects: Project[] = [
   },
   {
     title: 'Restaurant POS System',
-    summary:
-      'Point-of-sale system for a restaurant client, with dedicated waiter, kitchen, cashier and manager workflows.',
+    summary: 'Restaurant point-of-sale for a client, with views for waiters, kitchen, cashiers and managers.',
     highlights: [
-      'Live table status, order management and a kitchen queue',
-      'Payments and manager analytics behind JWT role-based access',
-      'Tested React and Express codebase with Zustand and Ant Design',
+      'Live table status and kitchen queue',
+      'Payments and analytics with role-based access',
+      'Tested React and Express codebase',
     ],
     description:
       'A modern restaurant Point of Sale platform built for a client with role-based workflows for waiters, kitchen staff, cashiers, and managers. It includes live table status tracking, order management, kitchen queue updates, payment processing, manager analytics, JWT authentication, and a tested React plus Express architecture.',
@@ -174,12 +164,11 @@ export const projects: Project[] = [
   },
   {
     title: 'UX Portfolio Microsite',
-    summary:
-      'Four-page portfolio site for a junior UX designer, built to support their job applications.',
+    summary: "Four-page portfolio site for a junior UX designer's job hunt.",
     highlights: [
-      'Apple Store-inspired glassmorphism design system built on CSS variables',
-      'Interview scheduling form with modular JavaScript validation',
-      'Semantic, accessible and responsive HTML5 with Bootstrap 5',
+      'Glassmorphism design system on CSS variables',
+      'Interview booking form with validation',
+      'Accessible, responsive HTML5',
     ],
     description:
       'A professional 4-page portfolio microsite for a client, who is a junior UX Designer, inspired by Apple Store aesthetics. Features a modern, glassmorphism design, responsive layout, and an interactive interview scheduling form. Built with HTML5, CSS3, JavaScript (ES6+), and Bootstrap 5. Includes advanced CSS techniques (variables, glassmorphism, gradient text, keyframe animations), semantic HTML5, accessibility, and modular JavaScript for form validation and micro-interactions. Demonstrates color theory, typography, and a component-based design system. Delivered for job application purposes to hiring managers and recruiters in the UX/design industry.',

@@ -3,7 +3,7 @@ import { gsap, MOTION_OK } from '../../../orbit/motion'
 import styles from './Statement.module.css'
 
 const STATEMENT =
-  'I build interfaces people rely on: treasury systems for a bank, live bidding for a government agency, and citizen-facing services at GovTech. React and TypeScript up front, Python and AWS behind them, and applied AI where it earns its place.'
+  'I build software people rely on, from bank treasury systems to government services. React up front, Python and AWS behind, and AI where it helps.'
 
 /** Orbit's statement band: the words light up one by one as you scroll. */
 export default function Statement() {

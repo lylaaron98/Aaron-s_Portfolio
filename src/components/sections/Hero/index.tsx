@@ -4,7 +4,7 @@ import Button from '../../ui/Button'
 import { scrollToSection } from '../../../utils/smoothScroll'
 import { useTheme } from '../../../context/ThemeContext'
 import { RESUME_URL } from '../../../constants/site'
-import { useLowPerformanceMode, usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
+import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery'
 import { ScrollTrigger, useMotionBudget, useScene } from '../../../orbit/motion'
 import { completeTask } from '../../../orbit/loadProgress'
 
@@ -24,7 +24,7 @@ const delay = (ms: number) => ({ ['--d' as string]: `${ms}ms` }) as CSSPropertie
  * component stops each tick from re-rendering the whole Hero subtree (and with
  * it the WebGL background and every social icon).
  */
-function RoleTypewriter({ disableMotion }: { disableMotion: boolean }) {
+function RoleTypewriter({ reducedMotion }: { reducedMotion: boolean }) {
   const [roleIndex, setRoleIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -32,7 +32,11 @@ function RoleTypewriter({ disableMotion }: { disableMotion: boolean }) {
   const current = ROLES[roleIndex]
 
   useEffect(() => {
-    if (disableMotion) return
+    // Reduced motion: no typing, just swap the whole title every few seconds.
+    if (reducedMotion) {
+      const id = setInterval(() => setRoleIndex((i) => (i + 1) % ROLES.length), 3000)
+      return () => clearInterval(id)
+    }
 
     let timeout: ReturnType<typeof setTimeout>
 
@@ -50,13 +54,13 @@ function RoleTypewriter({ disableMotion }: { disableMotion: boolean }) {
     }
 
     return () => clearTimeout(timeout)
-  }, [charIndex, current.length, disableMotion, isDeleting])
+  }, [charIndex, current.length, reducedMotion, isDeleting])
 
   return (
     <>
       {/* The animated text is decorative; screen readers get the stable label. */}
       <span className={styles.typewriter} aria-hidden="true">
-        {disableMotion ? ROLES[0] : current.slice(0, charIndex)}
+        {reducedMotion ? current : current.slice(0, charIndex)}
       </span>
       <span className={styles.cursor} aria-hidden="true">
         |
@@ -69,8 +73,6 @@ function RoleTypewriter({ disableMotion }: { disableMotion: boolean }) {
 export default function Hero({ introPending = false }: { introPending?: boolean }) {
   const { theme } = useTheme()
   const prefersReducedMotion = usePrefersReducedMotion()
-  const lowPerformanceMode = useLowPerformanceMode()
-  const disableMotion = prefersReducedMotion || lowPerformanceMode
   const { allow3d } = useMotionBudget()
   const canvas = useRef<HTMLCanvasElement>(null)
 
@@ -118,16 +120,15 @@ export default function Hero({ introPending = false }: { introPending?: boolean 
         </h1>
 
         <p className={`${styles.role} ${styles.reveal}`} style={delay(140)}>
-          <RoleTypewriter disableMotion={disableMotion} />
+          {/* Typing is a few text nodes a second, so it runs even on low-power
+              devices; only reduced motion swaps it for a plain rotation. */}
+          <RoleTypewriter reducedMotion={prefersReducedMotion} />
         </p>
 
         <p className={`${styles.lede} ${styles.reveal}`} style={delay(210)}>
-          Full stack software engineer at <strong>GovTech Singapore</strong>, building Ministry of
-          Manpower products in React, TypeScript, Python and AWS, including AI agents on Bedrock.
-          Before that I modernised mission-critical treasury systems at a{' '}
-          <strong>corporate bank</strong> and built a <strong>government agency&rsquo;s</strong>{' '}
-          real-time land bidding platform. On the side I take project-based applied AI work in
-          computer vision and OCR.
+          Full stack engineer at a <strong>government agency</strong>, building citizen-facing
+          products with React, TypeScript, Python and AWS. Previously at a{' '}
+          <strong>corporate bank</strong>.
         </p>
 
         <div className={`${styles.actions} ${styles.reveal}`} style={delay(280)}>

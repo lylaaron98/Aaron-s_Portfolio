@@ -60,7 +60,8 @@ export default function RoomIntro({ reduced, onExit }: { reduced: boolean; onExi
     (scene) => {
       sceneRef.current = scene
       scene.intro()
-      setStage('ready')
+      // A visitor may already have left while the room was loading.
+      setStage((current) => (current === 'loading' ? 'ready' : current))
       return () => {
         sceneRef.current = null
       }

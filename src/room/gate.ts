@@ -49,7 +49,7 @@ export function shouldShowRoom(onHome: boolean) {
 }
 
 /** True when WebGL is running on the CPU (blocklisted or missing GPU). */
-function softwareRenderer() {
+export function softwareRenderer() {
   try {
     const gl = document.createElement('canvas').getContext('webgl')
     const info = gl?.getExtension('WEBGL_debug_renderer_info')

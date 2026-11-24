@@ -160,10 +160,12 @@
   background: linear-gradient(to left, var(--line-strong), transparent);
 }
 
-.card:hover {
-  border-color: var(--brand-line);
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px -24px var(--brand-glow, var(--brand));
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    border-color: var(--brand-line);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -24px var(--brand-glow, var(--brand));
+  }
 }
 
 .role {

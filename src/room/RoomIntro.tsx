@@ -79,6 +79,9 @@ export default function RoomIntro({
   )
 
   // Live mode follows the clock; refresh once a minute.
+  // Relighting rebuilds the environment map, so only do it when the hour
+  // actually changes (not on every stage change, such as leaving).
+  const sceneReady = stage !== 'loading'
   useEffect(() => {
     sceneRef.current?.setHour(hour)
     if (mode !== 'auto') return
@@ -87,7 +90,7 @@ export default function RoomIntro({
       sceneRef.current?.setHour(localHour())
     }, 60_000)
     return () => window.clearInterval(id)
-  }, [mode, hour, stage])
+  }, [mode, hour, sceneReady])
 
   useEffect(() => {
     if (stage === 'ready') enterRef.current?.focus({ preventScroll: true })

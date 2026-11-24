@@ -709,16 +709,12 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
     const d = panoramaDirection(sky.sun[0], sky.sun[1], sky.center)
     return new THREE.Vector3(d.x, Math.max(d.y, 0.06), d.z).normalize()
   }
-  let currentHour = options.hour
-  const setHour = (hour: number) => {
-    currentHour = hour
-    const L = lightingAt(hour)
+  let currentHour = Number.NaN
+  // Only the photos change when one finishes loading: no lighting rebuild.
+  const applySky = (hour: number) => {
     const blend = skyBlendAt(hour)
-    const nightness = (blend.a === 'night' ? 1 - blend.t : 0) + (blend.b === 'night' ? blend.t : 0)
-    const body = { isDay: nightness < 0.5 }
-    sunDir.copy(bodyDir(blend.a)).lerp(bodyDir(blend.b), blend.t).normalize()
     const refresh = () => {
-      if (currentHour === hour) setHour(hour)
+      if (currentHour === hour) applySky(hour)
     }
     const ready = (t: THREE.Texture | null) => (t?.image ? t : null)
     const texA = ready(skyTexture(blend.a, refresh))
@@ -737,6 +733,16 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       second ? THREE.MathUtils.lerp(SKIES[blend.a].gain, SKIES[blend.b].gain, blend.t) : skyA.gain,
       first && !second && SKIES[blend.a].src && SKIES[blend.b].src ? 1 : strength,
     )
+  }
+  const setHour = (hour: number) => {
+    if (hour === currentHour) return
+    currentHour = hour
+    const L = lightingAt(hour)
+    const blend = skyBlendAt(hour)
+    const nightness = (blend.a === 'night' ? 1 - blend.t : 0) + (blend.b === 'night' ? blend.t : 0)
+    const body = { isDay: nightness < 0.5 }
+    sunDir.copy(bodyDir(blend.a)).lerp(bodyDir(blend.b), blend.t).normalize()
+    applySky(hour)
     skyline.update(L, sunDir, body.isDay)
     ;(scene.fog as THREE.Fog).color.set(L.skyHorizon)
 

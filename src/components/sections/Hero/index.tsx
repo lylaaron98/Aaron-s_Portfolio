@@ -122,12 +122,9 @@ export default function Hero({ introPending = false }: { introPending?: boolean 
         </p>
 
         <p className={`${styles.lede} ${styles.reveal}`} style={delay(210)}>
-          Full stack software engineer at <strong>GovTech Singapore</strong>, building Ministry of
-          Manpower products in React, TypeScript, Python and AWS, including AI agents on Bedrock.
-          Before that I modernised mission-critical treasury systems at a{' '}
-          <strong>corporate bank</strong> and built a <strong>government agency&rsquo;s</strong>{' '}
-          real-time land bidding platform. On the side I take project-based applied AI work in
-          computer vision and OCR.
+          Full stack engineer at <strong>GovTech Singapore</strong>, building Ministry of Manpower
+          products with React, TypeScript, Python and AWS. Previously at a{' '}
+          <strong>corporate bank</strong> and on a <strong>government agency</strong> platform.
         </p>
 
         <div className={`${styles.actions} ${styles.reveal}`} style={delay(280)}>

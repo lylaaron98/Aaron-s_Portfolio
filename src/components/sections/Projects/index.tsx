@@ -23,7 +23,7 @@ export default function Projects() {
       number="04"
       title="Selected work"
       meta="portfolio"
-      lede="Client deliveries and personal builds. Open any card for the detail, or jump straight to a project's demo page."
+      lede="Client work and personal builds. Open a card for details."
     >
       <ProjectsCarousel heading="Client Projects" projects={client} onOpenProject={setActiveProject} />
       <ProjectsCarousel heading="Personal Projects" projects={personal} onOpenProject={setActiveProject} />

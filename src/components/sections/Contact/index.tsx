@@ -128,9 +128,7 @@ export default function Contact() {
         <div className={styles.infoBlock}>
           <h3 className={styles.heading}>Let's Work Together</h3>
           <p className={styles.blurb}>
-            I'm currently open to new opportunities. Whether you have a project in mind,
-            a question, or just want to say hi — my inbox is always open. I'll do my
-            best to get back to you!
+            Open to new roles and projects. Send a message and I'll get back to you.
           </p>
           <div className={styles.contactItems}>
             <a href="mailto:lyl.aaron.98@gmail.com" className={styles.contactItem}>

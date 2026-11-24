@@ -16,29 +16,17 @@ export default function About() {
       <div className={styles.inner}>
         <div className={styles.textBlock}>
           <p>
-            Hey! I'm <span className={styles.highlight}>Aaron</span>, a software engineer with
-            production experience across banking, government, sustainability, and Japanese
-            enterprise clients, and a Bachelor's in Computer Science (Hons) from Goldsmiths,
-            University of London (SIM).
+            Hey! I'm <span className={styles.highlight}>Aaron</span>, a full stack engineer in
+            Singapore with a BSc (Hons) in Computer Science from Goldsmiths, University of London.
           </p>
           <p>
-            At a<span className={styles.highlight}> Corporate Bank</span> I modernized mission-critical
-            treasury systems, moving legacy VB.Net and Oracle applications onto a{' '}
-            <span className={styles.highlight}>React</span>,{' '}
-            <span className={styles.highlight}>TypeScript</span>, Node.js, and SQL Server
-            architecture. Before that I delivered a real-time land bidding platform on
-            WebSocket infrastructure, cutting frontend load time by over 30%.
+            I've shipped for a <span className={styles.highlight}>corporate bank</span>, a government
+            agency and Japanese enterprise clients. Today I build Ministry of Manpower products at{' '}
+            <span className={styles.highlight}>GovTech Singapore</span>, from{' '}
+            <span className={styles.highlight}>React</span> frontends to AI agents on{' '}
+            <span className={styles.highlight}>AWS Bedrock</span>.
           </p>
-          <p>
-            Today I'm a full stack engineer at{' '}
-            <span className={styles.highlight}>GovTech Singapore</span>, building Ministry of
-            Manpower products: a nationwide survey platform, an AI test-generation agent on{' '}
-            <span className={styles.highlight}>AWS Bedrock</span>, and the serverless AWS
-            infrastructure behind them. Alongside that I take project-based applied AI work —
-            computer vision and OCR pipelines in <span className={styles.highlight}>Python</span>{' '}
-            and <span className={styles.highlight}>FastAPI</span>. I like owning a feature end to
-            end, from API and data design through to a performant, accessible frontend.
-          </p>
+          <p>I like owning a feature end to end, from API design to a fast, accessible UI.</p>
           <ul className={styles.techList}>
             <li>React &amp; Next.js</li>
             <li>TypeScript / JavaScript</li>

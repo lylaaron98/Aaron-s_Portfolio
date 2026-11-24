@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
   test.slow()
 })
 
-test('first visit opens the room, Skip goes to the site and is remembered', async ({ page }) => {
+test('every home visit opens the room after the loader; Skip goes to the site', async ({ page }) => {
   await page.goto('/')
   await expect(room(page)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Enter portfolio' })).toBeEnabled({ timeout: 20_000 })
@@ -30,8 +30,7 @@ test('first visit opens the room, Skip goes to the site and is remembered', asyn
   await expect(page.getByRole('heading', { level: 1, name: 'Aaron Lee' })).toBeVisible()
 
   await page.reload()
-  await expect(page.locator('#hero')).toBeVisible()
-  await expect(room(page)).toHaveCount(0)
+  await expect(room(page)).toBeVisible()
 })
 
 test('Escape leaves the room; ?room brings it back', async ({ page }) => {

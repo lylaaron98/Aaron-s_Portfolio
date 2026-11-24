@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useScene } from '../orbit/motion'
-import { markRoomSeen, wantsLiteRoom } from './gate'
+import { wantsLiteRoom } from './gate'
 import { localHour, PHASE_HOURS, phaseAt, type Phase } from './timeOfDay'
 import type { RoomScene } from './roomScene'
 import styles from './RoomIntro.module.css'
@@ -111,7 +111,6 @@ export default function RoomIntro({
   }, [stage, finish])
 
   const leave = useCallback(() => {
-    markRoomSeen()
     setStage('leaving')
   }, [])
 

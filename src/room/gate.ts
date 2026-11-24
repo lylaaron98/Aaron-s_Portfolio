@@ -1,11 +1,12 @@
 /**
- * Whether the 3D room greets this visit. It is an optional front door: shown
- * once per browser, skipped for returning visitors, and never shown where it
- * would hurt (no WebGL, data saver). `?room` in the URL forces it, which is
- * also how the footer link brings it back.
+ * Whether the 3D room greets this visit. It is the front door on every home
+ * page visit (after the loader), with Skip and Escape always available. It is
+ * never shown where it would hurt (no WebGL, data saver) or when the visitor
+ * deep-links to a section. `?room` in the URL forces it.
  */
 
-export const ROOM_SEEN_KEY = 'portfolio-room-seen'
+/** Set to '1' to turn the room off in this browser (used by the site's tests). */
+export const ROOM_OFF_KEY = 'portfolio-room-off'
 export const OPEN_ROOM_EVENT = 'room:open'
 
 /** Opens the room. `fromScreen` starts on the monitor and zooms back out. */
@@ -19,14 +20,6 @@ export function canRenderRoom() {
     return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'))
   } catch {
     return false
-  }
-}
-
-export function markRoomSeen() {
-  try {
-    localStorage.setItem(ROOM_SEEN_KEY, '1')
-  } catch {
-    // Private mode: the room just shows again next time.
   }
 }
 
@@ -49,7 +42,7 @@ export function shouldShowRoom(onHome: boolean) {
   const nav = navigator as Navigator & { connection?: { saveData?: boolean } }
   if (nav.connection?.saveData) return false
   try {
-    return localStorage.getItem(ROOM_SEEN_KEY) !== '1'
+    return localStorage.getItem(ROOM_OFF_KEY) !== '1'
   } catch {
     return true
   }

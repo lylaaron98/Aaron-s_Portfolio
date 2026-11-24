@@ -38,23 +38,25 @@ if (legacyPath) window.history.replaceState(null, '', legacyPath)
 
 // The intro plays once per full page load, and only when it lands on home.
 const landedOnHome = demoSlugFromPath(window.location.pathname) === null
-// First-time visitors on the home page enter through the 3D room instead.
+// Home page visits go loader -> 3D room -> site. Start fetching the room
+// while the loader plays so it is ready when the loader finishes.
 const roomFirst = shouldShowRoom(landedOnHome)
+if (roomFirst) void import('../room/RoomIntro').then(() => import('../room/roomScene'))
 
 function App() {
   const { pathname, hash } = useLocation()
   const slug = demoSlugFromPath(pathname)
   const isDemoPage = slug !== null
   const { reduced, allow3d } = useMotionBudget()
-  const [showRoom, setShowRoom] = useState(roomFirst)
+  const [showRoom, setShowRoom] = useState(false)
   const [roomFromScreen, setRoomFromScreen] = useState(false)
-  const [showLoader, setShowLoader] = useState(landedOnHome && !roomFirst)
+  const [showLoader, setShowLoader] = useState(landedOnHome)
   const [introPending, setIntroPending] = useState(landedOnHome)
 
   // Register the load work before the loader subscribes, so it cannot read
   // 100% before the 3D scene has started.
   useState(() => {
-    if (!landedOnHome || roomFirst) return
+    if (!landedOnHome) return
     if (allow3d) addTask('scene', 3)
     trackPageAssets(['/assets/profile.webp'])
   })
@@ -111,7 +113,13 @@ function App() {
         </Suspense>
       )}
       {showLoader && (
-        <Loader reduced={reduced} onReveal={() => setIntroPending(false)} onDone={() => setShowLoader(false)} />
+        <Loader
+          reduced={reduced}
+          // With the room next, the loader opens onto the room and the hero
+          // intro waits until the visitor leaves it.
+          onReveal={() => (roomFirst ? setShowRoom(true) : setIntroPending(false))}
+          onDone={() => setShowLoader(false)}
+        />
       )}
       <div inert={showRoom} className="contents">
         <Navbar />

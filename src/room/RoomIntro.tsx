@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useScene } from '../orbit/motion'
-import { markRoomSeen, wantsLiteRoom } from './gate'
+import { softwareRenderer, wantsLiteRoom } from './gate'
 import { localHour, PHASE_HOURS, phaseAt, type Phase } from './timeOfDay'
 import type { RoomScene } from './roomScene'
 import styles from './RoomIntro.module.css'
@@ -41,6 +41,8 @@ export default function RoomIntro({
   const [clock, setClock] = useState(clockLabel)
   const [hover, setHover] = useState(false)
   const [lite] = useState(wantsLiteRoom)
+  // CPU-rendered WebGL: draw a few frames a second so taps and keys stay snappy.
+  const [maxFps] = useState(() => (softwareRenderer() ? 3 : 0))
   const [coarse] = useState(() => window.matchMedia('(pointer: coarse)').matches)
   const [screenSrc] = useState(() =>
     document.documentElement.getAttribute('data-theme') === 'light' ? '/assets/room/screen-light.webp' : '/assets/room/screen-dark.webp',
@@ -64,7 +66,7 @@ export default function RoomIntro({
     true,
     () =>
       import('./roomScene').then(
-        (m) => (canvas: HTMLCanvasElement) => m.createRoomScene(canvas, { lite, reduced, screenSrc, lightScreen: screenSrc.includes('light'), hour: localHour() }),
+        (m) => (canvas: HTMLCanvasElement) => m.createRoomScene(canvas, { lite, maxFps, reduced, screenSrc, lightScreen: screenSrc.includes('light'), hour: localHour() }),
       ),
     (scene) => {
       sceneRef.current = scene
@@ -111,7 +113,6 @@ export default function RoomIntro({
   }, [stage, finish])
 
   const leave = useCallback(() => {
-    markRoomSeen()
     setStage('leaving')
   }, [])
 

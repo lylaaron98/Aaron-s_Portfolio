@@ -6,7 +6,7 @@ const EXTERNAL = /hcaptcha\.com|fonts\.(googleapis|gstatic)\.com/
 
 // These checks cover the site itself; the 3D room front door has its own spec.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('portfolio-room-seen', '1'))
+  await page.addInitScript(() => localStorage.setItem('portfolio-room-off', '1'))
 })
 
 async function trackFailures(page: Page) {

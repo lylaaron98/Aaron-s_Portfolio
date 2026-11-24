@@ -33,6 +33,8 @@ import {
 export interface RoomOptions {
   /** Lighter build for phones and weak GPUs: no post-processing or shadows. */
   lite: boolean
+  /** Frame cap (0 = every frame). Software GL gets a low cap so the page stays responsive. */
+  maxFps?: number
   /** Screenshot shown on the main monitor (matches the visitor's theme). */
   screenSrc: string
   /** True when the screenshot is the light theme (a brighter screen). */
@@ -67,7 +69,8 @@ const SIDE_MONITOR = new THREE.Vector3(0.66, 1.16, -1.5)
 export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions): RoomScene {
   const { lite } = options
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: lite, powerPreference: 'high-performance' })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, lite ? 1.5 : 1.75))
+  // CPU-rendered WebGL draws at half resolution so each frame stays cheap.
+  renderer.setPixelRatio(options.maxFps ? 0.3 : Math.min(window.devicePixelRatio, lite ? 1.5 : 1.75))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.NeutralToneMapping
   renderer.shadowMap.enabled = !lite
@@ -817,7 +820,9 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
     },
 
     render(time) {
-      const dt = Math.min(0.05, Math.max(0, time - last))
+      const minStep = options.maxFps ? 1 / options.maxFps : 0
+      if (minStep && time - last < minStep && time > last) return
+      const dt = Math.min(Math.max(0.05, minStep), Math.max(0, time - last))
       last = time
       const t = options.reduced ? 0 : time
       skyline.tick(t)

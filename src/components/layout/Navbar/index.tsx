@@ -5,6 +5,7 @@ import { useTheme } from '../../../context/ThemeContext'
 import { navLinks } from '../../../data/navigation'
 import { PROJECTS_DEMO_ROUTE } from '../../../constants/routes'
 import Logo from '../../ui/Logo'
+import { canRenderRoom, openRoom } from '../../../room/gate'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -13,6 +14,7 @@ export default function Navbar() {
   const hiddenRef = useRef(false)
   const scrolledRef = useRef(false)
   const { theme, toggleTheme } = useTheme()
+  const [roomAvailable] = useState(canRenderRoom)
 
   // Hide on scroll down, show on scroll up.
   useEffect(() => {
@@ -70,6 +72,16 @@ export default function Navbar() {
               Demos
             </a>
           </div>
+
+          {roomAvailable && (
+            <button type="button" className={styles.roomButton} onClick={() => openRoom(true)} aria-label="Back to the 3D room" title="Back to the 3D room">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="12" rx="2" />
+                <path d="M8 20h8M12 16v4" />
+                <path d="M9.5 8.5 7.5 10.5l2 2M14.5 8.5l2 2-2 2" />
+              </svg>
+            </button>
+          )}
 
           <button
             className={styles.themeToggle}

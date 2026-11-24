@@ -4,6 +4,11 @@ import AxeBuilder from '@axe-core/playwright'
 // Third-party hosts the tests should not depend on (captcha, fonts).
 const EXTERNAL = /hcaptcha\.com|fonts\.(googleapis|gstatic)\.com/
 
+// These checks cover the site itself; the 3D room front door has its own spec.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('portfolio-room-seen', '1'))
+})
+
 async function trackFailures(page: Page) {
   const failures: string[] = []
   await page.route(EXTERNAL, (route) => route.abort())

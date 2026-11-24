@@ -13,6 +13,7 @@ import {
 import { cx } from '../../../utils/classNames'
 import { useLocation } from '../../../utils/router'
 import styles from './DemoPage.module.css'
+import { lockScroll } from '../../../utils/scrollLock'
 
 function categoryLabel(project: Project) {
   return project.category === 'client' ? 'Client project' : 'Personal project'
@@ -30,12 +31,11 @@ function Lightbox({ src, title, onClose }: { src: string; title?: string; onClos
     }
     window.addEventListener('keydown', onKeyDown)
 
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const unlock = lockScroll()
 
     return () => {
       window.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = previous
+      unlock()
     }
   }, [onClose])
 

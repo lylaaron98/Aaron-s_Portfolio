@@ -28,6 +28,8 @@ test('every home visit opens the room after the loader; Skip goes to the site', 
   await page.getByRole('button', { name: 'Skip to site' }).click()
   await expect(room(page)).toHaveCount(0)
   await expect(page.getByRole('heading', { level: 1, name: 'Aaron Lee' })).toBeVisible()
+  // The loader and room both lock scrolling; leaving must unlock it, or touch scrolling dies.
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).overflowY)).not.toBe('hidden')
 
   await page.reload()
   await expect(room(page)).toBeVisible()

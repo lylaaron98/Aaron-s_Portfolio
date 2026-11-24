@@ -14,6 +14,7 @@ import { projectDemoRoute } from '../../../constants/routes'
 import { getProjectStills } from '../../../data/projectMedia'
 import { cx } from '../../../utils/classNames'
 import styles from './Projects.module.css'
+import { lockScroll } from '../../../utils/scrollLock'
 
 const OPEN_DURATION_MS = 460
 const CLOSE_DURATION_MS = 340
@@ -179,10 +180,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
   useEffect(() => {
     if (!displayState) return
 
-    const previousBodyOverflow = document.body.style.overflow
-    const previousHtmlOverflow = document.documentElement.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
+    const unlock = lockScroll()
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -216,8 +214,7 @@ export default function ProjectCardModal({ state, onClosed }: ProjectCardModalPr
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.body.style.overflow = previousBodyOverflow
-      document.documentElement.style.overflow = previousHtmlOverflow
+      unlock()
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [displayState, requestClose])

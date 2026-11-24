@@ -4,6 +4,7 @@ import { qualityOverride, softwareRenderer, wantsLiteRoom } from './gate'
 import { localHour, PHASE_HOURS, phaseAt, type Phase } from './timeOfDay'
 import type { RoomScene } from './roomScene'
 import styles from './RoomIntro.module.css'
+import { lockScroll } from '../utils/scrollLock'
 
 type Stage = 'loading' | 'ready' | 'entering' | 'leaving'
 type Mode = 'auto' | Phase
@@ -58,12 +59,7 @@ export default function RoomIntro({
 
   // Hold the page still while the room is up.
   useLayoutEffect(() => {
-    const html = document.documentElement
-    const previous = html.style.overflow
-    html.style.overflow = 'hidden'
-    return () => {
-      html.style.overflow = previous
-    }
+    return lockScroll()
   }, [])
 
   useScene(

@@ -20,6 +20,8 @@
 }
 
 /* ── Hoverable ── */
+/* Hover effects only where there is a real hover. On touch screens a tap
+   would leave the card lifted and lit, so it looked tappable. */
 .hoverable {
   transition:
     background-color var(--dur-3) var(--ease-out),
@@ -28,11 +30,13 @@
     box-shadow var(--dur-3) var(--ease-out);
 }
 
-.hoverable:hover {
-  background: var(--surface-2);
-  border-color: var(--line-strong);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-pop);
+@media (hover: hover) and (pointer: fine) {
+  .hoverable:hover {
+    background: var(--surface-2);
+    border-color: var(--line-strong);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-pop);
+  }
 }
 
 /* ── Top-edge sheen on hover. The aurora catching the panel edge. ── */
@@ -51,8 +55,10 @@
   );
 }
 
-.hoverable:hover::after {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .hoverable:hover::after {
+    opacity: 1;
+  }
 }
 
 /* ── Gradient overlay on hover ── */
@@ -64,8 +70,10 @@
   transition: background-position var(--dur-4) var(--ease-out);
 }
 
-.gradientOverlay:hover {
-  background-position: 0 0;
+@media (hover: hover) and (pointer: fine) {
+  .gradientOverlay:hover {
+    background-position: 0 0;
+  }
 }
 
 /* ── Top accent rule on hover ── */
@@ -83,8 +91,10 @@
   z-index: var(--z-raised);
 }
 
-.topAccent:hover::before {
-  transform: scaleX(1);
+@media (hover: hover) and (pointer: fine) {
+  .topAccent:hover::before {
+    transform: scaleX(1);
+  }
 }
 
 /* ── Tilt glare. Was hardcoded rgba(100, 255, 218, .1) — a mint left over from

@@ -62,13 +62,17 @@ export function softwareRenderer() {
 }
 
 /** Phones, touch-first devices, small CPUs and software GL get the lighter scene. */
-export function wantsLiteRoom() {
+/** 'high' forces the full scene, 'sharp' only lifts the software-GL frame cap (testing). */
+export function qualityOverride() {
   try {
-    // Manual override for testing the full scene on any machine.
-    if (localStorage.getItem('portfolio-room-quality') === 'high') return false
+    return localStorage.getItem('portfolio-room-quality')
   } catch {
-    // ignore
+    return null
   }
+}
+
+export function wantsLiteRoom() {
+  if (qualityOverride() === 'high') return false
   const coarse = window.matchMedia('(max-width: 760px), (pointer: coarse)').matches
   const cores = navigator.hardwareConcurrency
   return coarse || (typeof cores === 'number' && cores > 0 && cores <= 4) || softwareRenderer()

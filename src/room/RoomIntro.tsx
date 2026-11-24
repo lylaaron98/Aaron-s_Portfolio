@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useScene } from '../orbit/motion'
-import { softwareRenderer, wantsLiteRoom } from './gate'
+import { qualityOverride, softwareRenderer, wantsLiteRoom } from './gate'
 import { localHour, PHASE_HOURS, phaseAt, type Phase } from './timeOfDay'
 import type { RoomScene } from './roomScene'
 import styles from './RoomIntro.module.css'
+import { lockScroll } from '../utils/scrollLock'
 
 type Stage = 'loading' | 'ready' | 'entering' | 'leaving'
 type Mode = 'auto' | Phase
@@ -42,23 +43,23 @@ export default function RoomIntro({
   const [hover, setHover] = useState(false)
   const [lite] = useState(wantsLiteRoom)
   // CPU-rendered WebGL: draw a few frames a second so taps and keys stay snappy.
-  const [maxFps] = useState(() => (softwareRenderer() ? 3 : 0))
+  const [maxFps] = useState(() => (softwareRenderer() && !qualityOverride() ? 3 : 0))
   const [coarse] = useState(() => window.matchMedia('(pointer: coarse)').matches)
   const [screenSrc] = useState(() =>
     document.documentElement.getAttribute('data-theme') === 'light' ? '/assets/room/screen-light.webp' : '/assets/room/screen-dark.webp',
   )
+  // Phone visitors zoom into the phone on the desk, which shows the mobile site.
+  const [phoneScreenSrc] = useState(() =>
+    coarse && window.matchMedia('(max-width: 760px)').matches ? screenSrc.replace('screen-', 'screen-phone-') : undefined,
+  )
+  const target = phoneScreenSrc ? 'phone' : 'monitor'
 
   const hour = mode === 'auto' ? localHour() : PHASE_HOURS[mode]
   const phase = phaseAt(hour)
 
   // Hold the page still while the room is up.
   useLayoutEffect(() => {
-    const html = document.documentElement
-    const previous = html.style.overflow
-    html.style.overflow = 'hidden'
-    return () => {
-      html.style.overflow = previous
-    }
+    return lockScroll()
   }, [])
 
   useScene(
@@ -66,7 +67,7 @@ export default function RoomIntro({
     true,
     () =>
       import('./roomScene').then(
-        (m) => (canvas: HTMLCanvasElement) => m.createRoomScene(canvas, { lite, maxFps, reduced, screenSrc, lightScreen: screenSrc.includes('light'), hour: localHour() }),
+        (m) => (canvas: HTMLCanvasElement) => m.createRoomScene(canvas, { lite, maxFps, reduced, screenSrc, phoneScreenSrc, lightScreen: screenSrc.includes('light'), hour: localHour() }),
       ),
     (scene) => {
       sceneRef.current = scene
@@ -203,7 +204,7 @@ export default function RoomIntro({
 
         <div className={styles.cta}>
           <span className={styles.hint} aria-hidden="true">
-            {coarse ? 'Tap the monitor' : 'Click the monitor'}
+            {`${coarse ? 'Tap' : 'Click'} the ${target}`}
           </span>
           <button ref={enterRef} type="button" className={styles.enter} onClick={() => void enter()} disabled={stage !== 'ready'}>
             Enter portfolio

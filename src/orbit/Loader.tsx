@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap } from './motion'
 import { subscribe } from './loadProgress'
 import styles from './Loader.module.css'
+import { lockScroll } from '../utils/scrollLock'
 
 const MIN_VISIBLE_MS = 1300
 const GIVE_UP_MS = 8000
@@ -20,12 +21,7 @@ export default function Loader({ reduced, onReveal, onDone }: { reduced: boolean
 
   // Hold the page still while the intro plays.
   useLayoutEffect(() => {
-    const html = document.documentElement
-    const previous = html.style.overflow
-    html.style.overflow = 'hidden'
-    return () => {
-      html.style.overflow = previous
-    }
+    return lockScroll()
   }, [])
 
   useEffect(() => {

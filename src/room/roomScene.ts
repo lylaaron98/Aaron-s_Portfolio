@@ -39,6 +39,8 @@ export interface RoomOptions {
   screenSrc: string
   /** True when the screenshot is the light theme (a brighter screen). */
   lightScreen: boolean
+  /** Phones zoom into a phone on the desk (showing this screenshot) instead of the monitor. */
+  phoneScreenSrc?: string
   hour: number
   reduced: boolean
 }
@@ -65,6 +67,10 @@ const SCREEN_H = 0.525
 const DESK_TOP = 0.74
 const MONITOR = new THREE.Vector3(-0.15, 1.13, -1.6)
 const SIDE_MONITOR = new THREE.Vector3(0.66, 1.16, -1.5)
+// A phone lying flat on the desk, right of the mouse; its top points away.
+const PHONE = new THREE.Vector3(0.5, 0, -1.2)
+const PHONE_SCREEN_W = 0.0695
+const PHONE_SCREEN_H = 0.1505
 
 export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions): RoomScene {
   const { lite } = options
@@ -335,6 +341,37 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   )
   pad.position.set(0.21, DESK_TOP + 0.0015, -1.22)
   add(pad, scene, false)
+
+  // Phone: flat on the desk. On phones it's the way in, lit with the site.
+  const phone = new THREE.Group()
+  phone.position.set(PHONE.x, DESK_TOP, PHONE.z)
+  const phoneBody = rounded(PHONE_SCREEN_W + 0.006, 0.0085, PHONE_SCREEN_H + 0.007, 0.0035, spaceGrey, 0, 0.00425, 0)
+  phone.add(phoneBody)
+  const phoneGlass = rounded(PHONE_SCREEN_W + 0.003, 0.0006, PHONE_SCREEN_H + 0.004, 0.0003, plasticBlack, 0, 0.0086, 0)
+  phone.add(phoneGlass)
+  const phoneScreenMat = track(new THREE.MeshBasicMaterial({ color: '#05060a' }))
+  const phoneScreen = new THREE.Mesh(track(new THREE.PlaneGeometry(PHONE_SCREEN_W, PHONE_SCREEN_H)), phoneScreenMat)
+  phoneScreen.rotation.x = -Math.PI / 2
+  phoneScreen.position.y = 0.0093
+  phone.add(phoneScreen)
+  const phoneHalo = new THREE.Mesh(
+    track(new THREE.PlaneGeometry(PHONE_SCREEN_W + 0.05, PHONE_SCREEN_H + 0.05)),
+    track(new THREE.MeshBasicMaterial({ color: '#19c3b2', transparent: true, opacity: 0, toneMapped: false, depthWrite: false })),
+  )
+  phoneHalo.rotation.x = -Math.PI / 2
+  phoneHalo.position.y = 0.0004
+  phone.add(phoneHalo)
+  add(phone)
+  contactShadow(PHONE.x, DESK_TOP, PHONE.z, 0.12, 0.2, 0.7)
+  if (options.phoneScreenSrc) {
+    new THREE.TextureLoader().load(options.phoneScreenSrc, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
+      phoneScreenMat.map = track(texture)
+      phoneScreenMat.color.set(options.lightScreen ? '#e9ebf2' : '#ffffff')
+      phoneScreenMat.needsUpdate = true
+    })
+  }
 
   // Mug: lathe-turned ceramic with coffee in it.
   const mug = new THREE.Group()
@@ -792,16 +829,31 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
         : { px: 1.75, py: 1.55, pz: 1.3, tx: -0.16, ty: 1.02, tz: -1.5, fov: 42 }
   Object.assign(rig, home())
   let entering = false
-  // Camera spot where the screen just covers the whole viewport.
-  const screenView = (fov: number) => {
+  const usePhone = Boolean(options.phoneScreenSrc)
+  const fitDistance = (fov: number, w: number, h: number) => {
     const tanHalf = Math.tan(THREE.MathUtils.degToRad(fov / 2))
-    const distance = Math.min(SCREEN_H / 2 / tanHalf, SCREEN_W / 2 / (tanHalf * aspect)) * 0.97
-    return { px: MONITOR.x, py: MONITOR.y, pz: MONITOR.z + 0.0075 + distance }
+    return Math.min(h / 2 / tanHalf, w / 2 / (tanHalf * aspect)) * 0.97
   }
+  // Camera spot (and aim) where the chosen screen just covers the viewport.
+  // The phone is seen from straight above; the hair of z offset keeps the
+  // look-at stable and puts the phone's top at the top of the frame.
+  const focusView = (fov: number) =>
+    usePhone
+      ? {
+          px: PHONE.x,
+          py: DESK_TOP + 0.0093 + fitDistance(fov, PHONE_SCREEN_W, PHONE_SCREEN_H),
+          pz: PHONE.z + 0.002,
+          tx: PHONE.x,
+          ty: DESK_TOP,
+          tz: PHONE.z,
+        }
+      : { px: MONITOR.x, py: MONITOR.y, pz: MONITOR.z + 0.0075 + fitDistance(fov, SCREEN_W, SCREEN_H), tx: MONITOR.x, ty: MONITOR.y, tz: MONITOR.z }
+  // Over his right shoulder, so the camera never passes through the figure.
+  const waypoint = () => (usePhone ? { px: 0.62, py: 1.45, pz: -0.62 } : { px: 0.35, py: 1.7, pz: -0.5 })
 
   const raycaster = new THREE.Raycaster()
   const ndc = new THREE.Vector2()
-  const hitTargets = [screen, bezel, shell]
+  const hitTargets = usePhone ? [phoneScreen, phoneBody, phoneGlass] : [screen, bezel, shell]
 
   let hover = false
   const lookTarget = new THREE.Vector3()
@@ -845,7 +897,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
         camera.updateProjectionMatrix()
       }
 
-      const haloMat = halo.material as THREE.MeshBasicMaterial
+      const haloMat = (usePhone ? phoneHalo : halo).material as THREE.MeshBasicMaterial
       haloMat.opacity += ((hover ? 0.85 : 0) - haloMat.opacity) * Math.min(1, dt * 8)
 
       if (post) {
@@ -893,7 +945,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       entering = true
       hover = false
       gsap.killTweensOf(rig)
-      Object.assign(rig, { ...screenView(end.fov), tx: MONITOR.x, ty: MONITOR.y, tz: MONITOR.z, fov: end.fov, zoom: 1 })
+      Object.assign(rig, { ...focusView(end.fov), fov: end.fov, zoom: 1 })
       return new Promise((resolve) => {
         gsap
           .timeline({
@@ -904,7 +956,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
             },
           })
           // The way in, reversed: back over his right shoulder, then home.
-          .to(rig, { px: 0.35, py: 1.7, pz: -0.5, duration: 0.85, ease: 'power2.in' }, 0)
+          .to(rig, { ...waypoint(), duration: 0.85, ease: 'power2.in' }, 0)
           .to(rig, { zoom: 0, duration: 1.7, ease: 'power2.inOut' }, 0)
           .to(rig, { tx: end.tx, ty: end.ty, tz: end.tz, duration: 1.1, ease: 'power2.inOut' }, 0.6)
           .to(rig, { px: end.px, py: end.py, pz: end.pz, duration: 1.1, ease: 'power3.out' }, 0.85)
@@ -914,16 +966,15 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
     enter() {
       entering = true
       hover = false
-      const target = screenView(rig.fov)
+      const { tx, ty, tz, ...target } = focusView(rig.fov)
       return new Promise((resolve) => {
         gsap.killTweensOf(rig)
         gsap
           .timeline({ onComplete: () => resolve() })
-          .to(rig, { tx: MONITOR.x, ty: MONITOR.y, tz: MONITOR.z, duration: 0.8, ease: 'power2.inOut' }, 0)
+          .to(rig, { tx, ty, tz, duration: 0.8, ease: 'power2.inOut' }, 0)
           .to(rig, { zoom: 1, duration: 1.7, ease: 'power2.inOut' }, 0)
-          // Over his right shoulder first, so the camera never passes through
-          // the figure, then square on to the screen.
-          .to(rig, { px: 0.35, py: 1.7, pz: -0.5, duration: 0.85, ease: 'power2.in' }, 0.05)
+          // Over his right shoulder first, then square on to the screen.
+          .to(rig, { ...waypoint(), duration: 0.85, ease: 'power2.in' }, 0.05)
           .to(rig, { ...target, duration: 0.85, ease: 'power2.out' }, 0.9)
       })
     },

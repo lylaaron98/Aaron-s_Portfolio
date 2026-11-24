@@ -8,6 +8,11 @@
 export const ROOM_SEEN_KEY = 'portfolio-room-seen'
 export const OPEN_ROOM_EVENT = 'room:open'
 
+/** Opens the room. `fromScreen` starts on the monitor and zooms back out. */
+export function openRoom(fromScreen = false) {
+  window.dispatchEvent(new CustomEvent(OPEN_ROOM_EVENT, { detail: { fromScreen } }))
+}
+
 export function canRenderRoom() {
   try {
     const canvas = document.createElement('canvas')

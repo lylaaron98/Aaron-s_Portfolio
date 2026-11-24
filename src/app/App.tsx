@@ -47,6 +47,7 @@ function App() {
   const isDemoPage = slug !== null
   const { reduced, allow3d } = useMotionBudget()
   const [showRoom, setShowRoom] = useState(roomFirst)
+  const [roomFromScreen, setRoomFromScreen] = useState(false)
   const [showLoader, setShowLoader] = useState(landedOnHome && !roomFirst)
   const [introPending, setIntroPending] = useState(landedOnHome)
 
@@ -66,12 +67,13 @@ function App() {
 
   useEffect(() => interceptLinkClicks(), [])
 
-  // The footer's "Visit the 3D room" link reopens the room from the top.
+  // The navbar and footer room buttons reopen the room.
   useEffect(() => {
-    const open = () => {
+    const open = (event: Event) => {
       if (!canRenderRoom()) return
       if (demoSlugFromPath(window.location.pathname) !== null) navigate('/')
       window.scrollTo({ top: 0, behavior: 'auto' })
+      setRoomFromScreen(Boolean((event as CustomEvent<{ fromScreen?: boolean }>).detail?.fromScreen))
       setShowRoom(true)
     }
     window.addEventListener(OPEN_ROOM_EVENT, open)
@@ -100,6 +102,7 @@ function App() {
         <Suspense fallback={<div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: '#0b0f1e' }} />}>
           <RoomIntro
             reduced={reduced}
+            fromScreen={roomFromScreen}
             onExit={() => {
               setShowRoom(false)
               setIntroPending(false)

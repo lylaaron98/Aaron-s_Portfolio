@@ -54,6 +54,8 @@ export interface RoomScene {
   enter(): Promise<void>
   /** Gentle dolly-in on first view. */
   intro(): void
+  /** Starts on the monitor (as if leaving the site) and pulls back to the room. */
+  zoomOut(): Promise<void>
 }
 
 const SCREEN_W = 0.84
@@ -781,6 +783,12 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
         : { px: 1.75, py: 1.55, pz: 1.3, tx: -0.16, ty: 1.02, tz: -1.5, fov: 42 }
   Object.assign(rig, home())
   let entering = false
+  // Camera spot where the screen just covers the whole viewport.
+  const screenView = (fov: number) => {
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(fov / 2))
+    const distance = Math.min(SCREEN_H / 2 / tanHalf, SCREEN_W / 2 / (tanHalf * aspect)) * 0.97
+    return { px: MONITOR.x, py: MONITOR.y, pz: MONITOR.z + 0.0075 + distance }
+  }
 
   const raycaster = new THREE.Raycaster()
   const ndc = new THREE.Vector2()
@@ -865,13 +873,37 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       )
     },
 
+    zoomOut() {
+      const end = home()
+      if (options.reduced) {
+        Object.assign(rig, end, { zoom: 0 })
+        return Promise.resolve()
+      }
+      entering = true
+      hover = false
+      gsap.killTweensOf(rig)
+      Object.assign(rig, { ...screenView(end.fov), tx: MONITOR.x, ty: MONITOR.y, tz: MONITOR.z, fov: end.fov, zoom: 1 })
+      return new Promise((resolve) => {
+        gsap
+          .timeline({
+            delay: 0.35,
+            onComplete: () => {
+              entering = false
+              resolve()
+            },
+          })
+          // The way in, reversed: back over his right shoulder, then home.
+          .to(rig, { px: 0.35, py: 1.7, pz: -0.5, duration: 0.85, ease: 'power2.in' }, 0)
+          .to(rig, { zoom: 0, duration: 1.7, ease: 'power2.inOut' }, 0)
+          .to(rig, { tx: end.tx, ty: end.ty, tz: end.tz, duration: 1.1, ease: 'power2.inOut' }, 0.6)
+          .to(rig, { px: end.px, py: end.py, pz: end.pz, duration: 1.1, ease: 'power3.out' }, 0.85)
+      })
+    },
+
     enter() {
       entering = true
       hover = false
-      // Distance at which the screen covers the whole viewport.
-      const tanHalf = Math.tan(THREE.MathUtils.degToRad(rig.fov / 2))
-      const distance = Math.min(SCREEN_H / 2 / tanHalf, SCREEN_W / 2 / (tanHalf * aspect)) * 0.97
-      const target = { px: MONITOR.x, py: MONITOR.y, pz: MONITOR.z + 0.0075 + distance }
+      const target = screenView(rig.fov)
       return new Promise((resolve) => {
         gsap.killTweensOf(rig)
         gsap

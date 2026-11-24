@@ -45,6 +45,18 @@ test('Escape leaves the room; ?room brings it back', async ({ page }) => {
   await expect(page).toHaveURL(/\/$/)
 })
 
+test('the navbar button goes back to the room', async ({ page }) => {
+  await page.goto('/')
+  await expect(room(page)).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(room(page)).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Back to the 3D room' }).click()
+  await expect(room(page)).toBeVisible()
+  await page.getByRole('button', { name: 'Skip to site' }).click()
+  await expect(room(page)).toHaveCount(0)
+})
+
 test('deep links skip the room', async ({ page }) => {
   await page.goto('/#projects')
   await expect(page.locator('#projects')).toBeAttached()

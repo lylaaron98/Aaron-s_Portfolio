@@ -1,5 +1,5 @@
 import styles from './Footer.module.css'
-import { OPEN_ROOM_EVENT } from '../../../room/gate'
+import { openRoom } from '../../../room/gate'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -12,7 +12,7 @@ export default function Footer() {
           <span className={styles.name}>Aaron</span>
         </p>
         <p className={styles.year}>© {year}</p>
-        <button type="button" className={styles.room} onClick={() => window.dispatchEvent(new Event(OPEN_ROOM_EVENT))}>
+        <button type="button" className={styles.room} onClick={() => openRoom()}>
           Visit the 3D room
         </button>
         <div className={styles.socials}>

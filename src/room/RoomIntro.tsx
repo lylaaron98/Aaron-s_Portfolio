@@ -23,7 +23,16 @@ const clockLabel = () => new Date().toLocaleTimeString([], { hour: '2-digit', mi
  * underneath), flies into the monitor on Enter, then fades away so the page
  * on the monitor becomes the page in the browser.
  */
-export default function RoomIntro({ reduced, onExit }: { reduced: boolean; onExit: () => void }) {
+export default function RoomIntro({
+  reduced,
+  fromScreen = false,
+  onExit,
+}: {
+  reduced: boolean
+  /** Opened from the site: start on the monitor and pull back. */
+  fromScreen?: boolean
+  onExit: () => void
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const enterRef = useRef<HTMLButtonElement>(null)
   const sceneRef = useRef<RoomScene | null>(null)
@@ -59,7 +68,8 @@ export default function RoomIntro({ reduced, onExit }: { reduced: boolean; onExi
       ),
     (scene) => {
       sceneRef.current = scene
-      scene.intro()
+      if (fromScreen) void scene.zoomOut()
+      else scene.intro()
       // A visitor may already have left while the room was loading.
       setStage((current) => (current === 'loading' ? 'ready' : current))
       return () => {

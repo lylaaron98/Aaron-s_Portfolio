@@ -94,6 +94,37 @@
 }
 
 /* ── Theme toggle ── */
+.roomButton {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: var(--space-1);
+  padding: 0;
+  color: var(--fg-mute);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+}
+
+.roomButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.roomButton:hover {
+  color: var(--fg);
+  border-color: var(--line-strong);
+}
+
+.roomButton:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
 .themeToggle {
   flex: none;
   padding: 0;

@@ -156,12 +156,11 @@ export default function RoomIntro({
       const label = labelRef.current
       if (scene && label) {
         const { x, y, visible } = scene.labelAnchor()
-        // Keep the pill on screen; the arrow still points at the screen.
+        // Keep the banner on screen at narrow widths.
         const half = label.offsetWidth / 2 + 12
         const cx = Math.min(Math.max(x, half), innerWidth - half)
         label.style.transform = `translate3d(${cx.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%)`
-        label.style.setProperty('--arrow-shift', `${(x - cx).toFixed(1)}px`)
-        label.dataset.visible = visible ? 'true' : 'false'
+                label.dataset.visible = visible ? 'true' : 'false'
       }
       id = requestAnimationFrame(tick)
     }
@@ -194,7 +193,7 @@ export default function RoomIntro({
         onClick={onClick}
       />
       {stage === 'ready' && (
-        // Game-style prompt over the screen. The Enter portfolio button is the
+        // Notification-style prompt over the screen. The Enter portfolio button is the
         // accessible way in, so this one stays out of the tab order.
         <button
           ref={labelRef}
@@ -207,9 +206,14 @@ export default function RoomIntro({
           onPointerEnter={() => sceneRef.current?.setHover(true)}
           onPointerLeave={() => sceneRef.current?.setHover(hover)}
         >
-          <span className={styles.promptKey}>{coarse ? '☝' : '⏎'}</span>
-          <span>{coarse ? 'Tap to enter' : `Click the ${target} to enter`}</span>
-          <span className={styles.promptArrow} />
+          <span className={styles.promptIcon}>A</span>
+          <span className={styles.promptText}>
+            <span className={styles.promptHead}>
+              <strong>Aaron Lee</strong>
+              <span>now</span>
+            </span>
+            <span>{coarse ? 'Tap to open my portfolio' : `Click the ${target} to open my portfolio`}</span>
+          </span>
         </button>
       )}
       <p className={styles.srOnly}>

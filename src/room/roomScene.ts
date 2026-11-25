@@ -392,7 +392,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   phoneHalo.rotation.x = -Math.PI / 2
   phoneHalo.position.y = 0.0004
   // Brighter than the monitor glow: on a phone the phone is only a few pixels wide.
-  ;(phoneHalo.material as THREE.MeshBasicMaterial).color.multiplyScalar(1.4)
+  ;(phoneHalo.material as THREE.MeshBasicMaterial).color.multiplyScalar(1.6)
   phone.add(phoneHalo)
   add(phone)
   contactShadow(PHONE.x, DESK_TOP, PHONE.z, 0.12, 0.2, 0.7)
@@ -939,7 +939,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       // Fades out as the camera zooms in, so it never tints the page.
       const haloMat = (usePhone ? phoneHalo : halo).material as THREE.MeshBasicMaterial
       // The phone is tiny on screen, so it gets a stronger idle glow than the monitor.
-      const [low, high, lit] = usePhone ? [0.3, 0.55, 0.8] : [0.08, 0.2, 0.5]
+      const [low, high, lit] = usePhone ? [0.42, 0.75, 0.9] : [0.13, 0.3, 0.75]
       const idle = options.reduced ? (low + high) / 2 : low + (high - low) * (0.5 + 0.5 * Math.sin(time * 2))
       const glow = (hover ? lit : idle) * (1 - rig.zoom)
       haloMat.opacity += (glow - haloMat.opacity) * Math.min(1, dt * 8)

@@ -424,10 +424,11 @@ export function createAvatar(scene: THREE.Scene, props: AvatarProps) {
     if (mugHeld) {
       props.mug.position.copy(left.target).sub(mugGrip)
       const raised = ease((left.target.y - deskMug.y - mugGrip.y) / (sip.y - deskMug.y - mugGrip.y))
-      props.mug.rotation.z = -raised * 0.9
+      // Tip the rim towards his mouth (he faces -z), not sideways.
+      props.mug.rotation.set(raised * 0.75, 0, 0)
     } else {
       props.mug.position.copy(deskMug)
-      props.mug.rotation.z = 0
+      props.mug.rotation.set(0, 0, 0)
     }
 
     // Body: lean, breathing, eye line with quick saccades.

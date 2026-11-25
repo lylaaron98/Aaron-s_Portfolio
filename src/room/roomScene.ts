@@ -14,6 +14,7 @@ import {
   fabricTexture,
   plasterTexture,
   rugTexture,
+  screenGlowTexture,
   softDotTexture,
   woodTextures,
 } from './textures'
@@ -71,6 +72,10 @@ const SIDE_MONITOR = new THREE.Vector3(0.66, 1.16, -1.5)
 const PHONE = new THREE.Vector3(0.5, 0, -1.2)
 const PHONE_SCREEN_W = 0.0695
 const PHONE_SCREEN_H = 0.1505
+// How far the click-me glow spreads past each screen's edge, in metres.
+const MONITOR_GLOW = 0.11
+const PHONE_GLOW = 0.075
+const GLOW_COLOR = '#2fe0cc'
 
 export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions): RoomScene {
   const { lite } = options
@@ -254,9 +259,20 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   monitor.add(shell)
   const bezel = rounded(SCREEN_W + 0.02, SCREEN_H + 0.02, 0.006, 0.004, plasticBlack, 0, 0, 0.004)
   monitor.add(bezel)
+  // Soft glow around the screen that says "click me": pulses gently, brightens on hover.
   const halo = new THREE.Mesh(
-    track(new THREE.PlaneGeometry(SCREEN_W + 0.08, SCREEN_H + 0.08)),
-    track(new THREE.MeshBasicMaterial({ color: '#19c3b2', transparent: true, opacity: 0, toneMapped: false })),
+    track(new THREE.PlaneGeometry(SCREEN_W + MONITOR_GLOW * 2, SCREEN_H + MONITOR_GLOW * 2)),
+    track(
+      new THREE.MeshBasicMaterial({
+        color: GLOW_COLOR,
+        map: track(screenGlowTexture(SCREEN_W, SCREEN_H, MONITOR_GLOW)),
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    ),
   )
   halo.position.z = -0.02
   monitor.add(halo)
@@ -355,11 +371,23 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   phoneScreen.position.y = 0.0093
   phone.add(phoneScreen)
   const phoneHalo = new THREE.Mesh(
-    track(new THREE.PlaneGeometry(PHONE_SCREEN_W + 0.05, PHONE_SCREEN_H + 0.05)),
-    track(new THREE.MeshBasicMaterial({ color: '#19c3b2', transparent: true, opacity: 0, toneMapped: false, depthWrite: false })),
+    track(new THREE.PlaneGeometry(PHONE_SCREEN_W + PHONE_GLOW * 2, PHONE_SCREEN_H + PHONE_GLOW * 2)),
+    track(
+      new THREE.MeshBasicMaterial({
+        color: GLOW_COLOR,
+        map: track(screenGlowTexture(PHONE_SCREEN_W, PHONE_SCREEN_H, PHONE_GLOW)),
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    ),
   )
   phoneHalo.rotation.x = -Math.PI / 2
   phoneHalo.position.y = 0.0004
+  // Brighter than the monitor glow: on a phone the phone is only a few pixels wide.
+  ;(phoneHalo.material as THREE.MeshBasicMaterial).color.multiplyScalar(1.8)
   phone.add(phoneHalo)
   add(phone)
   contactShadow(PHONE.x, DESK_TOP, PHONE.z, 0.12, 0.2, 0.7)
@@ -897,8 +925,14 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
         camera.updateProjectionMatrix()
       }
 
+      // Idle: a slow breathing glow so the way in is obvious. Hover: full.
+      // Fades out as the camera zooms in, so it never tints the page.
       const haloMat = (usePhone ? phoneHalo : halo).material as THREE.MeshBasicMaterial
-      haloMat.opacity += ((hover ? 0.85 : 0) - haloMat.opacity) * Math.min(1, dt * 8)
+      // The phone is tiny on screen, so it gets a stronger idle glow than the monitor.
+      const [low, high] = usePhone ? [0.55, 1] : [0.18, 0.42]
+      const idle = options.reduced ? (low + high) / 2 : low + (high - low) * (0.5 + 0.5 * Math.sin(time * 2.4))
+      const glow = (hover ? 1 : idle) * (1 - rig.zoom)
+      haloMat.opacity += (glow - haloMat.opacity) * Math.min(1, dt * 8)
 
       if (post) {
         // Bloom fades out on the way in, so the last frame matches the page.

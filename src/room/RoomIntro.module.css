@@ -179,12 +179,109 @@
   color: #fff;
 }
 
-.hint {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+/* Floating prompt over the screen you click, styled as an iOS notification banner. */
+.prompt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: min(290px, calc(100vw - 24px));
+  padding: 7px 11px 7px 7px;
+  margin-top: -10px;
+  font: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-sans);
+  text-align: left;
+  color: #111;
+  background: rgba(246, 246, 250, 0.78);
+  border: 0;
+  border-radius: 14px;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.35),
+    0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  cursor: pointer;
+  transition: opacity 0.3s, box-shadow 0.2s;
+  will-change: transform;
+  /* `translate` stacks on the positioning transform set from script. */
+  animation:
+    drop-in 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both,
+    bob 2.4s ease-in-out 0.6s infinite;
+}
+
+.prompt[data-visible='false'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prompt[data-hover],
+.prompt:hover {
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 0 0 2px rgba(47, 224, 204, 0.8);
+}
+
+/* App icon: rounded square with the site's gradient. */
+.promptIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-weight: 700;
+  font-size: 0.75rem;
   color: #fff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  background: var(--brand-gradient);
+  border-radius: 6px;
+}
+
+.promptText {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+
+.promptHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.promptHead strong {
+  font-weight: 600;
+}
+
+.promptHead span {
+  font-size: 0.64rem;
+  color: rgba(60, 60, 67, 0.6);
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    translate: 0 -18px;
+    scale: 0.94;
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+
+[data-reduced] .prompt {
+  animation: none;
 }
 
 .enter {

@@ -179,6 +179,36 @@ export function contactShadowTexture(size = 128) {
   return texture
 }
 
+/**
+ * Soft glow around a screen: full inside the w x h rectangle, fading to
+ * nothing across `margin` on every side. Sized in metres, so the falloff is
+ * even on wide and tall screens alike.
+ */
+export function screenGlowTexture(w: number, h: number, margin: number, res = 256) {
+  const totalW = w + margin * 2
+  const totalH = h + margin * 2
+  const scale = res / Math.max(totalW, totalH)
+  const cw = Math.max(8, Math.round(totalW * scale))
+  const ch = Math.max(8, Math.round(totalH * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = cw
+  canvas.height = ch
+  const ctx = canvas.getContext('2d')!
+  const img = ctx.createImageData(cw, ch)
+  for (let y = 0; y < ch; y++) {
+    for (let x = 0; x < cw; x++) {
+      const dx = Math.max(0, Math.abs((x + 0.5) / scale - totalW / 2) - w / 2)
+      const dy = Math.max(0, Math.abs((y + 0.5) / scale - totalH / 2) - h / 2)
+      const f = Math.max(0, 1 - Math.hypot(dx, dy) / margin)
+      const i = (y * cw + x) * 4
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = 255
+      img.data[i + 3] = Math.round(255 * f * f * f)
+    }
+  }
+  ctx.putImageData(img, 0, 0)
+  return new THREE.CanvasTexture(canvas)
+}
+
 /** Soft dot for dust motes and steam. */
 export function softDotTexture(size = 64) {
   const canvas = document.createElement('canvas')

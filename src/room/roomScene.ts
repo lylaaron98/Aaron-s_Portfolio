@@ -14,6 +14,7 @@ import {
   fabricTexture,
   plasterTexture,
   rugTexture,
+  screenGlowTexture,
   softDotTexture,
   woodTextures,
 } from './textures'
@@ -54,6 +55,11 @@ export interface RoomScene {
   /** True when the client point is over the main monitor. */
   hitMonitor(clientX: number, clientY: number): boolean
   setHover(on: boolean): void
+  /**
+   * Where the floating "click to enter" label sits, in canvas CSS pixels:
+   * just above the screen you click. Hidden once the camera starts zooming.
+   */
+  labelAnchor(): { x: number; y: number; visible: boolean }
   /** Flies the camera into the main monitor until it fills the viewport. */
   enter(): Promise<void>
   /** Gentle dolly-in on first view. */
@@ -65,12 +71,18 @@ export interface RoomScene {
 const SCREEN_W = 0.84
 const SCREEN_H = 0.525
 const DESK_TOP = 0.74
+// The standing desk's travel: 74 cm sitting, 108 cm standing.
+const DESK_LIFT = 0.34
 const MONITOR = new THREE.Vector3(-0.15, 1.13, -1.6)
 const SIDE_MONITOR = new THREE.Vector3(0.66, 1.16, -1.5)
 // A phone lying flat on the desk, right of the mouse; its top points away.
 const PHONE = new THREE.Vector3(0.5, 0, -1.2)
 const PHONE_SCREEN_W = 0.0695
 const PHONE_SCREEN_H = 0.1505
+// How far the click-me glow spreads past each screen's edge, in metres.
+const MONITOR_GLOW = 0.11
+const PHONE_GLOW = 0.075
+const GLOW_COLOR = '#2fe0cc'
 
 export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions): RoomScene {
   const { lite } = options
@@ -155,13 +167,13 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   const shadowTex = track(contactShadowTexture())
   const shadowMat = track(new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, color: '#000000', opacity: 0.85 }))
 
-  const contactShadow = (x: number, y: number, z: number, w: number, d: number, opacity = 1) => {
+  const contactShadow = (x: number, y: number, z: number, w: number, d: number, opacity = 1, parent: THREE.Object3D = scene) => {
     const plane = new THREE.Mesh(track(new THREE.PlaneGeometry(w, d)), opacity === 1 ? shadowMat : track(shadowMat.clone()))
     plane.rotation.x = -Math.PI / 2
     plane.position.set(x, y + 0.002, z)
     ;(plane.material as THREE.MeshBasicMaterial).opacity *= opacity
     plane.renderOrder = 1
-    scene.add(plane)
+    parent.add(plane)
   }
 
   // ── View ───────────────────────────────────────────────────────────────
@@ -233,30 +245,79 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   add(rug, scene, false)
 
   // ── Desk ───────────────────────────────────────────────────────────────
-  add(rounded(1.7, 0.035, 0.75, 0.008, deskMat, 0, DESK_TOP - 0.0175, -1.45))
-  for (const x of [-0.78, 0.78]) {
-    const frame = new THREE.Group()
-    frame.add(rounded(0.035, DESK_TOP - 0.04, 0.035, 0.006, blackMetal, x, (DESK_TOP - 0.04) / 2, -1.14))
-    frame.add(rounded(0.035, DESK_TOP - 0.04, 0.035, 0.006, blackMetal, x, (DESK_TOP - 0.04) / 2, -1.76))
-    frame.add(rounded(0.04, 0.025, 0.7, 0.006, blackMetal, x, 0.0125, -1.45))
-    frame.add(rounded(0.035, 0.03, 0.62, 0.006, blackMetal, x, DESK_TOP - 0.05, -1.45))
-    add(frame)
-    contactShadow(x, 0, -1.45, 0.35, 0.95, 0.7)
+  // A motorised sit-stand desk. Everything on the top rides in `deskTop`,
+  // which lifts; the feet and outer columns stay on the floor.
+  const deskTop = new THREE.Group()
+  scene.add(deskTop)
+  add(rounded(1.7, 0.035, 0.75, 0.008, deskMat, 0, DESK_TOP - 0.0175, -1.45), deskTop)
+  const legMat = track(new THREE.MeshStandardMaterial({ color: '#2a2b30', roughness: 0.45, metalness: 0.6 }))
+  for (const x of [-0.7, 0.7]) {
+    // Foot on the floor, outer column, and the inner stage that slides out of it.
+    add(rounded(0.07, 0.035, 0.68, 0.012, legMat, x, 0.0175, -1.45))
+    add(rounded(0.085, 0.6, 0.06, 0.006, legMat, x, 0.33, -1.45))
+    add(rounded(0.07, 0.5, 0.048, 0.005, blackMetal, x, 0.43, -1.45), deskTop)
+    // Bracket under the top.
+    add(rounded(0.06, 0.03, 0.62, 0.006, legMat, x, DESK_TOP - 0.05, -1.45), deskTop)
+    contactShadow(x, 0, -1.45, 0.3, 0.85, 0.75)
   }
-  add(rounded(1.5, 0.03, 0.03, 0.006, blackMetal, 0, DESK_TOP - 0.05, -1.75))
+  add(rounded(1.34, 0.04, 0.05, 0.006, legMat, 0, DESK_TOP - 0.06, -1.45), deskTop)
   contactShadow(0, 0, -1.42, 2.1, 1.1, 0.55)
+
+  // Control panel under the front edge, with a small height readout.
+  const panel = new THREE.Group()
+  panel.position.set(0.42, DESK_TOP - 0.05, -1.1)
+  panel.add(rounded(0.13, 0.03, 0.05, 0.008, plasticBlack))
+  const readout = document.createElement('canvas')
+  readout.width = 64
+  readout.height = 24
+  const readoutTex = track(new THREE.CanvasTexture(readout))
+  const readoutCtx = readout.getContext('2d')!
+  let shownCm = -1
+  const showHeight = (cm: number) => {
+    if (cm === shownCm) return
+    shownCm = cm
+    readoutCtx.fillStyle = '#05070a'
+    readoutCtx.fillRect(0, 0, 64, 24)
+    readoutCtx.fillStyle = '#7ff5e6'
+    readoutCtx.font = 'bold 18px monospace'
+    readoutCtx.textAlign = 'center'
+    readoutCtx.textBaseline = 'middle'
+    readoutCtx.fillText(String(cm), 32, 13)
+    readoutTex.needsUpdate = true
+  }
+  showHeight(74)
+  const display = new THREE.Mesh(track(new THREE.PlaneGeometry(0.04, 0.015)), track(new THREE.MeshBasicMaterial({ map: readoutTex, toneMapped: false })))
+  display.position.set(-0.03, 0, -0.0255)
+  display.rotation.y = Math.PI
+  panel.add(display)
+  for (const bx of [0.012, 0.038]) panel.add(rounded(0.018, 0.012, 0.006, 0.003, legMat, bx, 0, -0.026))
+  add(panel, deskTop)
+  // Where the hand goes to press the buttons, in desk space.
+  const panelGrip = new THREE.Vector3(0.45, DESK_TOP - 0.04, -1.07)
 
   // Main monitor.
   const monitor = new THREE.Group()
   monitor.position.copy(MONITOR)
-  const shell = rounded(SCREEN_W + 0.03, SCREEN_H + 0.03, 0.022, 0.008, alu)
-  shell.position.z = -0.006
+  // Mac-style display: thin aluminium body, edge-to-edge black glass, slim even border.
+  const shell = rounded(SCREEN_W + 0.036, SCREEN_H + 0.036, 0.018, 0.01, alu)
+  shell.position.z = -0.005
   monitor.add(shell)
-  const bezel = rounded(SCREEN_W + 0.02, SCREEN_H + 0.02, 0.006, 0.004, plasticBlack, 0, 0, 0.004)
+  const bezel = rounded(SCREEN_W + 0.032, SCREEN_H + 0.032, 0.004, 0.008, plasticBlack, 0, 0, 0.005)
   monitor.add(bezel)
+  // Soft glow around the screen that says "click me": pulses gently, brightens on hover.
   const halo = new THREE.Mesh(
-    track(new THREE.PlaneGeometry(SCREEN_W + 0.08, SCREEN_H + 0.08)),
-    track(new THREE.MeshBasicMaterial({ color: '#19c3b2', transparent: true, opacity: 0, toneMapped: false })),
+    track(new THREE.PlaneGeometry(SCREEN_W + MONITOR_GLOW * 2, SCREEN_H + MONITOR_GLOW * 2)),
+    track(
+      new THREE.MeshBasicMaterial({
+        color: GLOW_COLOR,
+        map: track(screenGlowTexture(SCREEN_W, SCREEN_H, MONITOR_GLOW)),
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    ),
   )
   halo.position.z = -0.02
   monitor.add(halo)
@@ -280,13 +341,14 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   )
   coat.position.z = 0.008
   monitor.add(coat)
-  monitor.add(rounded(0.06, 0.34, 0.02, 0.006, alu, 0, -0.37, -0.05))
-  const base = new THREE.Mesh(track(new THREE.CylinderGeometry(0.13, 0.13, 0.01, 40)), alu)
-  base.scale.set(1.2, 1, 0.7)
-  base.position.set(0, -MONITOR.y + DESK_TOP + 0.005, -0.03)
-  monitor.add(base)
-  add(monitor)
-  contactShadow(MONITOR.x, DESK_TOP, MONITOR.z - 0.03, 0.42, 0.26, 0.8)
+  // Mac-style stand: one slanted aluminium plate folding into a flat foot.
+  const standH = MONITOR.y - DESK_TOP - 0.02
+  const standPlate = rounded(0.17, standH, 0.012, 0.004, alu, 0, -standH / 2 - 0.02, -0.07)
+  standPlate.rotation.x = 0.12
+  monitor.add(standPlate)
+  monitor.add(rounded(0.17, 0.006, 0.2, 0.003, alu, 0, -MONITOR.y + DESK_TOP + 0.003, -0.02))
+  add(monitor, deskTop)
+  contactShadow(MONITOR.x, DESK_TOP, MONITOR.z - 0.03, 0.34, 0.3, 0.8, deskTop)
 
   // Side monitor, portrait, scrolling code.
   const codeTex = track(codeTexture())
@@ -298,12 +360,13 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   const sideScreen = new THREE.Mesh(track(new THREE.PlaneGeometry(0.31, 0.53)), track(new THREE.MeshBasicMaterial({ map: codeTex })))
   sideScreen.position.z = 0.0075
   side.add(sideScreen)
-  side.add(rounded(0.045, 0.16, 0.02, 0.006, alu, 0, -0.35, -0.04))
-  const sideBase = new THREE.Mesh(track(new THREE.CylinderGeometry(0.09, 0.09, 0.01, 32)), alu)
-  sideBase.position.set(0, -SIDE_MONITOR.y + DESK_TOP + 0.005, -0.02)
-  side.add(sideBase)
-  add(side)
-  contactShadow(SIDE_MONITOR.x, DESK_TOP, SIDE_MONITOR.z, 0.26, 0.22, 0.8)
+  const sideStandH = SIDE_MONITOR.y - 0.27 - DESK_TOP
+  const sidePlate = rounded(0.11, sideStandH + 0.08, 0.01, 0.004, alu, 0, -0.27 - sideStandH / 2 + 0.04, -0.05)
+  sidePlate.rotation.x = 0.1
+  side.add(sidePlate)
+  side.add(rounded(0.11, 0.006, 0.15, 0.003, alu, 0, -SIDE_MONITOR.y + DESK_TOP + 0.003, -0.02))
+  add(side, deskTop)
+  contactShadow(SIDE_MONITOR.x, DESK_TOP, SIDE_MONITOR.z, 0.22, 0.24, 0.8, deskTop)
 
   // Keyboard with individual keycaps.
   const keyboardPos = new THREE.Vector3(-0.12, DESK_TOP, -1.2)
@@ -326,8 +389,8 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   caps.count = ci
   keyboard.add(caps)
   keyboard.add(rounded(0.16, 0.008, 0.0225, 0.003, capMat, -0.002, 0.018, 0.052))
-  add(keyboard)
-  contactShadow(keyboardPos.x, DESK_TOP, keyboardPos.z, 0.55, 0.2, 0.6)
+  add(keyboard, deskTop)
+  contactShadow(keyboardPos.x, DESK_TOP, keyboardPos.z, 0.55, 0.2, 0.6, deskTop)
 
   const mouse = new THREE.Group()
   mouse.position.set(0.2, DESK_TOP, -1.2)
@@ -340,29 +403,54 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
     track(new THREE.MeshStandardMaterial({ map: track(fabricTexture([38, 40, 46], 128, 48)), roughness: 1 })),
   )
   pad.position.set(0.21, DESK_TOP + 0.0015, -1.22)
-  add(pad, scene, false)
+  add(pad, deskTop, false)
 
   // Phone: flat on the desk. On phones it's the way in, lit with the site.
   const phone = new THREE.Group()
   phone.position.set(PHONE.x, DESK_TOP, PHONE.z)
-  const phoneBody = rounded(PHONE_SCREEN_W + 0.006, 0.0085, PHONE_SCREEN_H + 0.007, 0.0035, spaceGrey, 0, 0.00425, 0)
+  // Latest-generation iPhone look: titanium frame, near edge-to-edge glass,
+  // Dynamic Island, side buttons.
+  const titanium = track(new THREE.MeshStandardMaterial({ color: '#a7a39c', roughness: 0.32, metalness: 0.9 }))
+  const phoneBody = rounded(PHONE_SCREEN_W + 0.0045, 0.0082, PHONE_SCREEN_H + 0.0048, 0.0042, titanium, 0, 0.0041, 0)
   phone.add(phoneBody)
-  const phoneGlass = rounded(PHONE_SCREEN_W + 0.003, 0.0006, PHONE_SCREEN_H + 0.004, 0.0003, plasticBlack, 0, 0.0086, 0)
+  const phoneGlass = rounded(PHONE_SCREEN_W + 0.0028, 0.0006, PHONE_SCREEN_H + 0.003, 0.0003, plasticBlack, 0, 0.0086, 0)
   phone.add(phoneGlass)
+  const island = new THREE.Mesh(track(new THREE.CapsuleGeometry(0.0028, 0.0085, 4, 12)), track(new THREE.MeshBasicMaterial({ color: '#000000' })))
+  island.rotation.set(-Math.PI / 2, 0, Math.PI / 2)
+  island.scale.set(1, 1, 0.2)
+  island.position.set(0, 0.0095, -PHONE_SCREEN_H / 2 + 0.0055)
+  phone.add(island)
+  const phoneSide = (PHONE_SCREEN_W + 0.0045) / 2
+  phone.add(rounded(0.0012, 0.003, 0.014, 0.0005, titanium, phoneSide, 0.0041, -0.03))
+  phone.add(rounded(0.0012, 0.003, 0.01, 0.0005, titanium, -phoneSide, 0.0041, -0.04))
+  phone.add(rounded(0.0012, 0.003, 0.01, 0.0005, titanium, -phoneSide, 0.0041, -0.026))
+  phone.add(rounded(0.0012, 0.003, 0.008, 0.0005, titanium, phoneSide, 0.0041, 0.01))
   const phoneScreenMat = track(new THREE.MeshBasicMaterial({ color: '#05060a' }))
   const phoneScreen = new THREE.Mesh(track(new THREE.PlaneGeometry(PHONE_SCREEN_W, PHONE_SCREEN_H)), phoneScreenMat)
   phoneScreen.rotation.x = -Math.PI / 2
   phoneScreen.position.y = 0.0093
   phone.add(phoneScreen)
   const phoneHalo = new THREE.Mesh(
-    track(new THREE.PlaneGeometry(PHONE_SCREEN_W + 0.05, PHONE_SCREEN_H + 0.05)),
-    track(new THREE.MeshBasicMaterial({ color: '#19c3b2', transparent: true, opacity: 0, toneMapped: false, depthWrite: false })),
+    track(new THREE.PlaneGeometry(PHONE_SCREEN_W + PHONE_GLOW * 2, PHONE_SCREEN_H + PHONE_GLOW * 2)),
+    track(
+      new THREE.MeshBasicMaterial({
+        color: GLOW_COLOR,
+        map: track(screenGlowTexture(PHONE_SCREEN_W, PHONE_SCREEN_H, PHONE_GLOW)),
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    ),
   )
   phoneHalo.rotation.x = -Math.PI / 2
   phoneHalo.position.y = 0.0004
+  // Brighter than the monitor glow: on a phone the phone is only a few pixels wide.
+  ;(phoneHalo.material as THREE.MeshBasicMaterial).color.multiplyScalar(1.6)
   phone.add(phoneHalo)
-  add(phone)
-  contactShadow(PHONE.x, DESK_TOP, PHONE.z, 0.12, 0.2, 0.7)
+  add(phone, deskTop)
+  contactShadow(PHONE.x, DESK_TOP, PHONE.z, 0.12, 0.2, 0.7, deskTop)
   if (options.phoneScreenSrc) {
     new THREE.TextureLoader().load(options.phoneScreenSrc, (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace
@@ -424,11 +512,11 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   bulb.rotation.x = Math.PI / 2
   bulb.position.set(j3.x, j3.y - 0.07, j3.z)
   lamp.add(bulb)
-  add(lamp)
+  add(lamp, deskTop)
   const lampLight = new THREE.SpotLight('#ffc98f', 0, 2.4, 0.85, 0.85, 1.6)
   lampLight.position.set(lamp.position.x + j3.x, DESK_TOP + j3.y - 0.07, lamp.position.z + j3.z)
   lampLight.target.position.set(lampLight.position.x + 0.15, DESK_TOP, lampLight.position.z + 0.25)
-  scene.add(lampLight, lampLight.target)
+  deskTop.add(lampLight, lampLight.target)
 
   // ── Chair ──────────────────────────────────────────────────────────────
   const chairFabric = track(new THREE.MeshStandardMaterial({ map: track(fabricTexture([46, 48, 56])), roughness: 1 }))
@@ -454,7 +542,9 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
     chair.add(caster)
   }
   add(chair)
-  contactShadow(-0.1, 0.012, -0.62, 0.9, 0.9)
+  const chairShadow = new THREE.Group()
+  scene.add(chairShadow)
+  contactShadow(-0.1, 0.012, -0.62, 0.9, 0.9, 1, chairShadow)
 
   // ── Plant ──────────────────────────────────────────────────────────────
   const plant = new THREE.Group()
@@ -830,6 +920,72 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   Object.assign(rig, home())
   let entering = false
   const usePhone = Boolean(options.phoneScreenSrc)
+  // ── Sit-stand routine ──────────────────────────────────────────────────
+  // Every so often he raises the desk and stands, or sits and lowers it.
+  // The desk only moves while he's seated with a hand on the panel, as you
+  // would with a real one: up = raise, then stand; down = sit, then lower.
+  const desk = {
+    lift: 0,
+    liftFrac: 0,
+    stand: 0,
+    wantUp: false,
+    // Seconds his hand spends reaching the panel before the motor starts.
+    reach: 0,
+    next: 14 + Math.random() * 10,
+  }
+  // Screenshot hook: localStorage portfolio-room-desk = "<liftFrac>,<stand>"
+  // pins the desk and pose (e.g. "1,1" standing at full height).
+  let deskPinned = false
+  try {
+    const pin = localStorage.getItem('portfolio-room-desk')?.split(',').map(Number)
+    if (pin && pin.length === 2 && pin.every((n) => n >= 0 && n <= 1)) {
+      ;[desk.liftFrac, desk.stand] = pin
+      deskPinned = true
+    }
+  } catch {
+    // Storage blocked: no pin.
+  }
+  const RAISE_TIME = 7
+  const STAND_TIME = 1.8
+  const panelWorld = new THREE.Vector3()
+  const stepDesk = (time: number, dt: number) => {
+    if (options.reduced && !deskPinned) return false
+    if (!entering && !deskPinned && time > desk.next) {
+      desk.wantUp = !desk.wantUp
+      desk.next = time + 28 + Math.random() * 30
+    }
+    // Freeze mid-zoom so the camera's target doesn't move under it.
+    if (entering) return false
+    let moving = false
+    if (deskPinned) moving = desk.liftFrac > 0 && desk.liftFrac < 1
+    const drive = (dir: number) => {
+      moving = true
+      desk.reach += dt
+      if (desk.reach > 0.8) desk.liftFrac = THREE.MathUtils.clamp(desk.liftFrac + (dir * dt) / RAISE_TIME, 0, 1)
+    }
+    if (deskPinned) {
+      // Hold the pinned pose.
+    } else if (desk.wantUp) {
+      if (desk.liftFrac < 1) drive(1)
+      else {
+        desk.reach = 0
+        desk.stand = Math.min(1, desk.stand + dt / STAND_TIME)
+      }
+    } else if (desk.stand > 0) desk.stand = Math.max(0, desk.stand - dt / STAND_TIME)
+    else if (desk.liftFrac > 0) drive(-1)
+    else desk.reach = 0
+    const f = desk.liftFrac
+    desk.lift = DESK_LIFT * f * f * (3 - 2 * f)
+    deskTop.position.y = desk.lift
+    showHeight(Math.round((DESK_TOP + desk.lift) * 100))
+    // The chair rolls back out of the way as he gets up.
+    const s = desk.stand * desk.stand * (3 - 2 * desk.stand)
+    chair.position.z = -0.62 + 0.4 * s
+    chair.rotation.y = 0.25 * s
+    chairShadow.position.z = 0.4 * s
+    return moving
+  }
+
   const fitDistance = (fov: number, w: number, h: number) => {
     const tanHalf = Math.tan(THREE.MathUtils.degToRad(fov / 2))
     return Math.min(h / 2 / tanHalf, w / 2 / (tanHalf * aspect)) * 0.97
@@ -841,21 +997,33 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
     usePhone
       ? {
           px: PHONE.x,
-          py: DESK_TOP + 0.0093 + fitDistance(fov, PHONE_SCREEN_W, PHONE_SCREEN_H),
+          py: DESK_TOP + desk.lift + 0.0093 + fitDistance(fov, PHONE_SCREEN_W, PHONE_SCREEN_H),
           pz: PHONE.z + 0.002,
           tx: PHONE.x,
-          ty: DESK_TOP,
+          ty: DESK_TOP + desk.lift,
           tz: PHONE.z,
         }
-      : { px: MONITOR.x, py: MONITOR.y, pz: MONITOR.z + 0.0075 + fitDistance(fov, SCREEN_W, SCREEN_H), tx: MONITOR.x, ty: MONITOR.y, tz: MONITOR.z }
+      : {
+          px: MONITOR.x,
+          py: MONITOR.y + desk.lift,
+          pz: MONITOR.z + 0.0075 + fitDistance(fov, SCREEN_W, SCREEN_H),
+          tx: MONITOR.x,
+          ty: MONITOR.y + desk.lift,
+          tz: MONITOR.z,
+        }
   // Over his right shoulder, so the camera never passes through the figure.
-  const waypoint = () => (usePhone ? { px: 0.62, py: 1.45, pz: -0.62 } : { px: 0.35, py: 1.7, pz: -0.5 })
+  const waypoint = () => (usePhone ? { px: 0.62, py: 1.45 + desk.lift, pz: -0.62 } : { px: 0.35, py: 1.7 + desk.lift, pz: -0.5 })
 
   const raycaster = new THREE.Raycaster()
   const ndc = new THREE.Vector2()
   const hitTargets = usePhone ? [phoneScreen, phoneBody, phoneGlass] : [screen, bezel, shell]
 
   let hover = false
+  // Just above the top edge of whichever screen is the way in.
+  const labelWorld = usePhone
+    ? new THREE.Vector3(PHONE.x, DESK_TOP + 0.025, PHONE.z - PHONE_SCREEN_H / 2)
+    : new THREE.Vector3(MONITOR.x, MONITOR.y + SCREEN_H / 2 + 0.07, MONITOR.z)
+  const labelPoint = new THREE.Vector3()
   const lookTarget = new THREE.Vector3()
   let last = 0
 
@@ -881,7 +1049,10 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       dustUniforms.uTime.value = t
       steamUniforms.uTime.value = t
       if (!options.reduced) codeTex.offset.y = (time * 0.02) % 1
-      avatar.update(time, dt, options.reduced)
+      const deskMoving = stepDesk(time, dt)
+      panelWorld.copy(panelGrip)
+      panelWorld.y += desk.lift
+      avatar.update(time, dt, options.reduced, { lift: desk.lift, stand: desk.stand, deskMoving, panel: panelWorld })
 
       pointer.sx += (pointer.x - pointer.sx) * Math.min(1, dt * 3)
       pointer.sy += (pointer.y - pointer.sy) * Math.min(1, dt * 3)
@@ -897,8 +1068,14 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
         camera.updateProjectionMatrix()
       }
 
+      // Idle: a slow breathing glow so the way in is obvious. Hover: full.
+      // Fades out as the camera zooms in, so it never tints the page.
       const haloMat = (usePhone ? phoneHalo : halo).material as THREE.MeshBasicMaterial
-      haloMat.opacity += ((hover ? 0.85 : 0) - haloMat.opacity) * Math.min(1, dt * 8)
+      // The phone is tiny on screen, so it gets a stronger idle glow than the monitor.
+      const [low, high, lit] = usePhone ? [0.42, 0.75, 0.9] : [0.13, 0.3, 0.75]
+      const idle = options.reduced ? (low + high) / 2 : low + (high - low) * (0.5 + 0.5 * Math.sin(time * 2))
+      const glow = (hover ? lit : idle) * (1 - rig.zoom)
+      haloMat.opacity += (glow - haloMat.opacity) * Math.min(1, dt * 8)
 
       if (post) {
         // Bloom fades out on the way in, so the last frame matches the page.
@@ -924,6 +1101,18 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
 
     setHover(on) {
       hover = on
+    },
+
+    labelAnchor() {
+      labelPoint.copy(labelWorld)
+      labelPoint.y += desk.lift
+      labelPoint.project(camera)
+      const { clientWidth: w, clientHeight: h } = canvas
+      return {
+        x: ((labelPoint.x + 1) / 2) * w,
+        y: ((1 - labelPoint.y) / 2) * h,
+        visible: rig.zoom < 0.02 && !entering && labelPoint.z < 1,
+      }
     },
 
     intro() {

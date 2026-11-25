@@ -17,9 +17,23 @@ export interface AvatarProps {
 
 type State = 'type' | 'mouse' | 'sip'
 
+/** Where the sit-stand desk is, and how far he is through standing up. */
+export interface DeskPose {
+  /** Metres the desk top has risen above its sitting height. */
+  lift: number
+  /** 0 seated, 1 standing. */
+  stand: number
+  /** True while he's holding the desk's up/down button. */
+  deskMoving: boolean
+  /** World position of the desk's control panel. */
+  panel: THREE.Vector3
+}
+
 const UPPER = 0.29
 const FORE = 0.27
 const HIPS = new THREE.Vector3(-0.1, 0.56, -0.66)
+// Standing, a step closer to the desk.
+const HIPS_STAND = new THREE.Vector3(-0.1, 0.97, -0.8)
 const up = new THREE.Vector3(0, 1, 0)
 
 function capsuleBetween(mesh: THREE.Mesh, from: THREE.Vector3, to: THREE.Vector3) {
@@ -70,7 +84,17 @@ export function createAvatar(scene: THREE.Scene, props: AvatarProps) {
   }
   const v = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
 
-  // ── Legs (static) ──────────────────────────────────────────────────────
+  // ── Legs: seated and standing poses, blended as he gets up ─────────────
+  interface Leg {
+    thigh: THREE.Mesh
+    shin: THREE.Mesh
+    kneeCap: THREE.Mesh
+    shoe: THREE.Mesh
+    sole: THREE.Mesh
+    sit: { hip: THREE.Vector3; knee: THREE.Vector3; ankle: THREE.Vector3 }
+    stand: { hip: THREE.Vector3; knee: THREE.Vector3; ankle: THREE.Vector3 }
+  }
+  const legs: Leg[] = []
   for (const [sx, reach] of [
     [-0.095, 0],
     [0.095, 0.05],
@@ -78,17 +102,41 @@ export function createAvatar(scene: THREE.Scene, props: AvatarProps) {
     const hip = v(HIPS.x + sx, HIPS.y, HIPS.z + 0.02)
     const knee = v(HIPS.x + sx * 1.15, HIPS.y + 0.02, HIPS.z - 0.4 - reach * 0.3)
     const ankle = v(HIPS.x + sx * 1.2, 0.1, knee.z - 0.06 - reach)
-    capsuleBetween(mesh(new THREE.CapsuleGeometry(0.075, 0.4 - 0.1, 6, 16), pants), hip, knee)
-    capsuleBetween(mesh(new THREE.CapsuleGeometry(0.058, knee.distanceTo(ankle) - 0.06, 6, 16), pants), knee, ankle)
+    const sHip = v(HIPS_STAND.x + sx, HIPS_STAND.y, HIPS_STAND.z + 0.02)
+    const sKnee = v(HIPS_STAND.x + sx * 1.05, 0.53, HIPS_STAND.z - 0.03 - reach * 0.2)
+    const sAnkle = v(HIPS_STAND.x + sx * 1.1, 0.1, HIPS_STAND.z + 0.01 - reach * 0.3)
+    const thigh = mesh(new THREE.CapsuleGeometry(0.075, 0.4 - 0.1, 6, 16), pants)
+    const shin = mesh(new THREE.CapsuleGeometry(0.058, 0.45 - 0.06, 6, 16), pants)
     const kneeCap = mesh(new THREE.SphereGeometry(0.068, 16, 12), pants)
-    kneeCap.position.copy(knee)
     const shoe = mesh(new THREE.CapsuleGeometry(0.05, 0.16, 6, 16), shoeMat)
     shoe.rotation.x = Math.PI / 2
     shoe.scale.set(1.05, 1, 0.75)
-    shoe.position.set(ankle.x, 0.045, ankle.z - 0.07)
     const sole = mesh(new THREE.BoxGeometry(0.1, 0.02, 0.27), soleMat)
-    sole.position.set(ankle.x, 0.012, ankle.z - 0.07)
+    legs.push({ thigh, shin, kneeCap, shoe, sole, sit: { hip, knee, ankle }, stand: { hip: sHip, knee: sKnee, ankle: sAnkle } })
   }
+  const jHip = new THREE.Vector3()
+  const jKnee = new THREE.Vector3()
+  const jAnkle = new THREE.Vector3()
+  // Stretch a capsule between two joints, scaling it to the gap.
+  const limb = (m: THREE.Mesh, from: THREE.Vector3, to: THREE.Vector3, nominal: number) => {
+    capsuleBetween(m, from, to)
+    m.scale.y = from.distanceTo(to) / nominal
+  }
+  const poseLegs = (s: number) => {
+    for (const leg of legs) {
+      jHip.lerpVectors(leg.sit.hip, leg.stand.hip, s)
+      jKnee.lerpVectors(leg.sit.knee, leg.stand.knee, s)
+      // Knees come forward mid-rise, as weight shifts over the feet.
+      jKnee.z -= 0.08 * Math.sin(Math.PI * s)
+      jAnkle.lerpVectors(leg.sit.ankle, leg.stand.ankle, s)
+      limb(leg.thigh, jHip, jKnee, 0.4)
+      limb(leg.shin, jKnee, jAnkle, 0.45)
+      leg.kneeCap.position.copy(jKnee)
+      leg.shoe.position.set(jAnkle.x, 0.045, jAnkle.z - 0.07)
+      leg.sole.position.set(jAnkle.x, 0.012, jAnkle.z - 0.07)
+    }
+  }
+  poseLegs(0)
   const pelvis = mesh(new THREE.SphereGeometry(1, 24, 16), pants)
   pelvis.scale.set(0.17, 0.09, 0.14)
   pelvis.position.copy(HIPS)
@@ -277,34 +325,73 @@ export function createAvatar(scene: THREE.Scene, props: AvatarProps) {
 
   const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x))
 
-  const update = (time: number, dt: number, reduced: boolean) => {
-    if (!reduced) {
+  const lifted = new THREE.Vector3()
+  const hips = new THREE.Vector3()
+  const deskKeyLeft = new THREE.Vector3()
+  const deskKeyRight = new THREE.Vector3()
+  const deskMouse = new THREE.Vector3()
+  const deskMug = new THREE.Vector3()
+  const sip = new THREE.Vector3()
+  const mainLook = new THREE.Vector3()
+  const sideLook = new THREE.Vector3()
+
+  const update = (time: number, dt: number, reduced: boolean, pose: DeskPose = { lift: 0, stand: 0, deskMoving: false, panel: v(0, 0, 0) }) => {
+    // Everything on the desk rides up with it.
+    lifted.set(0, pose.lift, 0)
+    deskKeyLeft.copy(keyLeft).add(lifted)
+    deskKeyRight.copy(keyRight).add(lifted)
+    deskMouse.copy(mouseHome).add(lifted)
+    deskMug.copy(mugHome).add(lifted)
+    mainLook.copy(props.mainMonitor).add(lifted)
+    sideLook.copy(props.sideMonitor).add(lifted)
+    const standEase = ease(pose.stand)
+    hips.lerpVectors(HIPS, HIPS_STAND, standEase)
+    sip.copy(sipPoint).y += hips.y - HIPS.y
+    sip.z += hips.z - HIPS.z
+    torso.position.copy(hips)
+    pelvis.position.copy(hips)
+    poseLegs(standEase)
+
+    // Hands on the desk buttons: hold the routine until the desk stops.
+    if (pose.deskMoving || (pose.stand > 0 && pose.stand < 1)) {
+      state = 'type'
+      stateTime = 0
+    } else if (!reduced) {
       stateTime += dt
       if (stateTime > stateLength) pickNext()
     }
 
     // Where each hand wants to be.
-    left.desired.copy(keyLeft)
-    right.desired.copy(keyRight)
-    let wantLean = -0.15
-    let lookAt = props.mainMonitor
+    left.desired.copy(deskKeyLeft)
+    right.desired.copy(deskKeyRight)
+    let wantLean = THREE.MathUtils.lerp(-0.15, -0.06, standEase)
+    let lookAt = mainLook
+    if (pose.deskMoving) {
+      right.desired.copy(pose.panel)
+      left.desired.copy(hips).add(v(-0.06, 0.1, -0.24))
+      lookAt = pose.panel
+    } else if (pose.stand > 0 && pose.stand < 1) {
+      // Getting up or sitting down: hands on the desk edge for support.
+      left.desired.copy(deskKeyLeft).add(v(-0.08, -0.01, 0.1))
+      right.desired.copy(deskKeyRight).add(v(0.08, -0.01, 0.1))
+    }
     if (state === 'mouse') {
       const t = stateTime
-      right.desired.copy(mouseHome).add(v(0.012 * Math.sin(t * 2.1), 0.028, 0.035 + 0.01 * Math.sin(t * 1.3)))
-      wantLean = -0.11
-      if (t > 0.8 && t < 2.2) lookAt = props.sideMonitor
+      right.desired.copy(deskMouse).add(v(0.012 * Math.sin(t * 2.1), 0.028, 0.035 + 0.01 * Math.sin(t * 1.3)))
+      wantLean += 0.04
+      if (t > 0.8 && t < 2.2) lookAt = sideLook
     } else if (state === 'sip') {
       const t = stateTime
-      wantLean = -0.04
-      const reach = mugHome.clone().add(mugGrip)
-      if (t < 0.9) left.desired.copy(keyLeft).lerp(reach, ease(t / 0.9))
-      else if (t < 1.8) left.desired.copy(reach).lerp(sipPoint, ease((t - 0.9) / 0.9))
-      else if (t < 2.7) left.desired.copy(sipPoint)
-      else if (t < 3.5) left.desired.copy(sipPoint).lerp(reach, ease((t - 2.7) / 0.8))
-      else left.desired.copy(reach).lerp(keyLeft, ease((t - 3.5) / 0.9))
+      wantLean += 0.11
+      const reach = deskMug.clone().add(mugGrip)
+      if (t < 0.9) left.desired.copy(deskKeyLeft).lerp(reach, ease(t / 0.9))
+      else if (t < 1.8) left.desired.copy(reach).lerp(sip, ease((t - 0.9) / 0.9))
+      else if (t < 2.7) left.desired.copy(sip)
+      else if (t < 3.5) left.desired.copy(sip).lerp(reach, ease((t - 2.7) / 0.8))
+      else left.desired.copy(reach).lerp(deskKeyLeft, ease((t - 3.5) / 0.9))
       mugHeld = t > 0.9 && t < 3.5
-      if (t > 1.6 && t < 2.8) lookAt = sipPoint.clone().add(v(0, 0.2, -0.6))
-    }
+      if (t > 1.6 && t < 2.8) lookAt = sip.clone().add(v(0, 0.2, -0.6))
+    } else mugHeld = false
 
     // Typing: small hops between keys and finger presses.
     if (!reduced && time > nextTap) {
@@ -317,7 +404,7 @@ export function createAvatar(scene: THREE.Scene, props: AvatarProps) {
       }
     }
     for (const arm of arms) {
-      const onKeys = arm.desired.equals(arm === left ? keyLeft : keyRight)
+      const onKeys = arm.desired.equals(arm === left ? deskKeyLeft : deskKeyRight)
       if (onKeys && state === 'type') arm.desired.add(arm.jitter)
       const k = 1 - Math.exp(-dt * (state === 'sip' && arm === left ? 9 : 12))
       arm.target.lerp(arm.desired, reduced ? 1 : k)
@@ -328,15 +415,20 @@ export function createAvatar(scene: THREE.Scene, props: AvatarProps) {
     }
 
     // Props follow the hands.
-    if (state === 'mouse') props.mouse.position.set(right.target.x, mouseHome.y, right.target.z - 0.035)
-    else props.mouse.position.lerp(mouseHome, 1 - Math.exp(-dt * 6))
+    if (state === 'mouse') props.mouse.position.set(right.target.x, deskMouse.y, right.target.z - 0.035)
+    else {
+      props.mouse.position.lerp(deskMouse, 1 - Math.exp(-dt * 6))
+      // Ride the desk exactly, rather than lagging behind it.
+      props.mouse.position.y = deskMouse.y
+    }
     if (mugHeld) {
       props.mug.position.copy(left.target).sub(mugGrip)
-      const lift = ease((left.target.y - mugHome.y - mugGrip.y) / (sipPoint.y - mugHome.y - mugGrip.y))
-      props.mug.rotation.z = -lift * 0.9
+      const raised = ease((left.target.y - deskMug.y - mugGrip.y) / (sip.y - deskMug.y - mugGrip.y))
+      // Tip the rim towards his mouth (he faces -z), not sideways.
+      props.mug.rotation.set(raised * 0.75, 0, 0)
     } else {
-      props.mug.position.copy(mugHome)
-      props.mug.rotation.z = 0
+      props.mug.position.copy(deskMug)
+      props.mug.rotation.set(0, 0, 0)
     }
 
     // Body: lean, breathing, eye line with quick saccades.

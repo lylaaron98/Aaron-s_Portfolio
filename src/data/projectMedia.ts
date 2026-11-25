@@ -27,6 +27,10 @@ export const projectThemes: Record<string, ProjectTheme> = {
     borderColor: '#eab308',
     gradient: 'linear-gradient(155deg, #854d0e, #020617 72%)',
   },
+  'Salon Group Websites': {
+    borderColor: '#c2849a',
+    gradient: 'linear-gradient(155deg, #5b2333, #020617 72%)',
+  },
   'AI Architectural Drawing Platform': {
     borderColor: '#a78bfa',
     gradient: 'linear-gradient(155deg, #4c1d95, #020617 72%)',
@@ -267,6 +271,34 @@ const propertyBuilderGallery: ProjectMedia[] = [
   },
 ]
 
+const salonGallery: ProjectMedia[] = [
+  {
+    src: '/assets/salon_demos/sable-hero.webp',
+    title: 'Hair Atelier',
+    subtitle: 'Sable & Shear home page in its serif, warm-brown brand theme.',
+  },
+  {
+    src: '/assets/salon_demos/studios.webp',
+    title: 'Group Landing',
+    subtitle: 'Three studios under one membership, each card in its own brand colours.',
+  },
+  {
+    src: '/assets/salon_demos/dewlab-hero.webp',
+    title: 'Skin Studio',
+    subtitle: 'Same components as the atelier, re-themed with rounded buttons and a rose palette.',
+  },
+  {
+    src: '/assets/salon_demos/rootwell-hero.webp',
+    title: 'Scalp Clinic',
+    subtitle: 'Third brand theme from the same token source.',
+  },
+  {
+    src: '/assets/salon_demos/design-tokens.webp',
+    title: 'Design Tokens',
+    subtitle: 'Live token reference: switch brands to see every swatch and sample update.',
+  },
+]
+
 const workforceSchedulingGallery: ProjectMedia[] = [
   {
     src: encodeURI('/assets/workforce_scheduling/schedule-calendar.webp'),
@@ -287,6 +319,7 @@ export const fallbackTheme: ProjectTheme = {
 
 export const mediaByProjectTitle: Record<string, ProjectMedia[]> = {
   'Property Website Builder & Agent CRM': propertyBuilderGallery,
+  'Salon Group Websites': salonGallery,
   'AI Architectural Drawing Platform': aiDrawingGallery,
   'DeFi Portfolio Dashboard': defiGallery,
   'Lifestyle App': lifestyleGallery,

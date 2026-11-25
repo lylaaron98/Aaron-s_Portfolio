@@ -179,12 +179,84 @@
   color: #fff;
 }
 
-.hint {
+/* Floating game-style prompt pinned above the screen you click. */
+.prompt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  margin-top: -14px;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.04em;
+  white-space: nowrap;
   color: #fff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  background: rgba(10, 14, 24, 0.62);
+  border: 1px solid rgba(47, 224, 204, 0.55);
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(47, 224, 204, 0.25);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: opacity 0.3s, border-color 0.2s, box-shadow 0.2s;
+  will-change: transform;
+  /* `translate` stacks on the positioning transform set from script. */
+  animation: bob 1.8s ease-in-out infinite;
+}
+
+.prompt[data-visible='false'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.prompt[data-hover],
+.prompt:hover {
+  border-color: rgba(47, 224, 204, 0.95);
+  box-shadow: 0 0 26px rgba(47, 224, 204, 0.45);
+}
+
+.promptKey {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+  color: #04201d;
+  background: #2fe0cc;
+  border-radius: 6px;
+  box-shadow: 0 2px 0 #138a7d;
+}
+
+/* Little arrow under the pill, pointing at the screen. */
+.promptArrow {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 10px;
+  height: 10px;
+  margin-left: calc(-5px + var(--arrow-shift, 0px));
+  background: inherit;
+  border-right: 1px solid rgba(47, 224, 204, 0.55);
+  border-bottom: 1px solid rgba(47, 224, 204, 0.55);
+  transform: rotate(45deg);
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+
+[data-reduced] .prompt {
+  animation: none;
 }
 
 .enter {

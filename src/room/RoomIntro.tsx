@@ -146,6 +146,29 @@ export default function RoomIntro({
     }
   }
 
+  // Keep the floating label pinned above the screen as the camera drifts.
+  const labelRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (stage !== 'ready') return
+    let id = 0
+    const tick = () => {
+      const scene = sceneRef.current
+      const label = labelRef.current
+      if (scene && label) {
+        const { x, y, visible } = scene.labelAnchor()
+        // Keep the pill on screen; the arrow still points at the screen.
+        const half = label.offsetWidth / 2 + 12
+        const cx = Math.min(Math.max(x, half), innerWidth - half)
+        label.style.transform = `translate3d(${cx.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%)`
+        label.style.setProperty('--arrow-shift', `${(x - cx).toFixed(1)}px`)
+        label.dataset.visible = visible ? 'true' : 'false'
+      }
+      id = requestAnimationFrame(tick)
+    }
+    tick()
+    return () => cancelAnimationFrame(id)
+  }, [stage])
+
   const onClick = (event: React.MouseEvent) => {
     if (sceneRef.current?.hitMonitor(event.clientX, event.clientY)) void enter()
   }
@@ -170,6 +193,25 @@ export default function RoomIntro({
         onPointerMove={onPointerMove}
         onClick={onClick}
       />
+      {stage === 'ready' && (
+        // Game-style prompt over the screen. The Enter portfolio button is the
+        // accessible way in, so this one stays out of the tab order.
+        <button
+          ref={labelRef}
+          type="button"
+          tabIndex={-1}
+          aria-hidden="true"
+          className={styles.prompt}
+          data-hover={hover || undefined}
+          onClick={() => void enter()}
+          onPointerEnter={() => sceneRef.current?.setHover(true)}
+          onPointerLeave={() => sceneRef.current?.setHover(hover)}
+        >
+          <span className={styles.promptKey}>{coarse ? '☝' : '⏎'}</span>
+          <span>{coarse ? 'Tap to enter' : `Click the ${target} to enter`}</span>
+          <span className={styles.promptArrow} />
+        </button>
+      )}
       <p className={styles.srOnly}>
         A 3D scene of Aaron at his desk, in a studio with a city view. Use Enter portfolio to continue.
       </p>
@@ -203,9 +245,6 @@ export default function RoomIntro({
         </div>
 
         <div className={styles.cta}>
-          <span className={styles.hint} aria-hidden="true">
-            {`${coarse ? 'Tap' : 'Click'} the ${target}`}
-          </span>
           <button ref={enterRef} type="button" className={styles.enter} onClick={() => void enter()} disabled={stage !== 'ready'}>
             Enter portfolio
           </button>

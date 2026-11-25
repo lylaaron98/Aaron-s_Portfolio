@@ -55,6 +55,11 @@ export interface RoomScene {
   /** True when the client point is over the main monitor. */
   hitMonitor(clientX: number, clientY: number): boolean
   setHover(on: boolean): void
+  /**
+   * Where the floating "click to enter" label sits, in canvas CSS pixels:
+   * just above the screen you click. Hidden once the camera starts zooming.
+   */
+  labelAnchor(): { x: number; y: number; visible: boolean }
   /** Flies the camera into the main monitor until it fills the viewport. */
   enter(): Promise<void>
   /** Gentle dolly-in on first view. */
@@ -387,7 +392,7 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   phoneHalo.rotation.x = -Math.PI / 2
   phoneHalo.position.y = 0.0004
   // Brighter than the monitor glow: on a phone the phone is only a few pixels wide.
-  ;(phoneHalo.material as THREE.MeshBasicMaterial).color.multiplyScalar(1.8)
+  ;(phoneHalo.material as THREE.MeshBasicMaterial).color.multiplyScalar(1.4)
   phone.add(phoneHalo)
   add(phone)
   contactShadow(PHONE.x, DESK_TOP, PHONE.z, 0.12, 0.2, 0.7)
@@ -884,6 +889,11 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
   const hitTargets = usePhone ? [phoneScreen, phoneBody, phoneGlass] : [screen, bezel, shell]
 
   let hover = false
+  // Just above the top edge of whichever screen is the way in.
+  const labelWorld = usePhone
+    ? new THREE.Vector3(PHONE.x, DESK_TOP + 0.025, PHONE.z - PHONE_SCREEN_H / 2)
+    : new THREE.Vector3(MONITOR.x, MONITOR.y + SCREEN_H / 2 + 0.07, MONITOR.z)
+  const labelPoint = new THREE.Vector3()
   const lookTarget = new THREE.Vector3()
   let last = 0
 
@@ -929,9 +939,9 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
       // Fades out as the camera zooms in, so it never tints the page.
       const haloMat = (usePhone ? phoneHalo : halo).material as THREE.MeshBasicMaterial
       // The phone is tiny on screen, so it gets a stronger idle glow than the monitor.
-      const [low, high] = usePhone ? [0.55, 1] : [0.18, 0.42]
-      const idle = options.reduced ? (low + high) / 2 : low + (high - low) * (0.5 + 0.5 * Math.sin(time * 2.4))
-      const glow = (hover ? 1 : idle) * (1 - rig.zoom)
+      const [low, high, lit] = usePhone ? [0.3, 0.55, 0.8] : [0.08, 0.2, 0.5]
+      const idle = options.reduced ? (low + high) / 2 : low + (high - low) * (0.5 + 0.5 * Math.sin(time * 2))
+      const glow = (hover ? lit : idle) * (1 - rig.zoom)
       haloMat.opacity += (glow - haloMat.opacity) * Math.min(1, dt * 8)
 
       if (post) {
@@ -958,6 +968,16 @@ export function createRoomScene(canvas: HTMLCanvasElement, options: RoomOptions)
 
     setHover(on) {
       hover = on
+    },
+
+    labelAnchor() {
+      labelPoint.copy(labelWorld).project(camera)
+      const { clientWidth: w, clientHeight: h } = canvas
+      return {
+        x: ((labelPoint.x + 1) / 2) * w,
+        y: ((1 - labelPoint.y) / 2) * h,
+        visible: rig.zoom < 0.02 && !entering && labelPoint.z < 1,
+      }
     },
 
     intro() {
